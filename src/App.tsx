@@ -1,14 +1,14 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { LoginPage } from './pages/auth/LoginPage'
-import { DashboardPage } from './pages/dashboard/DashboardPage'
-import { CatalogPage } from './pages/catalog/CatalogPage'
-import { CatalogFormPage } from './pages/catalog/CatalogFormPage'
-import { MembersPage } from './pages/members/MembersPage'
-import { CirculationPage } from './pages/circulation/CirculationPage'
-import { ReportsPage } from './pages/reports/ReportsPage'
-import { SettingsPage } from './pages/settings/SettingsPage'
-import { AboutPage } from './pages/settings/AboutPage'
-import { DashboardLayout } from './components/layout/DashboardLayout'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { LoginPage } from './pages/auth/LoginPage';
+import { DashboardPage } from './pages/dashboard/DashboardPage';
+import { CatalogForm } from './components/catalog/CatalogForm';
+import { useAuthStore } from './stores/authStore';
+import { MainLayout } from './components/layout/MainLayout';
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated } = useAuthStore();
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+};
 
 function App() {
   return (
@@ -16,89 +16,30 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route
-          path="/"
-          element={
-            <DashboardLayout>
-              <DashboardPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
           path="/dashboard"
           element={
-            <DashboardLayout>
-              <DashboardPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/catalog"
-          element={
-            <DashboardLayout>
-              <CatalogPage />
-            </DashboardLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <DashboardPage />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/catalog/new"
           element={
-            <DashboardLayout>
-              <CatalogFormPage />
-            </DashboardLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <CatalogForm />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
-        <Route
-          path="/catalog/:id/edit"
-          element={
-            <DashboardLayout>
-              <CatalogFormPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/members"
-          element={
-            <DashboardLayout>
-              <MembersPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/circulation"
-          element={
-            <DashboardLayout>
-              <CirculationPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/reports"
-          element={
-            <DashboardLayout>
-              <ReportsPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <DashboardLayout>
-              <SettingsPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/settings/about"
-          element={
-            <DashboardLayout>
-              <AboutPage />
-            </DashboardLayout>
-          }
-        />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

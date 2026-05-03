@@ -11,16 +11,16 @@
 
 ## Slices
 
-- [ ] **S01: Authentication System** `risk:low` `depends:[]`
+- [x] **S01: Authentication System** `risk:low` `depends:[]`
   > After this: User can access the application via a branded login screen.
 
-- [ ] **S02: Dashboard & Navigation** `risk:medium` `depends:[S01]`
-  > After this: Main dashboard is visible with mock data and sidebar/toolbar navigation.
+- [x] **S02: Dashboard & Navigation** `risk:medium` `depends:[S01]`
+  > After this: Main dashboard is visible with mock data and toolbar navigation.
 
-- [ ] **S03: Cataloging Infrastructure** `risk:high` `depends:[S02]`
+- [x] **S03: Cataloging Infrastructure** `risk:high` `depends:[S02]`
   > After this: "Add New" form is functional with all metadata fields and ID generation.
 
-- [ ] **S04: Inventory & Authority** `risk:medium` `depends:[S03]`
+- [x] **S04: Inventory & Authority** `risk:medium` `depends:[S03]`
   > After this: Holdings management and Authority control dialogs are implemented.
 
 ## Boundary Map
@@ -32,7 +32,7 @@ Produces:
 
 ### S02 → S03
 Produces:
-  MainLayout.tsx → Sidebar, Toolbar, Content area
+  MainLayout.tsx → Toolbar, Content area
   DataGrid.tsx → Generic reusable table component
 
 ### S03 → S04

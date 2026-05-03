@@ -7,7 +7,8 @@ This documentation provides comprehensive guidance for developing the Library Ma
 ## Documentation Index
 
 1. **[Project Tracker](./PROJECT-TRACKER.md)** - Latest progress and milestone status
-2. **[Design System](./DESIGN-SYSTEM.md)** - Consolidated UI/UX specs (colors, fonts, components)
+2. **[Workflow Protocol](./WORKFLOW.md)** - Strict execution loop (PM -> Code -> QA -> Tracker)
+3. **[Design System](./DESIGN-SYSTEM.md)** - Consolidated UI/UX specs (colors, fonts, components)
 3. **[Database Schema](./DATABASE-SCHEMA.md)** - Complete database structure and relationships
 4. **[Wireframe Analysis](./WIREFRAME-ANALYSIS.md)** - Original UI/UX requirements
 5. **[Wireframe-1 Detailed Analysis](./wireframe-1/analysis/)** - Granular specs for each screen

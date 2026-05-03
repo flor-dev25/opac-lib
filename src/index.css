@@ -3,31 +3,50 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    @apply border-gray-200 dark:border-gray-800;
-  }
   body {
-    @apply bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100;
+    @apply bg-classic-grey text-black;
+    font-family: 'Inter', 'Roboto', sans-serif;
   }
 }
 
 @layer components {
-  .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+  /* Classic Beveled Button */
+  .btn-classic {
+    @apply bg-classic-grey px-4 py-1 text-sm active:shadow-bevel-sunken transition-shadow duration-75;
+    box-shadow: 2px 2px 0px #FFFFFF inset, -2px -2px 0px #808080 inset;
   }
-  .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+
+  /* Classic Sunken Input */
+  .input-classic {
+    @apply bg-white px-2 py-1 text-sm border-none focus:outline-none;
+    box-shadow: 1.5px 1.5px 0px #808080 inset, -1.5px -1.5px 0px #FFFFFF inset;
   }
-  .btn-secondary {
-    @apply bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+
+  /* Window Container */
+  .window-classic {
+    @apply border-classic-grey p-1;
+    box-shadow: 2px 2px 0px #FFFFFF inset, -2px -2px 0px #808080 inset;
   }
-  .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+
+  /* Title Bar (Aero Gradient) */
+  .title-bar {
+    @apply flex items-center justify-between h-7 px-2 text-white font-semibold text-sm;
+    background: linear-gradient(to right, #A6CAF0 0%, #FFFFFF 100%);
+    color: #000040;
   }
-  .input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+
+  /* Data Grid Table */
+  .grid-table {
+    @apply w-full bg-white text-sm border-collapse;
   }
-  .card {
-    @apply bg-white rounded-lg shadow-md border border-gray-200 dark:bg-gray-800 dark:border-gray-700;
+  
+  .grid-header {
+    @apply bg-classic-header text-left font-normal border;
+    border-color: #808080 #FFFFFF #FFFFFF #808080;
+    padding: 2px 4px;
+  }
+
+  .grid-cell {
+    @apply border-r border-b border-gray-200 px-1 py-0.5 whitespace-nowrap overflow-hidden text-ellipsis;
   }
 }

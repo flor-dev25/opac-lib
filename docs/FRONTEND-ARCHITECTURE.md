@@ -94,7 +94,7 @@ Organisms (Complex UI sections)
 ├── DataTable
 ├── FilterPanel
 ├── ActionToolbar
-└── Sidebar
+└── NavigationTopbar
 
 Templates (Page layouts)
 ├── AuthLayout
