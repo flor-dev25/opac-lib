@@ -55,6 +55,13 @@ Complete parity implementation of Library Management System based on wireframe s
 - [x] Authority control
 - [x] Delete confirmation dialog
 
+### Phase 5: Backend & Desktop (M002)
+- [x] Tauri v2 & Bun migration
+- [x] PostgreSQL connection pool
+- [x] Dynamic window sizing
+- [x] System tray integration
+- [x] Native Catalog Read/Delete
+
 ## Legend
 - 🟢 Completed
 - 🟡 In Progress

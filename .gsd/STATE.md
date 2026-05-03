@@ -1,9 +1,9 @@
 # GSD State
 
-**Active Milestone:** M001 — Core Infrastructure & UI Parity
-**Active Slice:** Final Review
-**Active Task:** Project Handover & QA
-**Phase:** Review
+**Active Milestone:** M002 — Backend Infrastructure & Desktop Integration
+**Active Slice:** S02 — Database Layer (Postgres)
+**Active Task:** T01 — Connection Pool Setup
+**Phase:** Planning
 
 ## Recent Decisions
 - D001: Use React + Tailwind for UI implementation (Parity-first).
@@ -20,4 +20,4 @@
 - None
 
 ## Next Action
-Final QA and parity check for Milestone 1.
+Setup SQLx connection pool and PostgreSQL schema migration logic.

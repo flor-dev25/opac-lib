@@ -8,7 +8,7 @@ import { DeleteDialog } from '../dashboard/DeleteDialog';
 import { ExportDialog } from '../dashboard/ExportDialog';
 import { useAuthStore } from '../../stores/authStore';
 import { useCatalogStore } from '../../stores/catalogStore';
-import { useNavigate } from 'react-router-dom';
+import { invoke } from '@tauri-apps/api/core';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -17,7 +17,6 @@ interface MainLayoutProps {
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { logout } = useAuthStore();
   const { records, selectedId, deleteRecord } = useCatalogStore();
-  const navigate = useNavigate();
   const [showAuthority, setShowAuthority] = React.useState(false);
   const [showAbout, setShowAbout] = React.useState(false);
   const [showDelete, setShowDelete] = React.useState(false);
@@ -33,8 +32,12 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   const handleClose = () => {
-    logout();
-    navigate('/login');
+    try {
+      invoke('quit_app');
+    } catch (e) {
+      console.error('Tauri quit failed:', e);
+      logout(); // Fallback
+    }
   };
 
   return (

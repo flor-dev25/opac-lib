@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { invoke } from '@tauri-apps/api/core';
 
 interface CatalogRecord {
   id: number;
@@ -12,23 +13,40 @@ interface CatalogRecord {
 interface CatalogState {
   records: CatalogRecord[];
   selectedId: number | undefined;
+  isLoading: boolean;
+  error: string | null;
   setSelectedId: (id: number | undefined) => void;
-  deleteRecord: (id: number) => void;
+  fetchRecords: () => Promise<void>;
+  deleteRecord: (id: number) => Promise<void>;
 }
 
-const MOCK_DATA: CatalogRecord[] = [
-  { id: 1, title: 'Introduction to Algorithms', author: 'Cormen, Thomas H.', callno: 'QA76.6 .I585 2009', year: '2009', controlNo: '081007084930' },
-  { id: 2, title: 'Clean Code: A Handbook of Agile Software Craftsmanship', author: 'Martin, Robert C.', callno: 'QA76.76.D47 M37 2008', year: '2008', controlNo: '081007084931' },
-  { id: 3, title: 'The Pragmatic Programmer', author: 'Hunt, Andrew', callno: 'QA76.6 .H86 1999', year: '1999', controlNo: '081007084932' },
-  { id: 4, title: 'Design Patterns: Elements of Reusable Object-Oriented Software', author: 'Gamma, Erich', callno: 'QA76.64 .D47 1994', year: '1994', controlNo: '081007084933' },
-];
-
-export const useCatalogStore = create<CatalogState>((set) => ({
-  records: MOCK_DATA,
-  selectedId: 1,
+export const useCatalogStore = create<CatalogState>((set, get) => ({
+  records: [],
+  selectedId: undefined,
+  isLoading: false,
+  error: null,
   setSelectedId: (id) => set({ selectedId: id }),
-  deleteRecord: (id) => set((state) => ({
-    records: state.records.filter(r => r.id !== id),
-    selectedId: state.selectedId === id ? undefined : state.selectedId
-  })),
+  fetchRecords: async () => {
+    set({ isLoading: true });
+    try {
+      const records = await invoke<CatalogRecord[]>('get_catalog_records');
+      set({ records, isLoading: false });
+    } catch (e) {
+      set({ error: (e as Error).message, isLoading: false });
+    }
+  },
+  deleteRecord: async (id) => {
+    const record = get().records.find(r => r.id === id);
+    if (!record || !record.controlNo) return;
+
+    try {
+      await invoke('delete_catalog_record', { controlno: record.controlNo });
+      set((state) => ({
+        records: state.records.filter(r => r.id !== id),
+        selectedId: state.selectedId === id ? undefined : state.selectedId
+      }));
+    } catch (e) {
+      alert(`Delete failed: ${e}`);
+    }
+  },
 }));

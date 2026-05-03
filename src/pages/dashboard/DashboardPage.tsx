@@ -1,6 +1,4 @@
 import React from 'react';
-import { useAuthStore } from '../../stores/authStore';
-import { useNavigate } from 'react-router-dom';
 
 import { SearchBar } from '../../components/dashboard/SearchBar';
 import { DataGrid } from '../../components/common/DataGrid';
@@ -15,7 +13,11 @@ const COLUMNS = [
 ];
 
 export const DashboardPage: React.FC = () => {
-  const { records, selectedId, setSelectedId } = useCatalogStore();
+  const { records, selectedId, setSelectedId, fetchRecords } = useCatalogStore();
+
+  React.useEffect(() => {
+    fetchRecords();
+  }, [fetchRecords]);
 
   const handleSearch = (query: string, scope: string) => {
     console.log(`Searching for "${query}" in ${scope}`);

@@ -1,14 +1,13 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { invoke } from '@tauri-apps/api/core';
 
 interface User {
   username: string;
-  role: string;
 }
 
 interface AuthState {
-  user: User | null;
   isAuthenticated: boolean;
+  user: User | null;
   isLoading: boolean;
   error: string | null;
   login: (username: string, password: string) => Promise<boolean>;
@@ -16,47 +15,35 @@ interface AuthState {
   clearError: () => void;
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      error: null,
+export const useAuthStore = create<AuthState>((set) => ({
+  isAuthenticated: false,
+  user: null,
+  isLoading: false,
+  error: null,
+  login: async (username, password) => {
+    set({ isLoading: true, error: null });
+    // Mock validation delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-      login: async (username: string, _password: string) => {
-        set({ isLoading: true, error: null });
-        
-        // Mock validation delay
-        await new Promise((resolve) => setTimeout(resolve, 800));
-
-        // Mock validation logic
-        if (username.toLowerCase() === 'admin') {
-          set({ 
-            user: { username: 'admin', role: 'Administrator' }, 
-            isAuthenticated: true, 
-            isLoading: false 
-          });
-          return true;
-        } else {
-          set({ 
-            error: 'User Not Allowed', 
-            isLoading: false 
-          });
-          return false;
-        }
-      },
-
-      logout: () => {
-        set({ user: null, isAuthenticated: false, error: null });
-      },
-
-      clearError: () => {
-        set({ error: null });
-      },
-    }),
-    {
-      name: 'infolib-auth-storage',
+    if (username && password) {
+      set({ isAuthenticated: true, user: { username }, isLoading: false });
+      try {
+        await invoke('maximize_window');
+      } catch (e) {
+        console.error('Tauri invoke failed:', e);
+      }
+      return true;
     }
-  )
-);
+    set({ error: 'Invalid username or password', isLoading: false });
+    return false;
+  },
+  logout: () => {
+    set({ isAuthenticated: false, user: null, error: null });
+    try {
+      invoke('reset_window_size');
+    } catch (e) {
+      console.error('Tauri invoke failed:', e);
+    }
+  },
+  clearError: () => set({ error: null }),
+}));
