@@ -1,9 +1,9 @@
 # GSD State
 
-**Active Milestone:** M005 — Authority Control & Advanced Services
-**Active Slice:** S03 — Loan Renewals
-**Active Task:** T01 — Planning
-**Phase:** Planning
+**Active Milestone:** M006 — AI & Semantic Intelligence
+**Active Slice:** S01 — Semantic Infrastructure & AI UI
+**Active Task:** T06/T07 — Semantic Search Integration ✅ (DONE)
+**Phase:** Execution
 
 ## Recent Decisions
 - D001: Use React + Tailwind for UI implementation (Parity-first).
@@ -20,7 +20,7 @@
 - D032: Implemented classic "Record Navigator" (Page X of Y) for dashboard data navigation.
 - D033: Used psql for bulk import of 16,000+ legacy records.
 - D034: Reset database to full legacy schema for 100% data parity.
-- D035: Selected Gemma 2 2B via Ollama for offline-first AI privacy.
+- D035: Selected Phi-3 Mini via Ollama for offline-first AI privacy (Transitioned from Gemma 4 per user request).
 - D036: Chose pgvector for integrated semantic search in PostgreSQL.
 - D037: Designed AI Badge with dynamic opacity (30% idle, 100% hover) to prevent UI clutter.
 - D006: Adopted Caveman plugin for communication to reduce token usage (~75% reduction).
@@ -42,9 +42,12 @@
 - D023: Implemented Acquisitions Reporting with date_acquired tracking and multi-criteria filtering.
 - D024: Implemented Authority Control backend and frontend for centralized Author and Subject management.
 - D025: Implemented Item Reservations queue using tblReserve with serve/cancel workflow and 7-day expiry.
+- D038: Built pgvector v0.8.2 from source via VS2022 and installed into PostgreSQL 18. Extension verified operational.
+- D039: Connected Tauri backend to local Ollama (nomic-embed-text) for real-time query vectorization and semantic catalog search.
+- D040: Upgraded AI system prompt to behave like a natural conversational partner (similar to famous chatbots) instead of a mechanical search robot.
 
 ## Blockers
-- None
+- ~~B001: `pgvector` extension binary not found on PostgreSQL host.~~ **RESOLVED** — pgvector v0.8.2 installed and verified.
 
 ## Next Action
-Plan and implement Loan Renewals (S03).
+Full background indexing of the 16,000+ record catalog and fine-tuning the AI assistant's conversation logic.

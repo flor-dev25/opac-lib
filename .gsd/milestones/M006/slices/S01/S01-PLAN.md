@@ -6,18 +6,16 @@ Set up the foundational vector search capabilities and the AI entry point (Float
 ## Tasks
 
 ### 1. Database & Vector DB (Postgres)
-- [ ] **T01: Enable pgvector**
-  - Run `CREATE EXTENSION IF NOT EXISTS vector;`
-- [ ] **T02: Vector Columns**
-  - Add `embedding` column (vector(768)) to `tblCat`.
+- [x] **T01: Enable pgvector** (Added to `db.rs` - **BLOCKER**: Extension binary missing on host)
+- [x] **T02: Vector Columns** (Added to `db.rs` - **BLOCKER**: Depends on T01)
 - [ ] **T03: Initial Indexing**
-  - Create a migration script to generate embeddings for existing records using `nomic-embed-text`.
+  - Create a migration script to generate embeddings for existing records using `nomic-embed-text`. (Script created: `scripts/migrate_embeddings.py`)
 
 ### 2. Frontend UI (React)
-- [ ] **T04: Floating AI Badge**
+- [x] **T04: Floating AI Badge**
   - Create `AIChatBadge.tsx` in bottom-right.
   - Implement opacity logic: 30% idle, 100% hover.
-- [ ] **T05: Chat Interface**
+- [x] **T05: Chat Interface**
   - Design a beveled, high-density chat window.
   - Support "User" vs "AI" message bubbles in classic grey/blue theme.
 

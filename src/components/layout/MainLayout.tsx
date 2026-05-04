@@ -15,6 +15,7 @@ import { AcquisitionsDialog } from '../inventory/AcquisitionsDialog';
 import { AuditDialog } from '../inventory/AuditDialog';
 import { ReservationDialog } from '../circulation/ReservationDialog';
 import { EditCatalogDialog } from '../catalog/EditCatalogDialog';
+import { AIChatBadge } from '../ai/AIChatBadge';
 import { useAuthStore } from '../../stores/authStore';
 import { useCatalogStore } from '../../stores/catalogStore';
 import { usePatronStore } from '../../stores/patronStore';
@@ -178,6 +179,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           onClose={() => setEditDialogOpen(false)} 
         />
       )}
+      
+      <AIChatBadge />
     </div>
   );
 };

@@ -6,26 +6,32 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-interface BeveledBoxProps {
+interface BeveledBoxProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'raised' | 'sunken';
   children: React.ReactNode;
-  className?: string;
   padding?: string;
 }
 
-export const BeveledBox: React.FC<BeveledBoxProps> = ({ 
+export const BeveledBox = React.forwardRef<HTMLDivElement, BeveledBoxProps>(({ 
   variant = 'raised', 
   children, 
   className,
-  padding = 'p-1'
-}) => {
+  padding = 'p-1',
+  ...props
+}, ref) => {
   return (
-    <div className={cn(
-      padding,
-      variant === 'raised' ? 'shadow-bevel-raised' : 'shadow-bevel-sunken',
-      className
-    )}>
+    <div 
+      ref={ref}
+      className={cn(
+        padding,
+        variant === 'raised' ? 'shadow-bevel-raised' : 'shadow-bevel-sunken',
+        className
+      )}
+      {...props}
+    >
       {children}
     </div>
   );
-};
+});
+
+BeveledBox.displayName = 'BeveledBox';

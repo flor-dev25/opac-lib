@@ -12,11 +12,11 @@ Transform infoLib from a traditional database-driven catalog into an "Intelligen
   - Create embedding columns for `tblCat` (Title, Author, Subject).
   - Implement a background task to generate embeddings for all 6,619 legacy records.
 
-### S02: Offline LLM Integration (Ollama + Gemma 2)
+### S02: Offline LLM Integration (Ollama + Gemma 4)
 - **Objective**: Establish the local AI brain.
 - **Tasks**:
   - Integrate Ollama API (localhost:11434).
-  - Configure **Gemma 2 2B** for low-latency CPU inference.
+  - Configure **Gemma 4** for low-latency CPU inference.
   - Implement a Rust-based bridge to manage LLM lifecycle.
 
 ### S03: AI UI & Hover Badge
@@ -34,6 +34,6 @@ Transform infoLib from a traditional database-driven catalog into an "Intelligen
   - **Semantic Search**: Use cosine similarity for "Fuzzy/Conceptual" book searching.
 
 ## Technical Decisions
-- **D035**: Use **Gemma 2 2B** via Ollama for offline privacy and performance.
+- **D035**: Use **Gemma 4** via Ollama for offline privacy and performance.
 - **D036**: Use **pgvector** for the vector database to avoid adding external dependencies like Chroma or Qdrant.
 - **D037**: Use **nomic-embed-text** for high-quality, local embeddings.

@@ -25,5 +25,15 @@ pub async fn init_db() -> Result<PgPool, sqlx::Error> {
         .execute(&pool)
         .await?;
 
+    // M006-S01-T01: Enable pgvector extension
+    sqlx::query("CREATE EXTENSION IF NOT EXISTS vector")
+        .execute(&pool)
+        .await?;
+
+    // M006-S01-T02: Add embedding column to tblCat
+    sqlx::query(r#"ALTER TABLE "public"."tblCat" ADD COLUMN IF NOT EXISTS embedding vector(768)"#)
+        .execute(&pool)
+        .await?;
+
     Ok(pool)
 }

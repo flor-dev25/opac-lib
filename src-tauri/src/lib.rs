@@ -1,11 +1,13 @@
 mod models;
 mod db;
+mod ai;
 use tauri::{
   menu::{Menu, MenuItem},
   tray::TrayIconBuilder,
   Manager,
 };
 use db::DbState;
+use ai::AiState;
 use models::{CatalogRecord, CatalogEntry, Holdings, Patron, Circulation, CirculationStats, OverdueItem, AuditResult, FinancialSummary, AcquisitionRecord, Author, Subject, Reservation};
 use chrono::Utc;
 use sqlx::Row;
@@ -582,6 +584,7 @@ pub fn run() {
 
   tauri::Builder::default()
     .manage(DbState { pool })
+    .manage(AiState::default())
     .plugin(tauri_plugin_log::Builder::default().build())
     .invoke_handler(tauri::generate_handler![
       get_catalog_records,
@@ -618,7 +621,9 @@ pub fn run() {
       check_db_connection,
       maximize_window,
       reset_window_size,
-      quit_app
+      quit_app,
+      ai::search_catalog_semantic,
+      ai::chat_with_ai
     ])
     .setup(|app| {
       let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;

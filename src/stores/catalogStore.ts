@@ -64,6 +64,7 @@ interface CatalogState {
   fetchHoldings: (controlno: string) => Promise<Holding[]>;
   saveHolding: (holding: Holding) => Promise<void>;
   deleteHolding: (accession: String) => Promise<void>;
+  searchSemantic: (query: string) => Promise<void>;
 }
 
 export const useCatalogStore = create<CatalogState>((set, get) => ({
@@ -129,5 +130,14 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
   },
   deleteHolding: async (accession) => {
     await invoke('delete_holding', { accession });
+  },
+  searchSemantic: async (query) => {
+    set({ isLoading: true });
+    try {
+      const records = await invoke<CatalogRecord[]>('search_catalog_semantic', { query });
+      set({ records, isLoading: false, currentPage: 1 });
+    } catch (e) {
+      set({ error: (e as Error).message, isLoading: false });
+    }
   },
 }));
