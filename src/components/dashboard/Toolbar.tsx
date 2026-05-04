@@ -1,17 +1,25 @@
 import React from 'react';
-import { FilePlus, Trash2, Download, BookOpen, Info, LogOut } from 'lucide-react';
+import { FilePlus, Trash2, Download, BookOpen, Info, LogOut, Users, LayoutDashboard, Edit, ArrowUpRight, ArrowDownLeft, Activity, Wallet, ScanBarcode, TrendingUp, BookPlus } from 'lucide-react';
 import { ToolbarItem } from './ToolbarItem';
 import { useAuthStore } from '../../stores/authStore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface ToolbarProps {
   onAuthority?: () => void;
   onAbout?: () => void;
   onDelete?: () => void;
   onExport?: () => void;
+  onEdit?: () => void;
+  onCheckout?: () => void;
+  onReturn?: () => void;
+  onDashboard?: () => void;
+  onPayment?: () => void;
+  onAudit?: () => void;
+  onFinancialReports?: () => void;
+  onAcquisitions?: () => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete, onExport }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete, onExport, onEdit, onCheckout, onReturn, onDashboard, onPayment, onAudit, onFinancialReports, onAcquisitions }) => {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
 
@@ -20,12 +28,71 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete
     navigate('/login');
   };
 
+  const location = useLocation();
+  const isPatrons = location.pathname.startsWith('/patrons');
+
+  const handleNew = () => {
+    if (isPatrons) navigate('/patrons/new');
+    else navigate('/catalog/new');
+  };
+
   return (
     <div className="flex items-center gap-1 p-1 bg-classic-grey border-b border-white shadow-[0_1px_0_#808080]">
       <ToolbarItem 
+        icon={LayoutDashboard} 
+        label="Catalog" 
+        onClick={() => navigate('/dashboard')} 
+      />
+      <ToolbarItem 
+        icon={Users} 
+        label="Patrons" 
+        onClick={() => navigate('/patrons')} 
+      />
+      <ToolbarItem 
+        icon={ArrowUpRight} 
+        label="Borrow" 
+        onClick={onCheckout} 
+      />
+      <ToolbarItem 
+        icon={ArrowDownLeft} 
+        label="Return" 
+        onClick={onReturn} 
+      />
+      <ToolbarItem 
+        icon={Activity} 
+        label="Overview" 
+        onClick={onDashboard} 
+      />
+      <ToolbarItem 
+        icon={Wallet} 
+        label="Pay Fine" 
+        onClick={onPayment} 
+      />
+      <ToolbarItem 
+        icon={ScanBarcode} 
+        label="Audit" 
+        onClick={onAudit} 
+      />
+      <ToolbarItem 
+        icon={TrendingUp} 
+        label="Reports" 
+        onClick={onFinancialReports} 
+      />
+      <ToolbarItem 
+        icon={BookPlus} 
+        label="New Items" 
+        onClick={onAcquisitions} 
+      />
+      <div className="w-[1px] h-16 bg-gray-400 mx-1 shadow-[1px_0_0_white]" />
+      <ToolbarItem 
         icon={FilePlus} 
         label="New" 
-        onClick={() => navigate('/catalog/new')} 
+        onClick={handleNew} 
+      />
+      <ToolbarItem 
+        icon={Edit} 
+        label="Edit" 
+        onClick={onEdit} 
       />
       <ToolbarItem 
         icon={Trash2} 

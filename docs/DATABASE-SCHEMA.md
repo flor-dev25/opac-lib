@@ -114,6 +114,8 @@ pub struct CatalogEntry {
 | Location | TEXT | Physical location |
 | DueDate | TIMESTAMP | Due date if checked out |
 | Status | TEXT | Current status (Available, Checked Out, etc.) |
+| last_audit | TIMESTAMP | Last time the item was physically verified |
+| date_acquired | TIMESTAMP | Date the item was added to the collection |
 
 **Rust Model:**
 ```rust
@@ -125,6 +127,7 @@ pub struct Holdings {
     pub location: String,
     pub due_date: Option<DateTime<Utc>>,
     pub status: String,
+    pub last_audit: Option<DateTime<Utc>>,
 }
 ```
 

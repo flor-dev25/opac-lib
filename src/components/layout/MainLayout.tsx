@@ -6,8 +6,17 @@ import { AuthorityDialog } from '../catalog/AuthorityDialog';
 import { AboutDialog } from '../common/AboutDialog';
 import { DeleteDialog } from '../dashboard/DeleteDialog';
 import { ExportDialog } from '../dashboard/ExportDialog';
+import { CheckoutDialog } from '../circulation/CheckoutDialog';
+import { ReturnDialog } from '../circulation/ReturnDialog';
+import { CirculationDashboard } from '../circulation/CirculationDashboard';
+import { PaymentDialog } from '../patrons/PaymentDialog';
+import { FinancialReportsDialog } from '../patrons/FinancialReportsDialog';
+import { AcquisitionsDialog } from '../inventory/AcquisitionsDialog';
+import { AuditDialog } from '../inventory/AuditDialog';
 import { useAuthStore } from '../../stores/authStore';
 import { useCatalogStore } from '../../stores/catalogStore';
+import { usePatronStore } from '../../stores/patronStore';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { invoke } from '@tauri-apps/api/core';
 
 interface MainLayoutProps {
@@ -16,18 +25,48 @@ interface MainLayoutProps {
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { logout } = useAuthStore();
+  const navigate = useNavigate();
   const { records, selectedId, deleteRecord } = useCatalogStore();
+  const { patrons, selectedIdno, deletePatron } = usePatronStore();
+  const location = useLocation();
+  const isPatrons = location.pathname.startsWith('/patrons');
+
   const [showAuthority, setShowAuthority] = React.useState(false);
   const [showAbout, setShowAbout] = React.useState(false);
   const [showDelete, setShowDelete] = React.useState(false);
   const [showExport, setShowExport] = React.useState(false);
+  const [showCheckout, setShowCheckout] = React.useState(false);
+  const [showReturn, setShowReturn] = React.useState(false);
+  const [showCircDashboard, setShowCircDashboard] = React.useState(false);
+  const [showPayment, setShowPayment] = React.useState(false);
+  const [showFinancialReports, setShowFinancialReports] = React.useState(false);
+  const [showAcquisitions, setShowAcquisitions] = React.useState(false);
+  const [showAudit, setShowAudit] = React.useState(false);
 
   const selectedRecord = records.find(r => r.id === selectedId);
+  const selectedPatron = patrons.find(p => p.idno === selectedIdno);
 
   const confirmDelete = () => {
-    if (selectedId !== undefined) {
-      deleteRecord(selectedId);
-      setShowDelete(false);
+    if (isPatrons) {
+      if (selectedIdno) {
+        deletePatron(selectedIdno);
+        setShowDelete(false);
+      }
+    } else {
+      if (selectedId !== undefined) {
+        deleteRecord(selectedId);
+        setShowDelete(false);
+      }
+    }
+  };
+
+  const handleEdit = () => {
+    if (isPatrons) {
+      if (selectedIdno) navigate(`/patrons/edit/${selectedIdno}`);
+      else alert('Please select a patron to edit.');
+    } else {
+      if (selectedId) alert('Edit catalog record not yet implemented.');
+      else alert('Please select a record to edit.');
     }
   };
 
@@ -55,10 +94,37 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               onAuthority={() => setShowAuthority(true)} 
               onAbout={() => setShowAbout(true)} 
               onExport={() => setShowExport(true)}
-              onDelete={() => {
-                if (selectedId) setShowDelete(true);
-                else alert('Please select a record to delete.');
+              onEdit={handleEdit}
+              onCheckout={() => {
+                if (isPatrons) {
+                  if (selectedIdno) setShowCheckout(true);
+                  else alert('Please select a patron to issue items to.');
+                } else {
+                  alert('Please switch to Patrons view to manage circulation.');
+                }
               }}
+              onReturn={() => setShowReturn(true)}
+              onDashboard={() => setShowCircDashboard(true)}
+              onPayment={() => {
+                if (isPatrons) {
+                  if (selectedIdno) setShowPayment(true);
+                  else alert('Please select a patron to record payment.');
+                } else {
+                  alert('Please switch to Patrons view to manage payments.');
+                }
+              }}
+              onDelete={() => {
+                if (isPatrons) {
+                  if (selectedIdno) setShowDelete(true);
+                  else alert('Please select a patron to delete.');
+                } else {
+                  if (selectedId) setShowDelete(true);
+                  else alert('Please select a record to delete.');
+                }
+              }}
+              onAudit={() => setShowAudit(true)}
+              onFinancialReports={() => setShowFinancialReports(true)}
+              onAcquisitions={() => setShowAcquisitions(true)}
             />
           </header>
 
@@ -73,9 +139,23 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {showAuthority && <AuthorityDialog onClose={() => setShowAuthority(false)} />}
       {showAbout && <AboutDialog onClose={() => setShowAbout(false)} />}
       {showExport && <ExportDialog onClose={() => setShowExport(false)} />}
-      {showDelete && selectedRecord && (
+      {showCheckout && <CheckoutDialog onClose={() => setShowCheckout(false)} />}
+      {showReturn && <ReturnDialog onClose={() => setShowReturn(false)} />}
+      {showCircDashboard && <CirculationDashboard onClose={() => setShowCircDashboard(false)} />}
+      {showPayment && <PaymentDialog onClose={() => setShowPayment(false)} />}
+      {showFinancialReports && <FinancialReportsDialog onClose={() => setShowFinancialReports(false)} />}
+      {showAcquisitions && <AcquisitionsDialog onClose={() => setShowAcquisitions(false)} />}
+      {showAudit && <AuditDialog onClose={() => setShowAudit(false)} />}
+      {showDelete && !isPatrons && selectedRecord && (
         <DeleteDialog 
           controlNo={selectedRecord.controlNo || selectedRecord.id.toString()} 
+          onConfirm={confirmDelete}
+          onCancel={() => setShowDelete(false)}
+        />
+      )}
+      {showDelete && isPatrons && selectedPatron && (
+        <DeleteDialog 
+          controlNo={selectedPatron.idno} 
           onConfirm={confirmDelete}
           onCancel={() => setShowDelete(false)}
         />

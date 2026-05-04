@@ -7,6 +7,12 @@ pub struct Author {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Subject {
+    pub subject: String,
+    pub subject_code: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CatalogEntry {
     pub controlno: String,
     pub title: String,
@@ -38,6 +44,7 @@ pub struct Holdings {
     pub location: String,
     pub due_date: Option<String>, // simplified for now
     pub status: String,
+    pub last_audit: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -48,4 +55,76 @@ pub struct CatalogRecord {
     pub author: String,
     pub callno: Option<String>,
     pub year: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Patron {
+    pub name: String,
+    pub idno: String,
+    pub group_name: String,
+    pub expiry: Option<chrono::DateTime<chrono::Utc>>,
+    pub dept: Option<String>,
+    pub phone: Option<String>,
+    pub email: Option<String>,
+    pub unpaid_fine: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Circulation {
+    pub accession: String,
+    pub dte_borrow: chrono::DateTime<chrono::Utc>,
+    pub dte_due: chrono::DateTime<chrono::Utc>,
+    pub dte_return: Option<chrono::DateTime<chrono::Utc>>,
+    pub fine_code: Option<i32>,
+    pub idno: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CirculationStats {
+    pub total_active: i64,
+    pub total_overdue: i64,
+    pub total_fines: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct OverdueItem {
+    pub accession: String,
+    pub title: String,
+    pub patron_name: String,
+    pub idno: String,
+    pub due_date: chrono::DateTime<chrono::Utc>,
+    pub days_overdue: i64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AuditResult {
+    pub accession: String,
+    pub title: String,
+    pub location: String,
+    pub status: String,
+    pub last_audit: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct FinancialSummary {
+    pub total_collected: i32,
+    pub total_outstanding: i32,
+    pub recent_payments: Vec<PaymentRecord>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PaymentRecord {
+    pub amount_pay: i32,
+    pub idno: String,
+    pub dte_pay: chrono::DateTime<chrono::Utc>,
+    pub cashier: String,
+    pub patron_name: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AcquisitionRecord {
+    pub accession: String,
+    pub title: String,
+    pub author: String,
+    pub date_acquired: chrono::DateTime<chrono::Utc>,
 }

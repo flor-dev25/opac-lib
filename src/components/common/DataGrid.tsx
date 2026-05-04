@@ -10,6 +10,7 @@ interface DataGridProps {
   columns: Column[];
   data: any[];
   onRowClick?: (row: any) => void;
+  onRowDoubleClick?: (row: any) => void;
   selectedId?: string | number;
   idField?: string;
 }
@@ -18,6 +19,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
   columns,
   data,
   onRowClick,
+  onRowDoubleClick,
   selectedId,
   idField = 'id',
 }) => {
@@ -46,6 +48,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
                   <tr
                     key={row[idField] || idx}
                     onClick={() => onRowClick?.(row)}
+                    onDoubleClick={() => onRowDoubleClick?.(row)}
                     className={`
                       cursor-default
                       ${isSelected ? 'bg-classic-blue text-white' : 'hover:bg-blue-50'}

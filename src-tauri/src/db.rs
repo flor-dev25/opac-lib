@@ -10,8 +10,20 @@ pub async fn init_db() -> Result<PgPool, sqlx::Error> {
     dotenvy::dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
-    PgPoolOptions::new()
+    let pool = PgPoolOptions::new()
         .max_connections(5)
         .connect(&database_url)
-        .await
+        .await?;
+
+    // Migration: Add last_audit column if it doesn't exist
+    sqlx::query("ALTER TABLE tblHoldings ADD COLUMN IF NOT EXISTS last_audit TIMESTAMP")
+        .execute(&pool)
+        .await?;
+
+    // Migration: Add date_acquired column if it doesn't exist
+    sqlx::query("ALTER TABLE tblHoldings ADD COLUMN IF NOT EXISTS date_acquired TIMESTAMP DEFAULT NOW()")
+        .execute(&pool)
+        .await?;
+
+    Ok(pool)
 }

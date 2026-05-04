@@ -33,6 +33,7 @@ export const DashboardPage: React.FC = () => {
           data={records} 
           selectedId={selectedId}
           onRowClick={(row) => setSelectedId(row.id)}
+          onRowDoubleClick={(row) => alert('Edit catalog record not yet implemented.')}
           idField="id"
         />
       </div>
