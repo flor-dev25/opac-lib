@@ -22,13 +22,13 @@ Implement the "Edit" catalog record workflow as specified in wireframes `010-edi
   - Implement `upsert_holding(holding: Holdings)` and `delete_holding(accession: String)`.
 
 #### 2. Frontend Implementation (React)
-- [ ] **T04: Edit Dialog UI**
+- [x] **T04: Edit Dialog UI**
   - Create `EditCatalogDialog.tsx` mirroring wireframe `010`.
   - Integrate with `catalogStore` for data fetching on mount.
-- [ ] **T05: Holdings Panel UI**
+- [x] **T05: Holdings Panel UI**
   - Create `HoldingsManagementPanel.tsx` mirroring wireframe `011` (the blue box overlay).
   - Support adding and deleting physical copies.
-- [ ] **T06: Grid Integration**
+- [x] **T06: Grid Integration**
   - Replace the "Not implemented" alert in `DashboardPage.tsx` with a call to open the new Edit Dialog.
 
 ## Logical Decisions

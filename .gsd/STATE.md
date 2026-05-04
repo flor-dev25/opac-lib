@@ -2,8 +2,8 @@
 
 **Active Milestone:** M005 — Authority Control & Advanced Services
 **Active Slice:** S04 — Catalog Record Refinement
-**Active Task:** T04 — Edit Dialog UI
-**Phase:** Implementation
+**Active Task:** T06 — Grid Integration
+**Phase:** Completed
 
 ## Recent Decisions
 - D001: Use React + Tailwind for UI implementation (Parity-first).

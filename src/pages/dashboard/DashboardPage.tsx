@@ -13,7 +13,7 @@ const COLUMNS = [
 ];
 
 export const DashboardPage: React.FC = () => {
-  const { records, selectedId, setSelectedId, fetchRecords } = useCatalogStore();
+  const { records, selectedId, setSelectedId, fetchRecords, setEditDialogOpen, setEditingControlNo } = useCatalogStore();
 
   React.useEffect(() => {
     fetchRecords();
@@ -33,7 +33,12 @@ export const DashboardPage: React.FC = () => {
           data={records} 
           selectedId={selectedId}
           onRowClick={(row) => setSelectedId(row.id)}
-          onRowDoubleClick={(_row) => alert('Edit catalog record not yet implemented.')}
+          onRowDoubleClick={(row) => {
+            if (row.controlNo) {
+              setEditingControlNo(row.controlNo);
+              setEditDialogOpen(true);
+            }
+          }}
           idField="id"
         />
       </div>

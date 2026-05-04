@@ -14,6 +14,7 @@ import { FinancialReportsDialog } from '../patrons/FinancialReportsDialog';
 import { AcquisitionsDialog } from '../inventory/AcquisitionsDialog';
 import { AuditDialog } from '../inventory/AuditDialog';
 import { ReservationDialog } from '../circulation/ReservationDialog';
+import { EditCatalogDialog } from '../catalog/EditCatalogDialog';
 import { useAuthStore } from '../../stores/authStore';
 import { useCatalogStore } from '../../stores/catalogStore';
 import { usePatronStore } from '../../stores/patronStore';
@@ -27,7 +28,7 @@ interface MainLayoutProps {
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
-  const { records, selectedId, deleteRecord } = useCatalogStore();
+  const { records, selectedId, deleteRecord, isEditDialogOpen, editingControlNo, setEditDialogOpen, setEditingControlNo } = useCatalogStore();
   const { patrons, selectedIdno, deletePatron } = usePatronStore();
   const location = useLocation();
   const isPatrons = location.pathname.startsWith('/patrons');
@@ -67,8 +68,15 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       if (selectedIdno) navigate(`/patrons/edit/${selectedIdno}`);
       else alert('Please select a patron to edit.');
     } else {
-      if (selectedId) alert('Edit catalog record not yet implemented.');
-      else alert('Please select a record to edit.');
+      if (selectedId) {
+        const record = records.find(r => r.id === selectedId);
+        if (record?.controlNo) {
+          setEditingControlNo(record.controlNo);
+          setEditDialogOpen(true);
+        }
+      } else {
+        alert('Please select a record to edit.');
+      }
     }
   };
 
@@ -162,6 +170,12 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           controlNo={selectedPatron.idno} 
           onConfirm={confirmDelete}
           onCancel={() => setShowDelete(false)}
+        />
+      )}
+      {isEditDialogOpen && editingControlNo && (
+        <EditCatalogDialog 
+          controlno={editingControlNo} 
+          onClose={() => setEditDialogOpen(false)} 
         />
       )}
     </div>
