@@ -1,8 +1,8 @@
 # GSD State
 
 **Active Milestone:** M005 — Authority Control & Advanced Services
-**Active Slice:** S06 — Legacy Data Migration
-**Active Task:** T01 — Reset and Import
+**Active Slice:** S03 — Loan Renewals
+**Active Task:** T01 — Planning
 **Phase:** Planning
 
 ## Recent Decisions
@@ -18,6 +18,8 @@
 - D030: Holdings management will be implemented as a sub-panel within the Edit Dialog.
 - D031: Enforced 20 items per page limit for "No-Scroll" UI parity.
 - D032: Implemented classic "Record Navigator" (Page X of Y) for dashboard data navigation.
+- D033: Used psql for bulk import of 16,000+ legacy records.
+- D034: Reset database to full legacy schema for 100% data parity.
 - D006: Adopted Caveman plugin for communication to reduce token usage (~75% reduction).
 - D007: Implemented auto-generating timestamp ID (Control No) and full bibliographic form validation.
 - D008: Centralized global dialog management in MainLayout for multi-context access.
