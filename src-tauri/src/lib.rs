@@ -407,6 +407,135 @@ async fn cancel_reservation(rec_number: i32, state: tauri::State<'_, DbState>) -
 }
 
 #[tauri::command]
+async fn get_catalog_entry(controlno: String, state: tauri::State<'_, DbState>) -> Result<CatalogEntry, String> {
+  let row = sqlx::query(
+    r#"SELECT * FROM "public"."tblCat" WHERE "controlno" = $1"#
+  )
+  .bind(controlno)
+  .fetch_one(&state.pool)
+  .await
+  .map_err(|e| e.to_string())?;
+
+  Ok(CatalogEntry {
+    controlno: row.try_get("controlno").unwrap_or_default(),
+    title: row.try_get("Title").unwrap_or_default(),
+    callno: row.try_get("Callno").ok(),
+    author_code: row.try_get("AuthorCode").unwrap_or(0),
+    edition: row.try_get("Edition").ok(),
+    pagination: row.try_get("Pagination").ok(),
+    publisher: row.try_get("Publisher").ok(),
+    pubplace: row.try_get("Pubplace").ok(),
+    copyright: row.try_get("Copyright").ok(),
+    isbn: row.try_get("ISBN").ok(),
+    subject1_code: row.try_get("Subject1Code").ok(),
+    subject2_code: row.try_get("Subject2Code").ok(),
+    subject3_code: row.try_get("Subject3Code").ok(),
+    series_title: row.try_get("SeriesTitle").ok(),
+    a_entry_title: row.try_get("AEntryTitle").ok(),
+    ae_author1_code: row.try_get("AEAuthor1Code").ok(),
+    ae_author2_code: row.try_get("AEAuthor2Code").ok(),
+    ae_author3_code: row.try_get("AEAuthor3Code").ok(),
+    material: row.try_get("Material").ok(),
+    x_notes: row.try_get("xNotes").ok(),
+  })
+}
+
+#[tauri::command]
+async fn update_catalog_record(entry: CatalogEntry, state: tauri::State<'_, DbState>) -> Result<(), String> {
+  sqlx::query(
+    r#"
+    UPDATE "public"."tblCat"
+    SET "Title" = $1, "Callno" = $2, "AuthorCode" = $3, "Edition" = $4, "Pagination" = $5,
+        "Publisher" = $6, "Pubplace" = $7, "Copyright" = $8, "ISBN" = $9,
+        "Subject1Code" = $10, "Subject2Code" = $11, "Subject3Code" = $12,
+        "SeriesTitle" = $13, "AEntryTitle" = $14, "AEAuthor1Code" = $15,
+        "AEAuthor2Code" = $16, "AEAuthor3Code" = $17, "Material" = $18, "xNotes" = $19
+    WHERE "controlno" = $20
+    "#
+  )
+  .bind(entry.title)
+  .bind(entry.callno)
+  .bind(entry.author_code)
+  .bind(entry.edition)
+  .bind(entry.pagination)
+  .bind(entry.publisher)
+  .bind(entry.pubplace)
+  .bind(entry.copyright)
+  .bind(entry.isbn)
+  .bind(entry.subject1_code)
+  .bind(entry.subject2_code)
+  .bind(entry.subject3_code)
+  .bind(entry.series_title)
+  .bind(entry.a_entry_title)
+  .bind(entry.ae_author1_code)
+  .bind(entry.ae_author2_code)
+  .bind(entry.ae_author3_code)
+  .bind(entry.material)
+  .bind(entry.x_notes)
+  .bind(entry.controlno)
+  .execute(&state.pool)
+  .await
+  .map_err(|e| e.to_string())?;
+
+  Ok(())
+}
+
+#[tauri::command]
+async fn get_holdings(controlno: String, state: tauri::State<'_, DbState>) -> Result<Vec<Holdings>, String> {
+  let rows = sqlx::query(
+    r#"SELECT * FROM "public"."tblHoldings" WHERE "controlno" = $1"#
+  )
+  .bind(controlno)
+  .fetch_all(&state.pool)
+  .await
+  .map_err(|e| e.to_string())?;
+
+  let holdings = rows.into_iter().map(|row| Holdings {
+    controlno: row.try_get("controlno").unwrap_or_default(),
+    accession: row.try_get("Accession").unwrap_or_default(),
+    copy: row.try_get("Copy").unwrap_or_default(),
+    location: row.try_get("Location").unwrap_or_default(),
+    due_date: row.try_get("DueDate").ok(), // Note: column name from schema
+    status: row.try_get("Status").unwrap_or_else(|_| "Available".to_string()),
+    last_audit: row.try_get("last_audit").ok(),
+  }).collect();
+
+  Ok(holdings)
+}
+
+#[tauri::command]
+async fn add_holding(holding: Holdings, state: tauri::State<'_, DbState>) -> Result<(), String> {
+  sqlx::query(
+    r#"
+    INSERT INTO "public"."tblHoldings" ("controlno", "Accession", "Copy", "Location", "Status")
+    VALUES ($1, $2, $3, $4, $5)
+    ON CONFLICT ("Accession") DO UPDATE 
+    SET "Location" = EXCLUDED."Location", "Copy" = EXCLUDED."Copy", "Status" = EXCLUDED."Status"
+    "#
+  )
+  .bind(holding.controlno)
+  .bind(holding.accession)
+  .bind(holding.copy)
+  .bind(holding.location)
+  .bind(holding.status)
+  .execute(&state.pool)
+  .await
+  .map_err(|e| e.to_string())?;
+
+  Ok(())
+}
+
+#[tauri::command]
+async fn delete_holding(accession: String, state: tauri::State<'_, DbState>) -> Result<(), String> {
+  sqlx::query(r#"DELETE FROM "public"."tblHoldings" WHERE "Accession" = $1"#)
+    .bind(accession)
+    .execute(&state.pool)
+    .await
+    .map_err(|e| e.to_string())?;
+  Ok(())
+}
+
+#[tauri::command]
 async fn check_db_connection(state: tauri::State<'_, DbState>) -> Result<String, String> {
   match sqlx::query("SELECT 1").fetch_one(&state.pool).await {
     Ok(_) => Ok("Connected to PostgreSQL".to_string()),
@@ -468,6 +597,11 @@ pub fn run() {
       add_reservation,
       serve_reservation,
       cancel_reservation,
+      get_catalog_entry,
+      update_catalog_record,
+      get_holdings,
+      add_holding,
+      delete_holding,
       check_db_connection,
       maximize_window,
       reset_window_size,

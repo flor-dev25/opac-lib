@@ -1,9 +1,9 @@
 # GSD State
 
 **Active Milestone:** M005 — Authority Control & Advanced Services
-**Active Slice:** S02 — Item Reservations
-**Active Task:** T02 — Implementation
-**Phase:** Completed
+**Active Slice:** S04 — Catalog Record Refinement
+**Active Task:** T04 — Edit Dialog UI
+**Phase:** Implementation
 
 ## Recent Decisions
 - D001: Use React + Tailwind for UI implementation (Parity-first).
@@ -14,6 +14,8 @@
 - D026: Added Basic/Advanced mode toggle in the top Toolbar. Basic mode shows New, Delete, Export, Authority, About, and Exit.
 - D027: Resolved missing database state initialization in Tauri run loop and fixed PostgreSQL case-sensitivity in migrations.
 - D028: Analyzed legacy "Edit" wireframes (010, 011) to ensure full parity of the catalog update and holdings management workflow.
+- D029: Planned S04 to implement the full Edit Catalog Record workflow.
+- D030: Holdings management will be implemented as a sub-panel within the Edit Dialog.
 - D006: Adopted Caveman plugin for communication to reduce token usage (~75% reduction).
 - D007: Implemented auto-generating timestamp ID (Control No) and full bibliographic form validation.
 - D008: Centralized global dialog management in MainLayout for multi-context access.

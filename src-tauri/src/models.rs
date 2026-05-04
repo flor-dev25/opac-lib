@@ -44,7 +44,7 @@ pub struct Holdings {
     pub accession: String,
     pub copy: String,
     pub location: String,
-    pub due_date: Option<String>, // simplified for now
+    pub due_date: Option<chrono::DateTime<chrono::Utc>>,
     pub status: String,
     pub last_audit: Option<chrono::DateTime<chrono::Utc>>,
 }

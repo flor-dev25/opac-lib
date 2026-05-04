@@ -9,6 +9,8 @@ This milestone focuses on maintaining the integrity of bibliographic data (Autho
   > Queue-based system for reserving unavailable items (`tblReserve`).
 - [ ] **S03: Loan Renewals** `risk:low`
   > Logic to extend `dteDue` for active loans.
+- [ ] **S04: Catalog Record Refinement** `risk:medium`
+  > Implementation of the "Edit" record and "Holdings" management sub-view (Wireframes 010, 011).
 
 ## Boundary Map
 - **M04 Boundary**: Inventory tracking and basic financial reconciliation.
