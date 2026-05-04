@@ -65,6 +65,18 @@ Complete parity implementation of Library Management System based on wireframe s
 - [x] System tray integration
 - [x] Native Catalog Read/Delete
 
+### Phase 6: Catalog Refinement (M005)
+- [x] Edit Catalog Entry (Wireframe 010)
+- [x] Holdings Management Panel (Wireframe 011)
+- [x] Dashboard Pagination (No-Scroll UX)
+- [x] Legacy Data Migration (6,000+ records)
+
+### Phase 7: AI Intelligence (M006)
+- [ ] Semantic Infrastructure (pgvector)
+- [ ] Offline LLM Integration (Gemma 2)
+- [ ] AI UI & Chat Badge
+- [ ] Context-Aware RAG (Patron/Admin queries)
+
 ## Legend
 - 🟢 Completed
 - 🟡 In Progress

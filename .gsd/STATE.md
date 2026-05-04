@@ -20,6 +20,9 @@
 - D032: Implemented classic "Record Navigator" (Page X of Y) for dashboard data navigation.
 - D033: Used psql for bulk import of 16,000+ legacy records.
 - D034: Reset database to full legacy schema for 100% data parity.
+- D035: Selected Gemma 2 2B via Ollama for offline-first AI privacy.
+- D036: Chose pgvector for integrated semantic search in PostgreSQL.
+- D037: Designed AI Badge with dynamic opacity (30% idle, 100% hover) to prevent UI clutter.
 - D006: Adopted Caveman plugin for communication to reduce token usage (~75% reduction).
 - D007: Implemented auto-generating timestamp ID (Control No) and full bibliographic form validation.
 - D008: Centralized global dialog management in MainLayout for multi-context access.
