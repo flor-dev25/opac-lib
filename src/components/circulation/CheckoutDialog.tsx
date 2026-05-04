@@ -11,7 +11,7 @@ interface CheckoutDialogProps {
 }
 
 export const CheckoutDialog: React.FC<CheckoutDialogProps> = ({ onClose }) => {
-  const { patrons, selectedIdno, setSelectedIdno } = usePatronStore();
+  const { patrons, selectedIdno } = usePatronStore();
   const { activeLoans, checkOut, fetchActiveLoans, isLoading } = useCirculationStore();
   const [accession, setAccession] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);

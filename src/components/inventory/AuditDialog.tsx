@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BeveledBox } from '../common/BeveledBox';
 import { TitleBar } from '../layout/TitleBar';
 import { useAuditStore } from '../../stores/auditStore';
-import { ScanBarcode, AlertTriangle, CheckCircle2, X } from 'lucide-react';
+import { ScanBarcode, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 interface AuditDialogProps {
   onClose: () => void;

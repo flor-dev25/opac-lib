@@ -61,10 +61,22 @@ export const usePatronStore = create<PatronState>((set, get) => ({
       await invoke('delete_patron', { idno });
       set((state) => ({
         patrons: state.patrons.filter(p => p.idno !== idno),
-        selectedIdno: state.selectedIdno === idno ? undefined : state.selectedIdno
+        selectedIdno: state.selectedIdno === idno ? null : state.selectedIdno
       }));
     } catch (e) {
       alert(`Delete failed: ${e}`);
+    }
+  },
+  payFine: async (idno, amount) => {
+    try {
+      await invoke('pay_fine', { idno, amount });
+      set((state) => ({
+        patrons: state.patrons.map(p =>
+          p.idno === idno ? { ...p, unpaid_fine: Math.max(0, p.unpaid_fine - amount) } : p
+        ),
+      }));
+    } catch (e) {
+      alert(`Payment failed: ${e}`);
     }
   },
 }));

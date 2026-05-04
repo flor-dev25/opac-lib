@@ -32,7 +32,7 @@ export const PatronPage: React.FC = () => {
         <DataGrid 
           columns={COLUMNS} 
           data={patrons} 
-          selectedId={selectedIdno}
+          selectedId={selectedIdno ?? undefined}
           onRowClick={(row) => setSelectedIdno(row.idno)}
           onRowDoubleClick={(row) => navigate(`/patrons/edit/${row.idno}`)}
           idField="idno"

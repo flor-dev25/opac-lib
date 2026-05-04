@@ -1,5 +1,5 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useNavigate } from 'react-router-dom';
@@ -39,14 +39,20 @@ export const PatronForm: React.FC<PatronFormProps> = ({ initialData, onClose }) 
     defaultValues: initialData ? {
       ...initialData,
       expiry: initialData.expiry ? initialData.expiry.split('T')[0] : '',
+      dept: initialData.dept ?? '',
+      phone: initialData.phone ?? '',
+      email: initialData.email ?? '',
     } : {
       group_name: 'STUDENT',
       unpaid_fine: 0,
       expiry: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+      dept: '',
+      phone: '',
+      email: '',
     },
   });
 
-  const onSubmit = async (data: PatronFormData) => {
+  const onSubmit: SubmitHandler<PatronFormData> = async (data) => {
     const patronData: Patron = {
       ...data,
       email: data.email || null,
@@ -67,7 +73,8 @@ export const PatronForm: React.FC<PatronFormProps> = ({ initialData, onClose }) 
 
   return (
     <div className="flex flex-col h-full bg-classic-grey p-2 relative">
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <form onSubmit={handleSubmit(onSubmit as any)} className="flex flex-col h-full">
         <BeveledBox variant="raised" className="flex-1 flex flex-col p-4 bg-[#E8F0F8]">
           <div className="flex items-center justify-between mb-4 border-b border-white pb-2 shadow-[0_1px_0_rgba(128,128,128,0.5)]">
             <h2 className="text-xl font-bold italic text-classic-blue">

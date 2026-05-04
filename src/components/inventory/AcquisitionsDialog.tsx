@@ -50,7 +50,7 @@ export const AcquisitionsDialog: React.FC<AcquisitionsDialogProps> = ({ onClose 
         
         <div className="p-4 flex-1 flex flex-col gap-4 overflow-hidden">
           {/* Filters */}
-          <GroupBox title="Report Parameters">
+          <GroupBox label="Report Parameters">
             <div className="flex gap-4 items-end p-2">
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-bold uppercase text-gray-600 flex items-center gap-1">
@@ -85,7 +85,7 @@ export const AcquisitionsDialog: React.FC<AcquisitionsDialogProps> = ({ onClose 
           </GroupBox>
 
           {/* Report Table */}
-          <GroupBox title="Acquisitions History" className="flex-1 flex flex-col overflow-hidden">
+          <GroupBox label="Acquisitions History" className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 flex flex-col overflow-hidden bg-white border-2 border-inset border-gray-400">
               <div className="bg-[#808080] text-white flex font-bold text-xs p-1 sticky top-0 z-10">
                 <div className="w-24 px-1">Accession</div>

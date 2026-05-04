@@ -3,7 +3,7 @@ import { BeveledBox } from '../common/BeveledBox';
 import { GroupBox } from '../common/GroupBox';
 import { TitleBar } from '../layout/TitleBar';
 import { invoke } from '@tauri-apps/api/core';
-import { Wallet, TrendingUp, History, Download, Printer } from 'lucide-react';
+import { Wallet, TrendingUp, Download, Printer } from 'lucide-react';
 
 interface PaymentRecord {
   amount_pay: number;
@@ -56,7 +56,7 @@ export const FinancialReportsDialog: React.FC<FinancialReportsDialogProps> = ({ 
             <>
               {/* Summary Stats */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <GroupBox title="Collection Summary">
+                <GroupBox label="Collection Summary">
                   <div className="flex items-center gap-4 p-2">
                     <div className="p-3 bg-green-100 border border-green-600 text-green-700">
                       <Wallet size={32} />
@@ -70,7 +70,7 @@ export const FinancialReportsDialog: React.FC<FinancialReportsDialogProps> = ({ 
                   </div>
                 </GroupBox>
 
-                <GroupBox title="Liability Summary">
+                <GroupBox label="Liability Summary">
                   <div className="flex items-center gap-4 p-2">
                     <div className="p-3 bg-red-100 border border-red-600 text-red-700">
                       <TrendingUp size={32} />
@@ -86,7 +86,7 @@ export const FinancialReportsDialog: React.FC<FinancialReportsDialogProps> = ({ 
               </div>
 
               {/* Recent History */}
-              <GroupBox title="Recent Payment History" className="flex-1 flex flex-col overflow-hidden">
+              <GroupBox label="Recent Payment History" className="flex-1 flex flex-col overflow-hidden">
                 <div className="flex-1 flex flex-col overflow-hidden bg-white border-2 border-inset border-gray-400">
                   <div className="bg-[#808080] text-white flex font-bold text-xs p-1 sticky top-0 z-10">
                     <div className="w-32 px-1">Date/Time</div>
