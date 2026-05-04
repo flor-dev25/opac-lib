@@ -6,7 +6,7 @@ use tauri::{
   Manager,
 };
 use db::DbState;
-use models::{CatalogRecord, Patron, Circulation, CirculationStats, OverdueItem, AuditResult, FinancialSummary, AcquisitionRecord, Author, Subject, Reservation};
+use models::{CatalogRecord, CatalogEntry, Holdings, Patron, Circulation, CirculationStats, OverdueItem, AuditResult, FinancialSummary, AcquisitionRecord, Author, Subject, Reservation};
 use chrono::Utc;
 use sqlx::Row;
 
