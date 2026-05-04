@@ -70,8 +70,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     } else {
       if (selectedId) {
         const record = records.find(r => r.id === selectedId);
-        if (record?.controlNo) {
-          setEditingControlNo(record.controlNo);
+        if (record?.controlno) {
+          setEditingControlNo(record.controlno);
           setEditDialogOpen(true);
         }
       } else {
@@ -160,7 +160,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {showReservation && <ReservationDialog onClose={() => setShowReservation(false)} />}
       {showDelete && !isPatrons && selectedRecord && (
         <DeleteDialog 
-          controlNo={selectedRecord.controlNo || selectedRecord.id.toString()} 
+          controlNo={selectedRecord.controlno || selectedRecord.id.toString()} 
           onConfirm={confirmDelete}
           onCancel={() => setShowDelete(false)}
         />

@@ -34,8 +34,8 @@ export const DashboardPage: React.FC = () => {
           selectedId={selectedId}
           onRowClick={(row) => setSelectedId(row.id)}
           onRowDoubleClick={(row) => {
-            if (row.controlNo) {
-              setEditingControlNo(row.controlNo);
+            if (row.controlno) {
+              setEditingControlNo(row.controlno);
               setEditDialogOpen(true);
             }
           }}

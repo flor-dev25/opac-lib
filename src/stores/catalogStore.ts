@@ -7,7 +7,7 @@ interface CatalogRecord {
   author: string;
   callno: string;
   year: string;
-  controlNo?: string;
+  controlno?: string;
 }
 
 interface CatalogEntry {
@@ -83,10 +83,10 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
   },
   deleteRecord: async (id) => {
     const record = get().records.find(r => r.id === id);
-    if (!record || !record.controlNo) return;
+    if (!record || !record.controlno) return;
 
     try {
-      await invoke('delete_catalog_record', { controlno: record.controlNo });
+      await invoke('delete_catalog_record', { controlno: record.controlno });
       set((state) => ({
         records: state.records.filter(r => r.id !== id),
         selectedId: state.selectedId === id ? undefined : state.selectedId
