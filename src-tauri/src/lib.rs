@@ -22,7 +22,7 @@ async fn get_catalog_records(state: tauri::State<'_, DbState>) -> Result<Vec<Cat
       c."Copyright" as year
     FROM "public"."tblCat" c
     LEFT JOIN "public"."tblAuthor" a ON c."AuthorCode" = a."AuthorCode"
-    LIMIT 100
+    LIMIT 20
     "#
   )
   .fetch_all(&state.pool)

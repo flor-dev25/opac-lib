@@ -30,7 +30,16 @@ Implement the "Edit" catalog record workflow as specified in wireframes `010-edi
   - Support adding and deleting physical copies.
 - [x] **T06: Grid Integration**
   - Replace the "Not implemented" alert in `DashboardPage.tsx` with a call to open the new Edit Dialog.
+- [ ] **T07: Pagination UI**
+  - Implement `RecordNavigator.tsx` to handle page state and grid refresh.
 
 ## Logical Decisions
 - **D029**: Use the same form structure as `CatalogForm` but with field population and "Control No" lock.
 - **D030**: Holdings management will be implemented as a togglable view within the Edit Dialog to match legacy behavior.
+- **D031**: Fixed dashboard item count to 20 per page to achieve a "No Scrolling" UX on standard resolutions.
+
+## Next Steps: Pagination Implementation
+**Proposed Slice: S05 — Dashboard Pagination**
+1. **Backend**: Add `page` parameter to `get_catalog_records` and `get_total_records_count`.
+2. **Frontend**: Create `RecordNavigator.tsx` for the status bar.
+3. **Store**: Add `currentPage`, `totalCount`, and `setPage` to `catalogStore.ts`.

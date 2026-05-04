@@ -3,7 +3,8 @@
 **Active Milestone:** M005 — Authority Control & Advanced Services
 **Active Slice:** S04 — Catalog Record Refinement
 **Active Task:** T06 — Grid Integration
-**Phase:** Completed
+**Active Task:** T07 — Pagination UI
+**Phase:** Planning
 
 ## Recent Decisions
 - D001: Use React + Tailwind for UI implementation (Parity-first).
@@ -16,6 +17,7 @@
 - D028: Analyzed legacy "Edit" wireframes (010, 011) to ensure full parity of the catalog update and holdings management workflow.
 - D029: Planned S04 to implement the full Edit Catalog Record workflow.
 - D030: Holdings management will be implemented as a sub-panel within the Edit Dialog.
+- D031: Enforced 20 items per page limit for "No-Scroll" UI parity.
 - D006: Adopted Caveman plugin for communication to reduce token usage (~75% reduction).
 - D007: Implemented auto-generating timestamp ID (Control No) and full bibliographic form validation.
 - D008: Centralized global dialog management in MainLayout for multi-context access.
