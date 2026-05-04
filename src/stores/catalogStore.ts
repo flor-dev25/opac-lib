@@ -48,12 +48,16 @@ interface CatalogState {
   selectedId: number | undefined;
   isLoading: boolean;
   error: string | null;
+  currentPage: number;
+  totalRecords: number;
   isEditDialogOpen: boolean;
   editingControlNo: string | null;
   setSelectedId: (id: number | undefined) => void;
+  setPage: (page: number) => Promise<void>;
   setEditDialogOpen: (open: boolean) => void;
   setEditingControlNo: (controlno: string | null) => void;
-  fetchRecords: () => Promise<void>;
+  fetchRecords: (page?: number) => Promise<void>;
+  fetchCount: () => Promise<void>;
   deleteRecord: (id: number) => Promise<void>;
   fetchFullEntry: (controlno: string) => Promise<CatalogEntry>;
   updateEntry: (entry: CatalogEntry) => Promise<void>;
@@ -69,16 +73,30 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
   error: null,
   isEditDialogOpen: false,
   editingControlNo: null,
+  currentPage: 1,
+  totalRecords: 0,
   setSelectedId: (id) => set({ selectedId: id }),
+  setPage: async (page) => {
+    set({ currentPage: page });
+    await get().fetchRecords(page);
+  },
   setEditDialogOpen: (open) => set({ isEditDialogOpen: open }),
   setEditingControlNo: (controlno) => set({ editingControlNo: controlno }),
-  fetchRecords: async () => {
+  fetchRecords: async (page = 1) => {
     set({ isLoading: true });
     try {
-      const records = await invoke<CatalogRecord[]>('get_catalog_records');
+      const records = await invoke<CatalogRecord[]>('get_catalog_records', { page });
       set({ records, isLoading: false });
     } catch (e) {
       set({ error: (e as Error).message, isLoading: false });
+    }
+  },
+  fetchCount: async () => {
+    try {
+      const count = await invoke<number>('get_catalog_count');
+      set({ totalRecords: count });
+    } catch (e) {
+      console.error('Failed to fetch count:', e);
     }
   },
   deleteRecord: async (id) => {

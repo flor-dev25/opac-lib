@@ -2,6 +2,7 @@ import React from 'react';
 
 import { SearchBar } from '../../components/dashboard/SearchBar';
 import { DataGrid } from '../../components/common/DataGrid';
+import { RecordNavigator } from '../../components/dashboard/RecordNavigator';
 
 import { useCatalogStore } from '../../stores/catalogStore';
 
@@ -13,11 +14,12 @@ const COLUMNS = [
 ];
 
 export const DashboardPage: React.FC = () => {
-  const { records, selectedId, setSelectedId, fetchRecords, setEditDialogOpen, setEditingControlNo } = useCatalogStore();
+  const { records, selectedId, setSelectedId, fetchRecords, fetchCount, setEditDialogOpen, setEditingControlNo } = useCatalogStore();
 
   React.useEffect(() => {
     fetchRecords();
-  }, [fetchRecords]);
+    fetchCount();
+  }, [fetchRecords, fetchCount]);
 
   const handleSearch = (query: string, scope: string) => {
     console.log(`Searching for "${query}" in ${scope}`);
@@ -42,6 +44,8 @@ export const DashboardPage: React.FC = () => {
           idField="id"
         />
       </div>
+
+      <RecordNavigator />
       
       {/* Footer status bar for classic feel */}
       <div className="bg-classic-grey border-t border-white shadow-[0_-1px_0_#808080] px-2 py-0.5 text-[10px] text-gray-700 flex justify-between">

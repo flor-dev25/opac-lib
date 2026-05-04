@@ -11,7 +11,8 @@ use chrono::Utc;
 use sqlx::Row;
 
 #[tauri::command]
-async fn get_catalog_records(state: tauri::State<'_, DbState>) -> Result<Vec<CatalogRecord>, String> {
+async fn get_catalog_records(page: i32, state: tauri::State<'_, DbState>) -> Result<Vec<CatalogRecord>, String> {
+  let offset = (page - 1) * 20;
   let rows = sqlx::query(
     r#"
     SELECT 
@@ -22,9 +23,10 @@ async fn get_catalog_records(state: tauri::State<'_, DbState>) -> Result<Vec<Cat
       c."Copyright" as year
     FROM "public"."tblCat" c
     LEFT JOIN "public"."tblAuthor" a ON c."AuthorCode" = a."AuthorCode"
-    LIMIT 20
+    LIMIT 20 OFFSET $1
     "#
   )
+  .bind(offset)
   .fetch_all(&state.pool)
   .await
   .map_err(|e| e.to_string())?;
@@ -39,6 +41,16 @@ async fn get_catalog_records(state: tauri::State<'_, DbState>) -> Result<Vec<Cat
   }).collect();
 
   Ok(records)
+}
+
+#[tauri::command]
+async fn get_catalog_count(state: tauri::State<'_, DbState>) -> Result<i64, String> {
+  let row = sqlx::query(r#"SELECT COUNT(*) as count FROM "public"."tblCat""#)
+    .fetch_one(&state.pool)
+    .await
+    .map_err(|e| e.to_string())?;
+  
+  Ok(row.try_get("count").unwrap_or(0))
 }
 
 #[tauri::command]
@@ -573,6 +585,7 @@ pub fn run() {
     .plugin(tauri_plugin_log::Builder::default().build())
     .invoke_handler(tauri::generate_handler![
       get_catalog_records,
+      get_catalog_count,
       delete_catalog_record,
       get_patrons,
       add_patron,
