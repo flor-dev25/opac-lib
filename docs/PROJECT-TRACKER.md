@@ -15,6 +15,9 @@ Complete parity implementation of Library Management System based on wireframe s
 | 006 | new-catalog-entry-form.webp | 🟢 Analyzed | Antigravity | Analysis complete |
 | 007 | new-catalog-holdings.webp | 🟢 Analyzed | Antigravity | Analysis complete |
 | 008 | authority-dialog.webp | 🟢 Analyzed | Antigravity | Analysis complete |
+| 009 | delete.webp | 🟢 Analyzed | Antigravity | Analysis complete |
+| 010 | 010-edit-catalog-entry.webp | 🟢 Analyzed | Antigravity | Analysis complete |
+| 011 | 011-edit-catalog-holdings.webp | 🟢 Analyzed | Antigravity | Analysis complete |
 
 ## Senior Agents
 

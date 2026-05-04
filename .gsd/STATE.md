@@ -13,6 +13,7 @@
 - D005: Implemented high-density DataGrid with sticky headers for catalog browsing.
 - D026: Added Basic/Advanced mode toggle in the top Toolbar. Basic mode shows New, Delete, Export, Authority, About, and Exit.
 - D027: Resolved missing database state initialization in Tauri run loop and fixed PostgreSQL case-sensitivity in migrations.
+- D028: Analyzed legacy "Edit" wireframes (010, 011) to ensure full parity of the catalog update and holdings management workflow.
 - D006: Adopted Caveman plugin for communication to reduce token usage (~75% reduction).
 - D007: Implemented auto-generating timestamp ID (Control No) and full bibliographic form validation.
 - D008: Centralized global dialog management in MainLayout for multi-context access.
