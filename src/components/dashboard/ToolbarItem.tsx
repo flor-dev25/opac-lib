@@ -6,13 +6,15 @@ interface ToolbarItemProps {
   label: string;
   onClick?: () => void;
   disabled?: boolean;
+  className?: string;
 }
 
 export const ToolbarItem: React.FC<ToolbarItemProps> = ({ 
   icon: Icon, 
   label, 
   onClick, 
-  disabled 
+  disabled,
+  className = ''
 }) => {
   return (
     <button
@@ -22,6 +24,7 @@ export const ToolbarItem: React.FC<ToolbarItemProps> = ({
         flex flex-col items-center justify-center w-20 h-20 gap-1
         btn-classic group
         ${disabled ? 'opacity-50 cursor-not-allowed grayscale' : 'hover:bg-gray-200'}
+        ${className}
       `}
     >
       <div className="p-1 group-active:translate-y-0.5 transition-transform">

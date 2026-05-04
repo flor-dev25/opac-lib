@@ -12,6 +12,7 @@ pub struct Subject {
     pub subject_code: i32,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CatalogEntry {
     pub controlno: String,
@@ -36,6 +37,7 @@ pub struct CatalogEntry {
     pub x_notes: Option<String>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Holdings {
     pub controlno: String,

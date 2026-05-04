@@ -11,6 +11,8 @@
 - D003: Strictly follow beveled border styling for legacy parity.
 - D004: Removed Sidebar navigation in favor of a top-heavy Toolbar to match wireframe 003-dashboard-main.
 - D005: Implemented high-density DataGrid with sticky headers for catalog browsing.
+- D026: Added Basic/Advanced mode toggle in the top Toolbar. Basic mode shows New, Delete, Export, Authority, About, and Exit.
+- D027: Resolved missing database state initialization in Tauri run loop and fixed PostgreSQL case-sensitivity in migrations.
 - D006: Adopted Caveman plugin for communication to reduce token usage (~75% reduction).
 - D007: Implemented auto-generating timestamp ID (Control No) and full bibliographic form validation.
 - D008: Centralized global dialog management in MainLayout for multi-context access.

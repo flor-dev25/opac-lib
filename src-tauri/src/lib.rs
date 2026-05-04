@@ -6,7 +6,7 @@ use tauri::{
   Manager,
 };
 use db::DbState;
-use models::{CatalogRecord, Patron, Circulation, CirculationStats, OverdueItem, AuditResult, FinancialSummary, PaymentRecord, AcquisitionRecord, Author, Subject, Reservation};
+use models::{CatalogRecord, Patron, Circulation, CirculationStats, OverdueItem, AuditResult, FinancialSummary, AcquisitionRecord, Author, Subject, Reservation};
 use chrono::Utc;
 use sqlx::Row;
 
@@ -182,12 +182,12 @@ async fn return_item(accession: String, state: tauri::State<'_, DbState>) -> Res
 }
 
 #[tauri::command]
-async fn get_active_loans(state: tauri::State<'_, DbState>) -> Result<Vec<Circulation>, String> {
+async fn get_active_loans(_state: tauri::State<'_, DbState>) -> Result<Vec<Circulation>, String> {
   Ok(vec![]) // simplified for now
 }
 
 #[tauri::command]
-async fn get_circulation_stats(state: tauri::State<'_, DbState>) -> Result<CirculationStats, String> {
+async fn get_circulation_stats(_state: tauri::State<'_, DbState>) -> Result<CirculationStats, String> {
   Ok(CirculationStats {
     total_active: 0,
     total_overdue: 0,
@@ -196,7 +196,7 @@ async fn get_circulation_stats(state: tauri::State<'_, DbState>) -> Result<Circu
 }
 
 #[tauri::command]
-async fn get_overdue_items(state: tauri::State<'_, DbState>) -> Result<Vec<OverdueItem>, String> {
+async fn get_overdue_items(_state: tauri::State<'_, DbState>) -> Result<Vec<OverdueItem>, String> {
   Ok(vec![])
 }
 
@@ -241,7 +241,7 @@ async fn pay_fine(idno: String, amount: i32, state: tauri::State<'_, DbState>) -
 }
 
 #[tauri::command]
-async fn get_financial_reports(state: tauri::State<'_, DbState>) -> Result<FinancialSummary, String> {
+async fn get_financial_reports(_state: tauri::State<'_, DbState>) -> Result<FinancialSummary, String> {
   Ok(FinancialSummary {
       total_collected: 0,
       total_outstanding: 0,
@@ -250,7 +250,7 @@ async fn get_financial_reports(state: tauri::State<'_, DbState>) -> Result<Finan
 }
 
 #[tauri::command]
-async fn get_acquisitions_report(start_date: Option<String>, end_date: Option<String>, state: tauri::State<'_, DbState>) -> Result<Vec<AcquisitionRecord>, String> {
+async fn get_acquisitions_report(_start_date: Option<String>, _end_date: Option<String>, _state: tauri::State<'_, DbState>) -> Result<Vec<AcquisitionRecord>, String> {
   Ok(vec![])
 }
 
@@ -435,7 +435,12 @@ fn quit_app(app: tauri::AppHandle) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+  let pool = tauri::async_runtime::block_on(async {
+    db::init_db().await.expect("Failed to initialize database")
+  });
+
   tauri::Builder::default()
+    .manage(DbState { pool })
     .plugin(tauri_plugin_log::Builder::default().build())
     .invoke_handler(tauri::generate_handler![
       get_catalog_records,
