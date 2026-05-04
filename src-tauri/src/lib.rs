@@ -256,31 +256,71 @@ async fn get_acquisitions_report(start_date: Option<String>, end_date: Option<St
 
 #[tauri::command]
 async fn get_authors(state: tauri::State<'_, DbState>) -> Result<Vec<Author>, String> {
-  Ok(vec![])
+  let rows = sqlx::query(r#"SELECT "Author", "AuthorCode" FROM "public"."tblAuthor" ORDER BY "Author" ASC"#)
+    .fetch_all(&state.pool)
+    .await
+    .map_err(|e| e.to_string())?;
+  
+  let authors = rows.into_iter().map(|row| Author {
+      author: row.try_get("Author").unwrap_or_default(),
+      author_code: row.try_get("AuthorCode").unwrap_or(0),
+  }).collect();
+  Ok(authors)
 }
 
 #[tauri::command]
 async fn update_author(code: i32, name: String, state: tauri::State<'_, DbState>) -> Result<(), String> {
+  sqlx::query(r#"UPDATE "public"."tblAuthor" SET "Author" = $1 WHERE "AuthorCode" = $2"#)
+    .bind(name)
+    .bind(code)
+    .execute(&state.pool)
+    .await
+    .map_err(|e| e.to_string())?;
   Ok(())
 }
 
 #[tauri::command]
 async fn delete_author(code: i32, state: tauri::State<'_, DbState>) -> Result<(), String> {
+  sqlx::query(r#"DELETE FROM "public"."tblAuthor" WHERE "AuthorCode" = $1"#)
+    .bind(code)
+    .execute(&state.pool)
+    .await
+    .map_err(|e| e.to_string())?;
   Ok(())
 }
 
 #[tauri::command]
 async fn get_subjects(state: tauri::State<'_, DbState>) -> Result<Vec<Subject>, String> {
-  Ok(vec![])
+  let rows = sqlx::query(r#"SELECT "subject", "SubjectCode" FROM "public"."tblSubject" ORDER BY "subject" ASC"#)
+    .fetch_all(&state.pool)
+    .await
+    .map_err(|e| e.to_string())?;
+  
+  let subjects = rows.into_iter().map(|row| Subject {
+      subject: row.try_get("subject").unwrap_or_default(),
+      subject_code: row.try_get("SubjectCode").unwrap_or(0),
+  }).collect();
+  Ok(subjects)
 }
 
 #[tauri::command]
 async fn update_subject(code: i32, name: String, state: tauri::State<'_, DbState>) -> Result<(), String> {
+  sqlx::query(r#"UPDATE "public"."tblSubject" SET "subject" = $1 WHERE "SubjectCode" = $2"#)
+    .bind(name)
+    .bind(code)
+    .execute(&state.pool)
+    .await
+    .map_err(|e| e.to_string())?;
   Ok(())
 }
 
 #[tauri::command]
 async fn delete_subject(code: i32, state: tauri::State<'_, DbState>) -> Result<(), String> {
+  sqlx::query(r#"DELETE FROM "public"."tblSubject" WHERE "SubjectCode" = $1"#)
+    .bind(code)
+    .execute(&state.pool)
+    .await
+    .map_err(|e| e.to_string())?;
   Ok(())
 }
 

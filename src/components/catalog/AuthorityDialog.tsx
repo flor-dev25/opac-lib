@@ -1,37 +1,99 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BeveledBox } from '../common/BeveledBox';
 import { DataGrid } from '../common/DataGrid';
+import { invoke } from '@tauri-apps/api/core';
 
 interface AuthorityDialogProps {
   onClose: () => void;
 }
 
-const AUTHOR_MOCK = [
-  { id: 1, name: 'Cormen, Thomas H.' },
-  { id: 2, name: 'Martin, Robert C.' },
-  { id: 3, name: 'Hunt, Andrew' },
-  { id: 4, name: 'Gamma, Erich' },
-];
+interface Author {
+  author: string;
+  author_code: number;
+}
 
-const SUBJECT_MOCK = [
-  { id: 1, name: 'Algorithms' },
-  { id: 2, name: 'Software Engineering' },
-  { id: 3, name: 'Computer Networking' },
-  { id: 4, name: 'Data Structures' },
-];
+interface Subject {
+  subject: string;
+  subject_code: number;
+}
 
 export const AuthorityDialog: React.FC<AuthorityDialogProps> = ({ onClose }) => {
-  const [type, setType] = React.useState<'author' | 'subject'>('author');
-  const [selectedId, setSelectedId] = React.useState<number | undefined>(1);
-  const [editValue, setEditValue] = React.useState('');
+  const [type, setType] = useState<'author' | 'subject'>('author');
+  const [selectedId, setSelectedId] = useState<number | undefined>(undefined);
+  const [editValue, setEditValue] = useState('');
+  
+  const [authors, setAuthors] = useState<Author[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const data = type === 'author' ? AUTHOR_MOCK : SUBJECT_MOCK;
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      if (type === 'author') {
+        const data = await invoke<Author[]>('get_authors');
+        setAuthors(data);
+      } else {
+        const data = await invoke<Subject[]>('get_subjects');
+        setSubjects(data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+    setSelectedId(undefined);
+    setEditValue('');
+  }, [type]);
+
+  const data = type === 'author' 
+    ? authors.map(a => ({ id: a.author_code, name: a.author }))
+    : subjects.map(s => ({ id: s.subject_code, name: s.subject }));
+
   const columns = [{ key: 'name', header: type === 'author' ? 'Author Name' : 'Subject Heading', width: '100%' }];
 
-  React.useEffect(() => {
+  useEffect(() => {
     const selected = data.find(item => item.id === selectedId);
     if (selected) setEditValue(selected.name);
-  }, [selectedId, type, data]);
+    else setEditValue('');
+  }, [selectedId, data]);
+
+  const handleUpdate = async () => {
+    if (!selectedId || !editValue.trim()) return;
+    try {
+      if (type === 'author') {
+        await invoke('update_author', { code: selectedId, name: editValue.trim() });
+      } else {
+        await invoke('update_subject', { code: selectedId, name: editValue.trim() });
+      }
+      await loadData();
+    } catch (err) {
+      console.error('Failed to update:', err);
+      alert('Update failed');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedId) return;
+    if (!confirm('Are you sure you want to delete this authority record?')) return;
+    
+    try {
+      if (type === 'author') {
+        await invoke('delete_author', { code: selectedId });
+      } else {
+        await invoke('delete_subject', { code: selectedId });
+      }
+      setSelectedId(undefined);
+      setEditValue('');
+      await loadData();
+    } catch (err) {
+      console.error('Failed to delete:', err);
+      alert('Delete failed');
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
@@ -66,29 +128,37 @@ export const AuthorityDialog: React.FC<AuthorityDialogProps> = ({ onClose }) => 
 
           {/* List Area */}
           <div className="flex-1 min-h-[200px]">
-            <DataGrid 
-              columns={columns} 
-              data={data} 
-              selectedId={selectedId}
-              onRowClick={(row) => setSelectedId(row.id)}
-            />
+            {loading ? (
+              <div className="w-full h-full flex items-center justify-center border-2 border-gray-400 border-t-gray-600 border-l-gray-600 bg-white">
+                Loading...
+              </div>
+            ) : (
+              <DataGrid 
+                columns={columns} 
+                data={data} 
+                selectedId={selectedId}
+                onRowClick={(row) => setSelectedId(row.id)}
+              />
+            )}
           </div>
 
           {/* Edit Field */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-700">Edit / New Entry:</label>
+            <label className="text-xs font-bold text-gray-700">Edit Selected Entry:</label>
             <input 
               type="text" 
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               className="input-classic w-full h-8" 
+              disabled={!selectedId}
+              placeholder={selectedId ? "Edit name..." : "Select an entry to edit"}
             />
           </div>
 
           {/* Dialog Actions */}
           <div className="flex justify-end gap-2 pt-2">
-            <button className="btn-classic px-6 h-8 font-bold">Update</button>
-            <button className="btn-classic px-6 h-8 text-red-700">Delete</button>
+            <button onClick={handleUpdate} disabled={!selectedId} className="btn-classic px-6 h-8 font-bold disabled:opacity-50">Update</button>
+            <button onClick={handleDelete} disabled={!selectedId} className="btn-classic px-6 h-8 text-red-700 disabled:opacity-50">Delete</button>
             <button onClick={onClose} className="btn-classic px-6 h-8">Exit</button>
           </div>
         </div>
@@ -96,3 +166,4 @@ export const AuthorityDialog: React.FC<AuthorityDialogProps> = ({ onClose }) => 
     </div>
   );
 };
+

@@ -2,8 +2,8 @@
 
 **Active Milestone:** M005 — Authority Control & Advanced Services
 **Active Slice:** S01 — Authority Control
-**Active Task:** T01 — Planning
-**Phase:** Planning
+**Active Task:** T03 — Frontend Implementation
+**Phase:** Completed
 
 ## Recent Decisions
 - D001: Use React + Tailwind for UI implementation (Parity-first).
@@ -28,9 +28,10 @@
 - D021: Implemented Inventory Audit (Shelf-Read) with automatic last_audit timestamping and Missing status auto-recovery.
 - D022: Implemented Financial Reporting with transactional payment recording in tblFineCode.
 - D023: Implemented Acquisitions Reporting with date_acquired tracking and multi-criteria filtering.
+- D024: Implemented Authority Control backend and frontend for centralized Author and Subject management.
 
 ## Blockers
 - None
 
 ## Next Action
-Plan and implement the Inventory Audit (Shelf-Read) workflow (S02).
+Implement the frontend AuthorityDialog for Author and Subject management (S01).
