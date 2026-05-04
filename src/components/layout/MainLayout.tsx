@@ -13,6 +13,7 @@ import { PaymentDialog } from '../patrons/PaymentDialog';
 import { FinancialReportsDialog } from '../patrons/FinancialReportsDialog';
 import { AcquisitionsDialog } from '../inventory/AcquisitionsDialog';
 import { AuditDialog } from '../inventory/AuditDialog';
+import { ReservationDialog } from '../circulation/ReservationDialog';
 import { useAuthStore } from '../../stores/authStore';
 import { useCatalogStore } from '../../stores/catalogStore';
 import { usePatronStore } from '../../stores/patronStore';
@@ -42,6 +43,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showFinancialReports, setShowFinancialReports] = React.useState(false);
   const [showAcquisitions, setShowAcquisitions] = React.useState(false);
   const [showAudit, setShowAudit] = React.useState(false);
+  const [showReservation, setShowReservation] = React.useState(false);
 
   const selectedRecord = records.find(r => r.id === selectedId);
   const selectedPatron = patrons.find(p => p.idno === selectedIdno);
@@ -125,6 +127,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               onAudit={() => setShowAudit(true)}
               onFinancialReports={() => setShowFinancialReports(true)}
               onAcquisitions={() => setShowAcquisitions(true)}
+              onReservation={() => setShowReservation(true)}
             />
           </header>
 
@@ -146,6 +149,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {showFinancialReports && <FinancialReportsDialog onClose={() => setShowFinancialReports(false)} />}
       {showAcquisitions && <AcquisitionsDialog onClose={() => setShowAcquisitions(false)} />}
       {showAudit && <AuditDialog onClose={() => setShowAudit(false)} />}
+      {showReservation && <ReservationDialog onClose={() => setShowReservation(false)} />}
       {showDelete && !isPatrons && selectedRecord && (
         <DeleteDialog 
           controlNo={selectedRecord.controlNo || selectedRecord.id.toString()} 

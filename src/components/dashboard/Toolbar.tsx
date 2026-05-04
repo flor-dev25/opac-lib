@@ -1,5 +1,5 @@
 import React from 'react';
-import { FilePlus, Trash2, Download, BookOpen, Info, LogOut, Users, LayoutDashboard, Edit, ArrowUpRight, ArrowDownLeft, Activity, Wallet, ScanBarcode, TrendingUp, BookPlus } from 'lucide-react';
+import { FilePlus, Trash2, Download, BookOpen, Info, LogOut, Users, LayoutDashboard, Edit, ArrowUpRight, ArrowDownLeft, Activity, Wallet, ScanBarcode, TrendingUp, BookPlus, BookmarkPlus } from 'lucide-react';
 import { ToolbarItem } from './ToolbarItem';
 import { useAuthStore } from '../../stores/authStore';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -17,9 +17,10 @@ interface ToolbarProps {
   onAudit?: () => void;
   onFinancialReports?: () => void;
   onAcquisitions?: () => void;
+  onReservation?: () => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete, onExport, onEdit, onCheckout, onReturn, onDashboard, onPayment, onAudit, onFinancialReports, onAcquisitions }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete, onExport, onEdit, onCheckout, onReturn, onDashboard, onPayment, onAudit, onFinancialReports, onAcquisitions, onReservation }) => {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
 
@@ -82,6 +83,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete
         icon={BookPlus} 
         label="New Items" 
         onClick={onAcquisitions} 
+      />
+      <ToolbarItem 
+        icon={BookmarkPlus} 
+        label="Reserve" 
+        onClick={onReservation} 
       />
       <div className="w-[1px] h-16 bg-gray-400 mx-1 shadow-[1px_0_0_white]" />
       <ToolbarItem 

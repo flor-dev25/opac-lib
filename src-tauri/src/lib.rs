@@ -6,7 +6,7 @@ use tauri::{
   Manager,
 };
 use db::DbState;
-use models::{CatalogRecord, Patron, Circulation, CirculationStats, OverdueItem, AuditResult, FinancialSummary, PaymentRecord, AcquisitionRecord, Author, Subject};
+use models::{CatalogRecord, Patron, Circulation, CirculationStats, OverdueItem, AuditResult, FinancialSummary, PaymentRecord, AcquisitionRecord, Author, Subject, Reservation};
 use chrono::Utc;
 use sqlx::Row;
 
@@ -325,6 +325,88 @@ async fn delete_subject(code: i32, state: tauri::State<'_, DbState>) -> Result<(
 }
 
 #[tauri::command]
+async fn get_reservations(state: tauri::State<'_, DbState>) -> Result<Vec<Reservation>, String> {
+  let rows = sqlx::query(
+    r#"
+    SELECT r."RecNumber", r."Idno", r."Accession",
+           r."DateReserve", r."ReserveUntil", r."IsServed",
+           u."Name" as patron_name,
+           h."controlno"
+    FROM "public"."tblReserve" r
+    LEFT JOIN "public"."tblUser" u ON r."Idno" = u."Idno"
+    LEFT JOIN "public"."tblHoldings" h ON r."Accession" = h."Accession"
+    WHERE r."IsServed" = 'N'
+    ORDER BY r."DateReserve" ASC
+    "#
+  )
+  .fetch_all(&state.pool)
+  .await
+  .map_err(|e| e.to_string())?;
+
+  let reservations = rows.into_iter().map(|row| Reservation {
+    rec_number: row.try_get("RecNumber").unwrap_or(0),
+    idno: row.try_get::<Option<String>, _>("Idno").unwrap_or_default().unwrap_or_default(),
+    accession: row.try_get::<Option<String>, _>("Accession").unwrap_or_default().unwrap_or_default(),
+    date_reserve: row.try_get("DateReserve").unwrap_or_else(|_| Utc::now()),
+    reserve_until: row.try_get("ReserveUntil").unwrap_or_else(|_| Utc::now()),
+    is_served: row.try_get::<Option<String>, _>("IsServed").unwrap_or_default().unwrap_or_else(|| "N".to_string()),
+    patron_name: row.try_get("patron_name").unwrap_or_default(),
+    item_title: row.try_get::<Option<String>, _>("controlno").unwrap_or_default(),
+  }).collect();
+
+  Ok(reservations)
+}
+
+#[tauri::command]
+async fn add_reservation(idno: String, accession: String, state: tauri::State<'_, DbState>) -> Result<(), String> {
+  let now = Utc::now();
+  let until = now + chrono::Duration::days(7);
+
+  // Generate next RecNumber
+  let max_row = sqlx::query(r#"SELECT COALESCE(MAX("RecNumber"), 0) as max_rec FROM "public"."tblReserve""#)
+    .fetch_one(&state.pool)
+    .await
+    .map_err(|e| e.to_string())?;
+  let max_rec: i32 = max_row.try_get("max_rec").unwrap_or(0);
+  let next_rec = max_rec + 1;
+
+  sqlx::query(
+    r#"INSERT INTO "public"."tblReserve" ("RecNumber", "Idno", "Accession", "DateReserve", "ReserveUntil", "IsServed")
+       VALUES ($1, $2, $3, $4, $5, 'N')"#
+  )
+  .bind(next_rec)
+  .bind(idno)
+  .bind(accession)
+  .bind(now)
+  .bind(until)
+  .execute(&state.pool)
+  .await
+  .map_err(|e| e.to_string())?;
+
+  Ok(())
+}
+
+#[tauri::command]
+async fn serve_reservation(rec_number: i32, state: tauri::State<'_, DbState>) -> Result<(), String> {
+  sqlx::query(r#"UPDATE "public"."tblReserve" SET "IsServed" = 'Y' WHERE "RecNumber" = $1"#)
+    .bind(rec_number)
+    .execute(&state.pool)
+    .await
+    .map_err(|e| e.to_string())?;
+  Ok(())
+}
+
+#[tauri::command]
+async fn cancel_reservation(rec_number: i32, state: tauri::State<'_, DbState>) -> Result<(), String> {
+  sqlx::query(r#"DELETE FROM "public"."tblReserve" WHERE "RecNumber" = $1"#)
+    .bind(rec_number)
+    .execute(&state.pool)
+    .await
+    .map_err(|e| e.to_string())?;
+  Ok(())
+}
+
+#[tauri::command]
 async fn check_db_connection(state: tauri::State<'_, DbState>) -> Result<String, String> {
   match sqlx::query("SELECT 1").fetch_one(&state.pool).await {
     Ok(_) => Ok("Connected to PostgreSQL".to_string()),
@@ -377,6 +459,10 @@ pub fn run() {
       get_subjects,
       update_subject,
       delete_subject,
+      get_reservations,
+      add_reservation,
+      serve_reservation,
+      cancel_reservation,
       check_db_connection,
       maximize_window,
       reset_window_size,

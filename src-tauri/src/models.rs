@@ -128,3 +128,15 @@ pub struct AcquisitionRecord {
     pub author: String,
     pub date_acquired: chrono::DateTime<chrono::Utc>,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Reservation {
+    pub rec_number: i32,
+    pub idno: String,
+    pub accession: String,
+    pub date_reserve: chrono::DateTime<chrono::Utc>,
+    pub reserve_until: chrono::DateTime<chrono::Utc>,
+    pub is_served: String,
+    pub patron_name: Option<String>,
+    pub item_title: Option<String>,
+}

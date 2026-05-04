@@ -5,7 +5,7 @@ This milestone focuses on maintaining the integrity of bibliographic data (Autho
 ## Slices
 - [x] **S01: Authority Control** `risk:medium`
   > Full implementation of the Authority dialog (Wireframe 008) for Author and Subject management.
-- [ ] **S02: Item Reservations** `risk:high`
+- [x] **S02: Item Reservations** `risk:high`
   > Queue-based system for reserving unavailable items (`tblReserve`).
 - [ ] **S03: Loan Renewals** `risk:low`
   > Logic to extend `dteDue` for active loans.

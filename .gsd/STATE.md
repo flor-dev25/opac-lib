@@ -1,8 +1,8 @@
 # GSD State
 
 **Active Milestone:** M005 — Authority Control & Advanced Services
-**Active Slice:** S01 — Authority Control
-**Active Task:** T03 — Frontend Implementation
+**Active Slice:** S02 — Item Reservations
+**Active Task:** T02 — Implementation
 **Phase:** Completed
 
 ## Recent Decisions
@@ -29,9 +29,10 @@
 - D022: Implemented Financial Reporting with transactional payment recording in tblFineCode.
 - D023: Implemented Acquisitions Reporting with date_acquired tracking and multi-criteria filtering.
 - D024: Implemented Authority Control backend and frontend for centralized Author and Subject management.
+- D025: Implemented Item Reservations queue using tblReserve with serve/cancel workflow and 7-day expiry.
 
 ## Blockers
 - None
 
 ## Next Action
-Implement the frontend AuthorityDialog for Author and Subject management (S01).
+Plan and implement Loan Renewals (S03).
