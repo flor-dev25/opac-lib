@@ -1,0 +1,289 @@
+import React, { useState, useEffect } from 'react';
+import { invoke } from '@tauri-apps/api/core';
+import { open, save } from '@tauri-apps/plugin-dialog';
+import { Channel } from '@tauri-apps/api/core';
+
+export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const [tab, setTab] = useState<'db' | 'ai'>('db');
+
+  // DB State
+  const [dbUrl, setDbUrl] = useState('');
+  const [dbStatus, setDbStatus] = useState('');
+  const [dbTesting, setDbTesting] = useState(false);
+
+  // AI State
+  const [aiStatus, setAiStatus] = useState('');
+  const [aiProgress, setAiProgress] = useState('');
+  const [aiPulling, setAiPulling] = useState(false);
+  const [phi3Ready, setPhi3Ready] = useState(false);
+  const [embedReady, setEmbedReady] = useState(false);
+
+  useEffect(() => {
+    loadDbConfig();
+    checkAiModels();
+  }, []);
+
+  const loadDbConfig = async () => {
+    try {
+      const config: any = await invoke('get_db_config');
+      setDbUrl(config.database_url);
+    } catch (e) {
+      setDbUrl('postgres://postgres:password@localhost:5432/infolib');
+    }
+  };
+
+  const testConnection = async () => {
+    setDbTesting(true);
+    setDbStatus('Testing connection...');
+    try {
+      const msg = await invoke<string>('check_db_connection');
+      setDbStatus(`✓ ${msg}`);
+    } catch (err) {
+      setDbStatus(`✗ ${err}`);
+    } finally {
+      setDbTesting(false);
+    }
+  };
+
+  const saveDbConfig = async () => {
+    try {
+      await invoke('save_db_config', { config: { database_url: dbUrl } });
+      setDbStatus('Configuration saved. Restart app to apply changes.');
+    } catch (e) {
+      setDbStatus(`Save failed: ${e}`);
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      const filePath = await save({
+        filters: [{ name: 'Config', extensions: ['json'] }],
+        defaultPath: 'infolib_config.json'
+      });
+      if (filePath) {
+        await invoke('export_settings', { exportPath: filePath });
+        setDbStatus('Settings exported successfully.');
+      }
+    } catch (e) {
+      setDbStatus(`Export failed: ${e}`);
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      const selected = await open({
+        filters: [{ name: 'Config', extensions: ['json'] }],
+        multiple: false
+      });
+      if (selected && typeof selected === 'string') {
+        await invoke('import_settings', { importPath: selected });
+        setDbStatus('Settings imported. Restart app to apply.');
+        loadDbConfig();
+      }
+    } catch (e) {
+      setDbStatus(`Import failed: ${e}`);
+    }
+  };
+
+  const checkAiModels = async () => {
+    try {
+      setAiStatus('Checking AI models...');
+      const hasPhi3 = await invoke<boolean>('check_ollama_model', { model: 'phi3' });
+      const hasEmbed = await invoke<boolean>('check_ollama_model', { model: 'nomic-embed-text' });
+      setPhi3Ready(hasPhi3);
+      setEmbedReady(hasEmbed);
+      if (hasPhi3 && hasEmbed) {
+        setAiStatus('All AI models ready.');
+      } else {
+        setAiStatus('Some models are missing. Click "Pull" to download.');
+      }
+    } catch (err) {
+      setAiStatus(`Ollama not reachable: ${err}`);
+    }
+  };
+
+  const pullModel = async (model: string) => {
+    setAiPulling(true);
+    setAiProgress('');
+    try {
+      setAiStatus(`Downloading ${model}...`);
+      const onProgress = new Channel<string>();
+      onProgress.onmessage = (msg) => setAiProgress(msg);
+      await invoke('pull_ollama_model', { model, onProgress });
+      setAiProgress('');
+      setAiStatus(`${model} downloaded.`);
+      checkAiModels();
+    } catch (err) {
+      setAiStatus(`Download failed: ${err}`);
+    } finally {
+      setAiPulling(false);
+    }
+  };
+
+  const tabClass = (t: string) =>
+    `px-4 py-1 text-sm font-bold cursor-pointer ${
+      tab === t
+        ? 'bg-[#D4D0C8] border-t-2 border-l-2 border-white border-b-0 border-r-2 border-r-gray-800 -mb-[1px] relative z-10'
+        : 'bg-[#b0b0b0] border-t border-l border-white border-b border-r border-gray-800'
+    }`;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center backdrop-blur-sm transition-all duration-300">
+      <div className="bg-[#D4D0C8] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 w-[580px] shadow-2xl animate-fade-in">
+        {/* Title Bar */}
+        <div className="title-bar-gjc">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">⚙</span>
+            <span>infoLib Settings</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-5 h-5 bg-[#c0c0c0] border-t border-l border-white border-b border-r border-gray-800 text-[10px] font-bold leading-none hover:bg-red-500 hover:text-white transition-colors"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Tab Headers */}
+        <div className="flex px-4 pt-3 gap-1">
+          <div className={tabClass('db')} onClick={() => setTab('db')}>Database</div>
+          <div className={tabClass('ai')} onClick={() => setTab('ai')}>AI Engine</div>
+        </div>
+
+        {/* Tab Content */}
+        <div className="mx-4 mb-4 p-5 bg-[#D4D0C8] border-t-2 border-white border-l-2 border-white border-b-2 border-gray-600 border-r-2 border-gray-600 shadow-inner min-h-[300px]">
+          {tab === 'db' && (
+            <div className="space-y-4 animate-fade-in">
+              <div>
+                <label className="block text-xs font-bold mb-1.5 text-gray-700">PostgreSQL Connection URL:</label>
+                <input
+                  type="text"
+                  value={dbUrl}
+                  onChange={(e) => setDbUrl(e.target.value)}
+                  className="w-full border-2 border-gray-600 border-t-gray-800 border-l-gray-800 p-2 bg-white text-sm font-mono shadow-inner focus:ring-1 ring-gjc-green outline-none"
+                  placeholder="postgres://user:pass@host:port/db"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={testConnection}
+                  disabled={dbTesting}
+                  className="px-4 py-1.5 text-xs font-bold bg-[#c0c0c0] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 hover:bg-[#d4d0c8] active:border-inset disabled:opacity-50 transition-colors"
+                >
+                  {dbTesting ? 'Testing...' : 'Test Connection'}
+                </button>
+                <button
+                  onClick={saveDbConfig}
+                  className="btn-gjc px-6 py-1.5 text-xs"
+                >
+                  Save Config
+                </button>
+              </div>
+
+              {dbStatus && (
+                <div className={`p-3 text-xs border-2 border-gray-600 border-t-gray-800 border-l-gray-800 ${dbStatus.includes('✓') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'} font-bold shadow-inner`}>
+                  {dbStatus}
+                </div>
+              )}
+
+              <div className="border-t border-gray-400 pt-4 mt-2">
+                <p className="text-[10px] font-bold mb-2 uppercase tracking-wider text-gray-500">Security & Backups</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleExport}
+                    className="px-4 py-1 text-xs bg-[#c0c0c0] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 hover:bg-[#d4d0c8] active:border-inset transition-colors"
+                  >
+                    Export JSON
+                  </button>
+                  <button
+                    onClick={handleImport}
+                    className="px-4 py-1 text-xs bg-[#c0c0c0] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 hover:bg-[#d4d0c8] active:border-inset transition-colors"
+                  >
+                    Import JSON
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {tab === 'ai' && (
+            <div className="space-y-4 animate-fade-in">
+              <div className="text-xs font-bold mb-1 text-gray-700">Ollama AI Runtime Status</div>
+
+              <div className="bg-white border-2 border-gray-600 border-t-gray-800 border-l-gray-800 shadow-inner overflow-hidden">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-100 border-b border-gray-300">
+                    <tr>
+                      <th className="text-left px-3 py-2 font-bold text-gray-600">Model</th>
+                      <th className="text-left px-3 py-2 font-bold text-gray-600">Utility</th>
+                      <th className="text-center px-3 py-2 font-bold text-gray-600">State</th>
+                      <th className="text-right px-3 py-2 font-bold text-gray-600">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-gray-200 hover:bg-blue-50/30">
+                      <td className="px-3 py-2 font-mono">phi3</td>
+                      <td className="px-3 py-2">Conversational</td>
+                      <td className={`px-3 py-2 text-center font-bold ${phi3Ready ? 'text-green-600' : 'text-red-500'}`}>{phi3Ready ? 'Ready' : 'Missing'}</td>
+                      <td className="px-3 py-2 text-right">
+                        {!phi3Ready && (
+                          <button
+                            onClick={() => pullModel('phi3')}
+                            disabled={aiPulling}
+                            className="btn-gjc px-3 py-0.5 text-[10px]"
+                          >
+                            Pull
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-blue-50/30">
+                      <td className="px-3 py-2 font-mono">nomic-embed</td>
+                      <td className="px-3 py-2">Vector Search</td>
+                      <td className={`px-3 py-2 text-center font-bold ${embedReady ? 'text-green-600' : 'text-red-500'}`}>{embedReady ? 'Ready' : 'Missing'}</td>
+                      <td className="px-3 py-2 text-right">
+                        {!embedReady && (
+                          <button
+                            onClick={() => pullModel('nomic-embed-text')}
+                            disabled={aiPulling}
+                            className="btn-gjc px-3 py-0.5 text-[10px]"
+                          >
+                            Pull
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {aiProgress && (
+                <div>
+                  <div className="w-full bg-gray-200 h-2 border-2 border-gray-600 border-t-gray-800 border-l-gray-800 overflow-hidden">
+                    <div className="bg-[#00401A] h-full animate-pulse" style={{ width: '100%' }}></div>
+                  </div>
+                  <p className="text-[10px] text-gray-500 mt-1">{aiProgress}</p>
+                </div>
+              )}
+
+              {aiStatus && (
+                <div className="bg-white border-2 border-gray-600 border-t-gray-800 border-l-gray-800 p-2 text-xs">
+                  {aiStatus}
+                </div>
+              )}
+
+              <button
+                onClick={checkAiModels}
+                disabled={aiPulling}
+                className="px-3 py-1 text-xs font-bold bg-[#c0c0c0] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 hover:bg-[#d4d0c8] active:border-inset disabled:opacity-50"
+              >
+                Refresh Status
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};

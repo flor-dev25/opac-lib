@@ -1,8 +1,9 @@
 # GSD State
 
-**Active Milestone:** M006 — AI & Semantic Intelligence
-**Active Slice:** S01 — Semantic Infrastructure & AI UI
-**Active Task:** T06/T07 — Semantic Search Integration ✅ (DONE)
+**Active Milestone:** M007 — Distribution & Premium Deployment (DONE)
+**Active Milestone:** M008 — Legacy Data Migration
+**Active Slice:** S03 — High-Performance Batch Import
+**Active Task:** Execute sanitized SQL import
 **Phase:** Execution
 
 ## Recent Decisions
@@ -45,9 +46,24 @@
 - D038: Built pgvector v0.8.2 from source via VS2022 and installed into PostgreSQL 18. Extension verified operational.
 - D039: Connected Tauri backend to local Ollama (nomic-embed-text) for real-time query vectorization and semantic catalog search.
 - D040: Upgraded AI system prompt to behave like a natural conversational partner (similar to famous chatbots) instead of a mechanical search robot.
+- D041: Adopted General de Jesus College (GJC) color scheme for the installer and premium UI elements (Primary: #00401A, Secondary: #C5A059).
+- D042: Selected Tauri v2 NSIS bundling for "colorized" MSI/EXE with custom branding templates.
+- D043: Bundle PostgreSQL + Ollama inside NSIS installer EXE (not sidecars).
+- D044: Implemented secure settings export/import for backup on external drives.
+- D045: Enabled user-configurable database credentials via the application setup flow.
+- D046: Custom NSIS credentials page writes db_config.json to %APPDATA% during install.
+- D047: Dependencies extracted to $INSTDIR subdirectories for full portability.
+- D048: NSIS auto-detects existing PostgreSQL/Ollama installations — skips bundled install if found.
+- D049: Removed SetupPage first-boot intercept. Login is first screen. Settings accessible from Toolbar.
+- D050: Registered tauri-plugin-dialog and tauri-plugin-shell in Rust builder to fix settings crash.
+- D051: Applied glassmorphism and GJC branding to all premium dialogs.
+- D052: Refactored SettingsPage into a tabbed interface with system status monitoring.
+- D053: Sanitized legacy SQL dump to fix Mojibake using byte-level replacement script.
+- D054: Source data identified as PostgreSQL SQL dump in docs/legacy-database/.
 
 ## Blockers
 - ~~B001: `pgvector` extension binary not found on PostgreSQL host.~~ **RESOLVED** — pgvector v0.8.2 installed and verified.
+- **B002**: Awaiting final raw data export from GJC Library legacy terminal.
 
 ## Next Action
-Full background indexing of the 16,000+ record catalog and fine-tuning the AI assistant's conversation logic.
+Analyze `migration_log.txt` and raw export files to map legacy fields to PostgreSQL schema.

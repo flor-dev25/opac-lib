@@ -1,5 +1,5 @@
 import React from 'react';
-import { FilePlus, Trash2, Download, BookOpen, Info, LogOut, Users, LayoutDashboard, Edit, ArrowUpRight, ArrowDownLeft, Activity, Wallet, ScanBarcode, TrendingUp, BookPlus, BookmarkPlus, Settings } from 'lucide-react';
+import { FilePlus, Trash2, Download, BookOpen, Info, LogOut, Users, LayoutDashboard, Edit, ArrowUpRight, ArrowDownLeft, Activity, Wallet, ScanBarcode, TrendingUp, BookPlus, BookmarkPlus, Settings, ToggleLeft } from 'lucide-react';
 import { ToolbarItem } from './ToolbarItem';
 import { useAuthStore } from '../../stores/authStore';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -18,9 +18,10 @@ interface ToolbarProps {
   onFinancialReports?: () => void;
   onAcquisitions?: () => void;
   onReservation?: () => void;
+  onSettings?: () => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete, onExport, onEdit, onCheckout, onReturn, onDashboard, onPayment, onAudit, onFinancialReports, onAcquisitions, onReservation }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete, onExport, onEdit, onCheckout, onReturn, onDashboard, onPayment, onAudit, onFinancialReports, onAcquisitions, onReservation, onSettings }) => {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
   const [isAdvanced, setIsAdvanced] = React.useState(false);
@@ -140,9 +141,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete
       {/* Spacer */}
       <div className="flex-1 min-w-[20px]" />
       
-      {/* Mode Toggle Button */}
+      {/* Settings Button */}
       <ToolbarItem 
         icon={Settings} 
+        label="Settings" 
+        onClick={onSettings} 
+      />
+      
+      {/* Mode Toggle Button */}
+      <ToolbarItem 
+        icon={ToggleLeft} 
         label={isAdvanced ? "Basic Mode" : "Adv. Mode"} 
         onClick={() => setIsAdvanced(!isAdvanced)} 
         className={isAdvanced ? "!shadow-bevel-sunken bg-blue-100/30 border border-blue-500" : "border-2 border-dashed border-gray-500"}

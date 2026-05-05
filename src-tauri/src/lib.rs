@@ -1,6 +1,7 @@
 mod models;
 mod db;
 mod ai;
+mod settings;
 use tauri::{
   menu::{Menu, MenuItem},
   tray::TrayIconBuilder,
@@ -29,7 +30,7 @@ async fn get_catalog_records(page: i32, state: tauri::State<'_, DbState>) -> Res
     "#
   )
   .bind(offset)
-  .fetch_all(&state.pool)
+  .fetch_all(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
 
@@ -48,7 +49,7 @@ async fn get_catalog_records(page: i32, state: tauri::State<'_, DbState>) -> Res
 #[tauri::command]
 async fn get_catalog_count(state: tauri::State<'_, DbState>) -> Result<i64, String> {
   let row = sqlx::query(r#"SELECT COUNT(*) as count FROM "public"."tblCat""#)
-    .fetch_one(&state.pool)
+    .fetch_one(&state.get_pool().await?)
     .await
     .map_err(|e| e.to_string())?;
   
@@ -59,7 +60,7 @@ async fn get_catalog_count(state: tauri::State<'_, DbState>) -> Result<i64, Stri
 async fn delete_catalog_record(controlno: String, state: tauri::State<'_, DbState>) -> Result<(), String> {
   sqlx::query(r#"DELETE FROM "public"."tblCat" WHERE "controlno" = $1"#)
     .bind(controlno)
-    .execute(&state.pool)
+    .execute(&state.get_pool().await?)
     .await
     .map_err(|e| e.to_string())?;
   Ok(())
@@ -81,7 +82,7 @@ async fn get_patrons(state: tauri::State<'_, DbState>) -> Result<Vec<Patron>, St
     FROM "public"."tblUser"
     "#
   )
-  .fetch_all(&state.pool)
+  .fetch_all(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
 
@@ -114,7 +115,7 @@ async fn add_patron(patron: Patron, state: tauri::State<'_, DbState>) -> Result<
   .bind(patron.phone)
   .bind(patron.email)
   .bind(patron.unpaid_fine)
-  .execute(&state.pool)
+  .execute(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
   Ok(())
@@ -136,7 +137,7 @@ async fn update_patron(patron: Patron, state: tauri::State<'_, DbState>) -> Resu
   .bind(patron.email)
   .bind(patron.unpaid_fine)
   .bind(patron.idno)
-  .execute(&state.pool)
+  .execute(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
   Ok(())
@@ -146,7 +147,7 @@ async fn update_patron(patron: Patron, state: tauri::State<'_, DbState>) -> Resu
 async fn delete_patron(idno: String, state: tauri::State<'_, DbState>) -> Result<(), String> {
   sqlx::query(r#"DELETE FROM "public"."tblUser" WHERE "Idno" = $1"#)
     .bind(idno)
-    .execute(&state.pool)
+    .execute(&state.get_pool().await?)
     .await
     .map_err(|e| e.to_string())?;
   Ok(())
@@ -163,13 +164,13 @@ async fn check_out_item(accession: String, idno: String, state: tauri::State<'_,
   .bind(now)
   .bind(due)
   .bind(idno)
-  .execute(&state.pool)
+  .execute(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
 
   sqlx::query(r#"UPDATE "public"."tblHoldings" SET "Status" = 'Checked Out' WHERE "Accession" = $1"#)
   .bind(&accession)
-  .execute(&state.pool)
+  .execute(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
   
@@ -182,13 +183,13 @@ async fn return_item(accession: String, state: tauri::State<'_, DbState>) -> Res
   sqlx::query(r#"UPDATE "public"."tblRent" SET "dteReturn" = $1 WHERE "Accession" = $2 AND "dteReturn" IS NULL"#)
   .bind(now)
   .bind(&accession)
-  .execute(&state.pool)
+  .execute(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
 
   sqlx::query(r#"UPDATE "public"."tblHoldings" SET "Status" = 'Available' WHERE "Accession" = $1"#)
   .bind(&accession)
-  .execute(&state.pool)
+  .execute(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
 
@@ -220,7 +221,7 @@ async fn audit_item(accession: String, state: tauri::State<'_, DbState>) -> Resu
   sqlx::query(r#"UPDATE "public"."tblHoldings" SET last_audit = $1, "Status" = CASE WHEN "Status" = 'Missing' THEN 'Available' ELSE "Status" END WHERE "Accession" = $2"#)
   .bind(now)
   .bind(&accession)
-  .execute(&state.pool)
+  .execute(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
 
@@ -239,7 +240,7 @@ async fn pay_fine(idno: String, amount: i32, state: tauri::State<'_, DbState>) -
   sqlx::query(r#"UPDATE "public"."tblUser" SET "UnpaidFine" = GREATEST(0, COALESCE("UnpaidFine", 0) - $1) WHERE "Idno" = $2"#)
   .bind(amount)
   .bind(&idno)
-  .execute(&state.pool)
+  .execute(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
 
@@ -247,7 +248,7 @@ async fn pay_fine(idno: String, amount: i32, state: tauri::State<'_, DbState>) -
   .bind(amount)
   .bind(&idno)
   .bind(now)
-  .execute(&state.pool)
+  .execute(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
   
@@ -271,7 +272,7 @@ async fn get_acquisitions_report(_start_date: Option<String>, _end_date: Option<
 #[tauri::command]
 async fn get_authors(state: tauri::State<'_, DbState>) -> Result<Vec<Author>, String> {
   let rows = sqlx::query(r#"SELECT "Author", "AuthorCode" FROM "public"."tblAuthor" ORDER BY "Author" ASC"#)
-    .fetch_all(&state.pool)
+    .fetch_all(&state.get_pool().await?)
     .await
     .map_err(|e| e.to_string())?;
   
@@ -287,7 +288,7 @@ async fn update_author(code: i32, name: String, state: tauri::State<'_, DbState>
   sqlx::query(r#"UPDATE "public"."tblAuthor" SET "Author" = $1 WHERE "AuthorCode" = $2"#)
     .bind(name)
     .bind(code)
-    .execute(&state.pool)
+    .execute(&state.get_pool().await?)
     .await
     .map_err(|e| e.to_string())?;
   Ok(())
@@ -297,7 +298,7 @@ async fn update_author(code: i32, name: String, state: tauri::State<'_, DbState>
 async fn delete_author(code: i32, state: tauri::State<'_, DbState>) -> Result<(), String> {
   sqlx::query(r#"DELETE FROM "public"."tblAuthor" WHERE "AuthorCode" = $1"#)
     .bind(code)
-    .execute(&state.pool)
+    .execute(&state.get_pool().await?)
     .await
     .map_err(|e| e.to_string())?;
   Ok(())
@@ -306,7 +307,7 @@ async fn delete_author(code: i32, state: tauri::State<'_, DbState>) -> Result<()
 #[tauri::command]
 async fn get_subjects(state: tauri::State<'_, DbState>) -> Result<Vec<Subject>, String> {
   let rows = sqlx::query(r#"SELECT "subject", "SubjectCode" FROM "public"."tblSubject" ORDER BY "subject" ASC"#)
-    .fetch_all(&state.pool)
+    .fetch_all(&state.get_pool().await?)
     .await
     .map_err(|e| e.to_string())?;
   
@@ -322,7 +323,7 @@ async fn update_subject(code: i32, name: String, state: tauri::State<'_, DbState
   sqlx::query(r#"UPDATE "public"."tblSubject" SET "subject" = $1 WHERE "SubjectCode" = $2"#)
     .bind(name)
     .bind(code)
-    .execute(&state.pool)
+    .execute(&state.get_pool().await?)
     .await
     .map_err(|e| e.to_string())?;
   Ok(())
@@ -332,7 +333,7 @@ async fn update_subject(code: i32, name: String, state: tauri::State<'_, DbState
 async fn delete_subject(code: i32, state: tauri::State<'_, DbState>) -> Result<(), String> {
   sqlx::query(r#"DELETE FROM "public"."tblSubject" WHERE "SubjectCode" = $1"#)
     .bind(code)
-    .execute(&state.pool)
+    .execute(&state.get_pool().await?)
     .await
     .map_err(|e| e.to_string())?;
   Ok(())
@@ -353,7 +354,7 @@ async fn get_reservations(state: tauri::State<'_, DbState>) -> Result<Vec<Reserv
     ORDER BY r."DateReserve" ASC
     "#
   )
-  .fetch_all(&state.pool)
+  .fetch_all(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
 
@@ -378,7 +379,7 @@ async fn add_reservation(idno: String, accession: String, state: tauri::State<'_
 
   // Generate next RecNumber
   let max_row = sqlx::query(r#"SELECT COALESCE(MAX("RecNumber"), 0) as max_rec FROM "public"."tblReserve""#)
-    .fetch_one(&state.pool)
+    .fetch_one(&state.get_pool().await?)
     .await
     .map_err(|e| e.to_string())?;
   let max_rec: i32 = max_row.try_get("max_rec").unwrap_or(0);
@@ -393,7 +394,7 @@ async fn add_reservation(idno: String, accession: String, state: tauri::State<'_
   .bind(accession)
   .bind(now)
   .bind(until)
-  .execute(&state.pool)
+  .execute(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
 
@@ -404,7 +405,7 @@ async fn add_reservation(idno: String, accession: String, state: tauri::State<'_
 async fn serve_reservation(rec_number: i32, state: tauri::State<'_, DbState>) -> Result<(), String> {
   sqlx::query(r#"UPDATE "public"."tblReserve" SET "IsServed" = 'Y' WHERE "RecNumber" = $1"#)
     .bind(rec_number)
-    .execute(&state.pool)
+    .execute(&state.get_pool().await?)
     .await
     .map_err(|e| e.to_string())?;
   Ok(())
@@ -414,7 +415,7 @@ async fn serve_reservation(rec_number: i32, state: tauri::State<'_, DbState>) ->
 async fn cancel_reservation(rec_number: i32, state: tauri::State<'_, DbState>) -> Result<(), String> {
   sqlx::query(r#"DELETE FROM "public"."tblReserve" WHERE "RecNumber" = $1"#)
     .bind(rec_number)
-    .execute(&state.pool)
+    .execute(&state.get_pool().await?)
     .await
     .map_err(|e| e.to_string())?;
   Ok(())
@@ -426,7 +427,7 @@ async fn get_catalog_entry(controlno: String, state: tauri::State<'_, DbState>) 
     r#"SELECT * FROM "public"."tblCat" WHERE "controlno" = $1"#
   )
   .bind(controlno)
-  .fetch_one(&state.pool)
+  .fetch_one(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
 
@@ -487,7 +488,7 @@ async fn update_catalog_record(entry: CatalogEntry, state: tauri::State<'_, DbSt
   .bind(entry.material)
   .bind(entry.x_notes)
   .bind(entry.controlno)
-  .execute(&state.pool)
+  .execute(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
 
@@ -500,7 +501,7 @@ async fn get_holdings(controlno: String, state: tauri::State<'_, DbState>) -> Re
     r#"SELECT * FROM "public"."tblHoldings" WHERE "controlno" = $1"#
   )
   .bind(controlno)
-  .fetch_all(&state.pool)
+  .fetch_all(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
 
@@ -532,7 +533,7 @@ async fn add_holding(holding: Holdings, state: tauri::State<'_, DbState>) -> Res
   .bind(holding.copy)
   .bind(holding.location)
   .bind(holding.status)
-  .execute(&state.pool)
+  .execute(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
 
@@ -543,16 +544,31 @@ async fn add_holding(holding: Holdings, state: tauri::State<'_, DbState>) -> Res
 async fn delete_holding(accession: String, state: tauri::State<'_, DbState>) -> Result<(), String> {
   sqlx::query(r#"DELETE FROM "public"."tblHoldings" WHERE "Accession" = $1"#)
     .bind(accession)
-    .execute(&state.pool)
+    .execute(&state.get_pool().await?)
     .await
     .map_err(|e| e.to_string())?;
   Ok(())
 }
 
 #[tauri::command]
-async fn check_db_connection(state: tauri::State<'_, DbState>) -> Result<String, String> {
-  match sqlx::query("SELECT 1").fetch_one(&state.pool).await {
-    Ok(_) => Ok("Connected to PostgreSQL".to_string()),
+async fn check_db_connection(app: tauri::AppHandle, state: tauri::State<'_, DbState>) -> Result<String, String> {
+  // Try existing pool first
+  {
+    let lock = state.pool.lock().await;
+    if let Some(pool) = &*lock {
+      if let Ok(_) = sqlx::query("SELECT 1").fetch_one(pool).await {
+        return Ok("Connected to PostgreSQL".to_string());
+      }
+    }
+  }
+
+  // If failed or missing, try re-initializing
+  match db::init_db(&app).await {
+    Ok(pool) => {
+      let mut lock = state.pool.lock().await;
+      *lock = Some(pool);
+      Ok("Connected to PostgreSQL (Re-initialized)".to_string())
+    }
     Err(e) => Err(format!("Database connection failed: {}", e)),
   }
 }
@@ -578,14 +594,11 @@ fn quit_app(app: tauri::AppHandle) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-  let pool = tauri::async_runtime::block_on(async {
-    db::init_db().await.expect("Failed to initialize database")
-  });
-
   tauri::Builder::default()
-    .manage(DbState { pool })
     .manage(AiState::default())
     .plugin(tauri_plugin_log::Builder::default().build())
+    .plugin(tauri_plugin_dialog::init())
+    .plugin(tauri_plugin_shell::init())
     .invoke_handler(tauri::generate_handler![
       get_catalog_records,
       get_catalog_count,
@@ -623,9 +636,49 @@ pub fn run() {
       reset_window_size,
       quit_app,
       ai::search_catalog_semantic,
-      ai::chat_with_ai
+      ai::chat_with_ai,
+      ai::check_ollama_model,
+      ai::pull_ollama_model,
+      settings::get_db_config,
+      settings::save_db_config,
+      settings::export_settings,
+      settings::import_settings
     ])
+    .plugin(tauri_plugin_dialog::init())
+    .plugin(tauri_plugin_shell::init())
     .setup(|app| {
+      use tauri_plugin_shell::ShellExt;
+      let handle = app.handle().clone();
+
+      // Spawn Ollama Sidecar
+      if let Ok(command) = app.shell().sidecar("ollama") {
+        tauri::async_runtime::spawn(async move {
+          let _ = command.spawn();
+        });
+      }
+
+      // Start PostgreSQL Service
+      if let Ok(command) = app.shell().sidecar("pg_ctl") {
+        let command = command.args(["start", "-D", "pgsql/data"]);
+        tauri::async_runtime::spawn(async move {
+          let _ = command.spawn();
+        });
+      }
+
+      let pool_arc = std::sync::Arc::new(tokio::sync::Mutex::new(None));
+      let pool_for_setup = pool_arc.clone();
+
+      tauri::async_runtime::spawn(async move {
+        if let Ok(pool) = db::init_db(&handle).await {
+          let mut lock = pool_for_setup.lock().await;
+          *lock = Some(pool);
+        } else {
+          eprintln!("Initial database connection failed. App will start in Setup Mode.");
+        }
+      });
+
+      app.manage(DbState { pool: pool_arc });
+
       let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
       let show_i = MenuItem::with_id(app, "show", "Show infoLib", true, None::<&str>)?;
       let menu = Menu::with_items(app, &[&show_i, &quit_i])?;

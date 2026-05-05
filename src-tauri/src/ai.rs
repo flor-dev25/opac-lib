@@ -120,7 +120,7 @@ pub async fn search_catalog_semantic(
         "#
     )
     .bind(&embedding_str)
-    .fetch_all(&db_state.pool)
+    .fetch_all(&db_state.get_pool().await?)
     .await
     .map_err(|e| {
         println!("[AI] ERROR pgvector query: {}", e);
@@ -142,6 +142,78 @@ pub async fn search_catalog_semantic(
 
 use futures_util::StreamExt;
 use tauri::ipc::Channel;
+
+#[derive(Debug, Deserialize)]
+struct OllamaListResponse {
+    models: Vec<OllamaModel>,
+}
+
+#[derive(Debug, Deserialize)]
+struct OllamaModel {
+    name: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct OllamaPullResponse {
+    status: String,
+    _digest: Option<String>,
+    total: Option<i64>,
+    completed: Option<i64>,
+}
+
+#[tauri::command]
+pub async fn check_ollama_model(
+    model: String,
+    ai_state: tauri::State<'_, AiState>,
+) -> Result<bool, String> {
+    let client = reqwest::Client::new();
+    let res = client
+        .get(format!("{}/api/tags", ai_state.ollama_url))
+        .send()
+        .await
+        .map_err(|e| format!("Failed to connect to Ollama: {}", e))?;
+
+    if !res.status().is_success() {
+        return Err(format!("Ollama error: {}", res.status()));
+    }
+
+    let response: OllamaListResponse = res.json().await.map_err(|e| e.to_string())?;
+    Ok(response.models.iter().any(|m| m.name.starts_with(&model)))
+}
+
+#[tauri::command]
+pub async fn pull_ollama_model(
+    model: String,
+    ai_state: tauri::State<'_, AiState>,
+    on_progress: Channel<String>,
+) -> Result<(), String> {
+    let client = reqwest::Client::new();
+    let res = client
+        .post(format!("{}/api/pull", ai_state.ollama_url))
+        .json(&serde_json::json!({ "name": model, "stream": true }))
+        .send()
+        .await
+        .map_err(|e| format!("Failed to initiate pull: {}", e))?;
+
+    let mut stream = res.bytes_stream();
+    while let Some(chunk_result) = stream.next().await {
+        let chunk = chunk_result.map_err(|e| e.to_string())?;
+        let text = String::from_utf8_lossy(&chunk);
+        for line in text.lines() {
+            if line.trim().is_empty() { continue; }
+            if let Ok(parsed) = serde_json::from_str::<OllamaPullResponse>(line) {
+                let msg = if let (Some(t), Some(c)) = (parsed.total, parsed.completed) {
+                    format!("{}: {}/{} bytes", parsed.status, c, t)
+                } else {
+                    parsed.status
+                };
+                let _ = on_progress.send(msg);
+            }
+        }
+    }
+
+    Ok(())
+}
 
 #[tauri::command]
 pub async fn chat_with_ai(

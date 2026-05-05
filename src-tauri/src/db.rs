@@ -1,14 +1,24 @@
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
-use std::env;
+use tauri::AppHandle;
+use crate::settings;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 pub struct DbState {
-    pub pool: PgPool,
+    pub pool: Arc<Mutex<Option<PgPool>>>,
 }
 
-pub async fn init_db() -> Result<PgPool, sqlx::Error> {
-    dotenvy::dotenv().ok();
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+impl DbState {
+    pub async fn get_pool(&self) -> Result<PgPool, String> {
+        let lock = self.pool.lock().await;
+        lock.clone().ok_or_else(|| "Database not connected. Please complete setup.".to_string())
+    }
+}
+
+pub async fn init_db(app: &AppHandle) -> Result<PgPool, sqlx::Error> {
+    let config = settings::load_config(app);
+    let database_url = config.database_url;
 
     let pool = PgPoolOptions::new()
         .max_connections(5)

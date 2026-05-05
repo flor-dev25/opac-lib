@@ -3,7 +3,6 @@ import { TitleBar } from './TitleBar';
 import { Toolbar } from '../dashboard/Toolbar';
 import { BeveledBox } from '../common/BeveledBox';
 import { AuthorityDialog } from '../catalog/AuthorityDialog';
-import { AboutDialog } from '../common/AboutDialog';
 import { DeleteDialog } from '../dashboard/DeleteDialog';
 import { ExportDialog } from '../dashboard/ExportDialog';
 import { CheckoutDialog } from '../circulation/CheckoutDialog';
@@ -16,6 +15,8 @@ import { AuditDialog } from '../inventory/AuditDialog';
 import { ReservationDialog } from '../circulation/ReservationDialog';
 import { EditCatalogDialog } from '../catalog/EditCatalogDialog';
 import { AIChatBadge } from '../ai/AIChatBadge';
+import { SettingsPage } from '../../pages/settings/SettingsPage';
+import { AboutDialog } from './AboutDialog';
 import { useAuthStore } from '../../stores/authStore';
 import { useCatalogStore } from '../../stores/catalogStore';
 import { usePatronStore } from '../../stores/patronStore';
@@ -46,6 +47,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showAcquisitions, setShowAcquisitions] = React.useState(false);
   const [showAudit, setShowAudit] = React.useState(false);
   const [showReservation, setShowReservation] = React.useState(false);
+  const [showSettings, setShowSettings] = React.useState(false);
 
   const selectedRecord = records.find(r => r.id === selectedId);
   const selectedPatron = patrons.find(p => p.idno === selectedIdno);
@@ -137,6 +139,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               onFinancialReports={() => setShowFinancialReports(true)}
               onAcquisitions={() => setShowAcquisitions(true)}
               onReservation={() => setShowReservation(true)}
+              onSettings={() => setShowSettings(true)}
             />
           </header>
 
@@ -181,6 +184,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       )}
       
       <AIChatBadge />
+      {showSettings && <SettingsPage onClose={() => setShowSettings(false)} />}
+      {showAbout && <AboutDialog onClose={() => setShowAbout(false)} />}
     </div>
   );
 };

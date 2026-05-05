@@ -124,6 +124,27 @@ This document provides technical recommendations for building an offline-first l
 - **Webhooks**: Delivery status callbacks
 - **Number Management**: Easy phone number provisioning
 
+### 1.5 Installer & Distribution: **Velopack + Custom NSIS**
+
+**Decision:** Use Velopack for a premium "one-click" experience, with a fall-back to a "Colorized" Custom NSIS installer for traditional MSI/EXE needs.
+
+#### Why This Combo?
+
+| Feature | Velopack | Custom NSIS | Winner |
+|---------|----------|-------------|--------|
+| **Install Feel** | One-click, splash screen | Traditional wizard | Velopack |
+| **Colorization** | Full brand UI | Custom BMPs/Colors | Tie |
+| **Updates** | Fast delta updates | Full reinstall | Velopack |
+| **Seamlessness** | Extremely high | Medium | Velopack |
+
+#### Modernization Strategy:
+- **Velopack**: Use for primary distribution. Discord-like "one-click" setup with splash screen.
+- **Custom NSIS Branding**: Modernize traditional wizard via `tauri.conf.json`:
+    - `headerImage`: High-resolution brand banner.
+    - `sidebarImage`: Vertical brand artwork.
+    - `MUI_BGCOLOR`: Define brand-specific hex codes (e.g., `#2ECC71`) in custom template to "colorize" the wizard.
+- **Aesthetics**: Replace default grey UI with a curated color palette matching the app's Design System.
+
 ---
 
 ## 2. Architecture Overview
@@ -612,10 +633,13 @@ interface SMSCredits {
 ### 8.4 Distribution
 
 **Channels:**
-- Windows: MSI installer
-- macOS: DMG with code signing
-- Linux: AppImage, DEB, RPM
-- Auto-update mechanism
+- **Primary**: Velopack (One-click "Silent" Installer)
+- **Secondary**: Colorized MSI/EXE via Custom NSIS Template
+- **Branding**:
+  - Custom splash screens
+  - Brand-colored installer backgrounds
+  - High-res icons and bitmaps
+- **Auto-update**: Integrated via Velopack for seamless delta updates
 
 ---
 

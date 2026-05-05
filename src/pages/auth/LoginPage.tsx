@@ -28,29 +28,35 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-600">
-      <BeveledBox className="w-[520px] h-[380px] flex flex-col overflow-hidden" padding="p-0">
+    <div className="min-h-screen flex items-center justify-center bg-[#404040]">
+      <BeveledBox className="w-[520px] h-[380px] flex flex-col overflow-hidden animate-fade-in" padding="p-0">
         {/* Title Bar */}
-        <div className="title-bar">
+        <div className="title-bar-gjc">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-600 border border-black flex items-center justify-center text-[10px] text-white font-bold">L</div>
-            <span>Login</span>
+            <div className="w-4 h-4 bg-white/20 border border-white/40 flex items-center justify-center text-[10px] text-gjc-gold font-bold">L</div>
+            <span>System Login</span>
           </div>
           <div className="flex gap-1">
-             <button className="w-5 h-5 bg-classic-grey shadow-bevel-raised flex items-center justify-center text-black text-xs">_</button>
-             <button className="w-5 h-5 bg-red-600 shadow-bevel-raised flex items-center justify-center text-white text-xs">X</button>
+             <button className="w-5 h-5 bg-[#c0c0c0] border border-gray-800 flex items-center justify-center text-black text-xs hover:bg-gray-100">_</button>
+             <button className="w-5 h-5 bg-[#c0c0c0] border border-gray-800 flex items-center justify-center text-black text-xs hover:bg-red-500 hover:text-white">✕</button>
           </div>
         </div>
 
         {/* Top Branding Section */}
-        <div className="h-[200px] flex-shrink-0 relative overflow-hidden" style={{ background: 'linear-gradient(to right, #A6CAF0 0%, #FFFFFF 100%)' }}>
-          {/* Faint pattern overlay */}
-          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 0)', backgroundSize: '10px 10px' }}></div>
+        <div className="h-[180px] flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-gjc-green to-[#006030]">
+          {/* Subtle GJC Pattern */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#C5A059 1px, transparent 0)', backgroundSize: '20px 20px' }}></div>
           
+          <div className="absolute left-8 top-1/2 -translate-y-1/2">
+             <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center border-2 border-gjc-gold/30">
+                <span className="text-gjc-gold/50 text-2xl font-bold italic">GJC</span>
+             </div>
+          </div>
+
           <div className="absolute right-10 bottom-8 text-right">
-            <h1 className="text-5xl font-sans font-bold text-black tracking-tighter leading-none">infolib.</h1>
-            <div className="h-[2px] bg-black w-full mt-1 mb-1"></div>
-            <p className="text-sm font-sans text-black italic">Library Information System</p>
+            <h1 className="text-5xl font-sans font-bold text-gjc-gold tracking-tighter leading-none drop-shadow-lg">infoLib.</h1>
+            <div className="h-[3px] bg-gjc-gold w-full mt-2 mb-1 shadow-md"></div>
+            <p className="text-xs font-sans text-gjc-gold font-bold uppercase tracking-widest opacity-80">Library Information System</p>
           </div>
         </div>
 

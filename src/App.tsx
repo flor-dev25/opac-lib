@@ -8,7 +8,6 @@ import { useAuthStore } from './stores/authStore';
 import { MainLayout } from './components/layout/MainLayout';
 import { useParams } from 'react-router-dom';
 import { usePatronStore } from './stores/patronStore';
-
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuthStore();
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
