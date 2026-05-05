@@ -64,29 +64,29 @@ export const CatalogForm: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-classic-grey p-2 relative">
+    <div className="flex flex-col h-full bg-classic-grey dark:bg-dark-surface p-2 relative">
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
         <BeveledBox 
           variant="raised" 
-          className={`flex-1 flex flex-col p-4 transition-colors duration-200 ${isHoldingsMode ? 'bg-[#0000FF]' : 'bg-[#E8F0F8]'}`}
+          className={`flex-1 flex flex-col p-4 transition-colors duration-200 ${isHoldingsMode ? 'bg-[#0000FF] dark:bg-dark-title' : 'bg-[#E8F0F8] dark:bg-dark-surface-alt'}`}
         >
           {/* Form Header Area */}
-          <div className={`flex items-center justify-between mb-4 border-b pb-2 shadow-[0_1px_0_rgba(128,128,128,0.5)] ${isHoldingsMode ? 'border-blue-400' : 'border-white'}`}>
+          <div className={`flex items-center justify-between mb-4 border-b pb-2 shadow-[0_1px_0_rgba(128,128,128,0.5)] dark:shadow-[0_1px_0_rgba(26,26,26,0.5)] ${isHoldingsMode ? 'border-blue-400 dark:border-dark-highlight' : 'border-white dark:border-dark-highlight'}`}>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <span className={`text-sm font-bold ${isHoldingsMode ? 'text-white' : 'text-black'}`}>Control No.</span>
-                <span className="text-sm font-bold text-[#008000] px-2 py-0.5 bg-white shadow-bevel-sunken min-w-[120px]">
+                <span className={`text-sm font-bold ${isHoldingsMode ? 'text-white' : 'text-black dark:text-dark-text'}`}>Control No.</span>
+                <span className="text-sm font-bold text-[#008000] dark:text-green-400 px-2 py-0.5 bg-white dark:bg-dark-input shadow-bevel-sunken min-w-[120px]">
                   {controlNo || 'Generating...'}
                 </span>
               </div>
               {!isHoldingsMode && (
                 <div className="flex items-center gap-2">
-                  <label htmlFor="material-select" className="text-sm font-bold">Material</label>
-                  <div className="bg-white shadow-bevel-sunken px-1">
+                  <label htmlFor="material-select" className="text-sm font-bold dark:text-dark-text">Material</label>
+                  <div className="bg-white dark:bg-dark-input shadow-bevel-sunken px-1">
                     <select 
                       id="material-select" 
                       {...register('material')}
-                      className="bg-transparent border-none outline-none text-sm h-6"
+                      className="bg-transparent border-none outline-none text-sm h-6 dark:text-dark-text"
                     >
                       <option>Book</option>
                       <option>Journal</option>
@@ -97,7 +97,7 @@ export const CatalogForm: React.FC = () => {
                 </div>
               )}
             </div>
-            <div className={`text-xl font-bold italic ${isHoldingsMode ? 'text-white' : 'text-classic-blue'}`}>
+            <div className={`text-xl font-bold italic ${isHoldingsMode ? 'text-white' : 'text-classic-blue dark:text-dark-accent'}`}>
               {isHoldingsMode ? 'Holdings Management' : 'Add New'}
             </div>
           </div>
@@ -245,7 +245,7 @@ export const CatalogForm: React.FC = () => {
           )}
 
           {/* Action Buttons */}
-          <div className={`mt-6 flex justify-end gap-2 border-t pt-4 shadow-[0_-1px_0_rgba(128,128,128,0.5)] ${isHoldingsMode ? 'border-blue-400' : 'border-white'}`}>
+          <div className={`mt-6 flex justify-end gap-2 border-t pt-4 shadow-[0_-1px_0_rgba(128,128,128,0.5)] dark:shadow-[0_-1px_0_rgba(26,26,26,0.5)] ${isHoldingsMode ? 'border-blue-400 dark:border-dark-highlight' : 'border-white dark:border-dark-highlight'}`}>
             {!isHoldingsMode ? (
               <>
                 <button type="submit" className="btn-classic px-6 h-8">Save</button>

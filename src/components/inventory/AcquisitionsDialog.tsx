@@ -45,7 +45,7 @@ export const AcquisitionsDialog: React.FC<AcquisitionsDialogProps> = ({ onClose 
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
-      <BeveledBox variant="raised" className="w-full max-w-5xl h-[85vh] flex flex-col bg-[#D4D0C8]">
+      <BeveledBox variant="raised" className="w-full max-w-5xl h-[85vh] flex flex-col bg-[#D4D0C8] dark:bg-dark-surface">
         <TitleBar title="Acquisitions Report (New Accessions)" onClose={onClose} />
         
         <div className="p-4 flex-1 flex flex-col gap-4 overflow-hidden">
@@ -53,25 +53,25 @@ export const AcquisitionsDialog: React.FC<AcquisitionsDialogProps> = ({ onClose 
           <GroupBox label="Report Parameters">
             <div className="flex gap-4 items-end p-2">
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold uppercase text-gray-600 flex items-center gap-1">
+                <label className="text-xs font-bold uppercase text-gray-600 dark:text-dark-text flex items-center gap-1">
                   <Calendar size={12} /> Start Date
                 </label>
                 <input 
                   type="date" 
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="h-8 px-2 border-2 border-inset bg-white focus:outline-none text-sm"
+                  className="h-8 px-2 border-2 border-inset dark:border-dark-border-dark bg-white dark:bg-dark-input dark:text-dark-text focus:outline-none text-sm"
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold uppercase text-gray-600 flex items-center gap-1">
+                <label className="text-xs font-bold uppercase text-gray-600 dark:text-dark-text flex items-center gap-1">
                   <Calendar size={12} /> End Date
                 </label>
                 <input 
                   type="date" 
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="h-8 px-2 border-2 border-inset bg-white focus:outline-none text-sm"
+                  className="h-8 px-2 border-2 border-inset dark:border-dark-border-dark bg-white dark:bg-dark-input dark:text-dark-text focus:outline-none text-sm"
                 />
               </div>
               <button 
@@ -96,17 +96,17 @@ export const AcquisitionsDialog: React.FC<AcquisitionsDialogProps> = ({ onClose 
               
               <div className="flex-1 overflow-y-scroll">
                 {records.map((item, idx) => (
-                  <div key={idx} className="flex text-xs p-1 border-b border-gray-100 hover:bg-blue-50 items-center">
+                  <div key={idx} className="flex text-xs p-1 border-b border-gray-100 dark:border-dark-border-dark hover:bg-blue-50 dark:hover:bg-dark-selection/30 dark:text-dark-text items-center">
                     <div className="w-24 px-1 font-mono font-bold">{item.accession}</div>
                     <div className="flex-1 px-1 font-bold">{item.title}</div>
                     <div className="w-48 px-1 truncate">{item.author || 'N/A'}</div>
-                    <div className="w-32 px-1 text-right text-gray-600">
+                    <div className="w-32 px-1 text-right text-gray-600 dark:text-dark-text-muted">
                       {new Date(item.date_acquired).toLocaleDateString()}
                     </div>
                   </div>
                 ))}
                 {records.length === 0 && !loading && (
-                  <div className="p-12 flex flex-col items-center justify-center text-gray-400 italic gap-2">
+                  <div className="p-12 flex flex-col items-center justify-center text-gray-400 dark:text-dark-text-muted italic gap-2">
                     <BookPlus size={48} strokeWidth={1} />
                     <p>No acquisitions found for this period.</p>
                   </div>
@@ -116,7 +116,7 @@ export const AcquisitionsDialog: React.FC<AcquisitionsDialogProps> = ({ onClose 
           </GroupBox>
 
           {/* Summary & Actions */}
-          <div className="flex justify-between items-center text-sm font-bold bg-[#D4D0C8] p-2 border-t-2 border-white shadow-[-1px_-1px_0_#808080]">
+          <div className="flex justify-between items-center text-sm font-bold bg-[#D4D0C8] dark:bg-dark-panel dark:text-dark-text p-2 border-t-2 border-white dark:border-dark-highlight shadow-[-1px_-1px_0_#808080] dark:shadow-[-1px_-1px_0_#1A1A1A]">
             <div>Items Found: {records.length}</div>
             <div className="flex gap-2">
               <button className="btn-classic px-4 h-8 flex items-center gap-2">

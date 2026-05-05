@@ -187,12 +187,12 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
           {tab === 'db' && (
             <div className="space-y-4 animate-fade-in">
               <div>
-                <label className="block text-xs font-bold mb-1.5 text-gray-700">PostgreSQL Connection URL:</label>
+                <label className="block text-xs font-bold mb-1.5 text-gray-700 dark:text-dark-text">PostgreSQL Connection URL:</label>
                 <input
                   type="text"
                   value={dbUrl}
                   onChange={(e) => setDbUrl(e.target.value)}
-                  className="w-full border-2 border-gray-600 border-t-gray-800 border-l-gray-800 p-2 bg-white text-sm font-mono shadow-inner focus:ring-1 ring-[#A6CAF0] outline-none"
+                  className="w-full border-2 border-gray-600 dark:border-dark-border-dark border-t-gray-800 dark:border-t-dark-shadow border-l-gray-800 dark:border-l-dark-shadow p-2 bg-white dark:bg-dark-input text-sm font-mono shadow-inner focus:ring-1 ring-[#A6CAF0] dark:ring-dark-accent outline-none dark:text-dark-text dark:placeholder-dark-text-muted"
                   placeholder="postgres://user:pass@host:port/db"
                 />
               </div>
@@ -201,7 +201,7 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                 <button
                   onClick={testConnection}
                   disabled={dbTesting}
-                  className="px-4 py-1.5 text-xs font-bold bg-[#c0c0c0] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 hover:bg-[#d4d0c8] active:border-inset disabled:opacity-50 transition-colors"
+                  className="px-4 py-1.5 text-xs font-bold bg-[#c0c0c0] dark:bg-dark-panel dark:text-dark-text border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-2 border-r-2 border-gray-800 dark:border-dark-shadow hover:bg-[#d4d0c8] dark:hover:bg-dark-surface-alt active:border-inset disabled:opacity-50 transition-colors"
                 >
                   {dbTesting ? 'Testing...' : 'Test Connection'}
                 </button>
@@ -220,11 +220,11 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
               )}
 
               <div className="border-t border-gray-400 pt-4 mt-2">
-                <p className="text-[10px] font-bold mb-2 uppercase tracking-wider text-gray-500">Security & Backups</p>
+                <p className="text-[10px] font-bold mb-2 uppercase tracking-wider text-gray-500 dark:text-dark-text-muted">Security & Backups</p>
                 <div className="flex gap-2">
                   <button
                     onClick={handleExport}
-                    className="px-4 py-1 text-xs bg-[#c0c0c0] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 hover:bg-[#d4d0c8] active:border-inset transition-colors"
+                    className="px-4 py-1 text-xs bg-[#c0c0c0] dark:bg-dark-panel dark:text-dark-text border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-2 border-r-2 border-gray-800 dark:border-dark-shadow hover:bg-[#d4d0c8] dark:hover:bg-dark-surface-alt active:border-inset transition-colors"
                   >
                     Export JSON
                   </button>
@@ -241,22 +241,22 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
 
           {tab === 'ai' && (
             <div className="space-y-4 animate-fade-in">
-              <div className="text-xs font-bold mb-1 text-gray-700">Ollama AI Runtime Status</div>
+              <div className="text-xs font-bold mb-1 text-gray-700 dark:text-dark-text">Ollama AI Runtime Status</div>
 
-              <div className="bg-white border-2 border-gray-600 border-t-gray-800 border-l-gray-800 shadow-inner overflow-hidden">
+              <div className="bg-white dark:bg-dark-input border-2 border-gray-600 dark:border-dark-border-dark border-t-gray-800 dark:border-t-dark-shadow border-l-gray-800 dark:border-l-dark-shadow shadow-inner overflow-hidden">
                 <table className="w-full text-xs">
-                  <thead className="bg-gray-100 border-b border-gray-300">
+                  <thead className="bg-gray-100 dark:bg-dark-surface border-b border-gray-300 dark:border-dark-border-dark">
                     <tr>
-                      <th className="text-left px-3 py-2 font-bold text-gray-600">Model</th>
-                      <th className="text-left px-3 py-2 font-bold text-gray-600">Utility</th>
-                      <th className="text-center px-3 py-2 font-bold text-gray-600">State</th>
-                      <th className="text-right px-3 py-2 font-bold text-gray-600">Action</th>
+                      <th className="text-left px-3 py-2 font-bold text-gray-600 dark:text-dark-text-muted">Model</th>
+                      <th className="text-left px-3 py-2 font-bold text-gray-600 dark:text-dark-text-muted">Utility</th>
+                      <th className="text-center px-3 py-2 font-bold text-gray-600 dark:text-dark-text-muted">State</th>
+                      <th className="text-right px-3 py-2 font-bold text-gray-600 dark:text-dark-text-muted">Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-gray-200 hover:bg-blue-50/30">
-                      <td className="px-3 py-2 font-mono">phi3</td>
-                      <td className="px-3 py-2">Conversational</td>
+                    <tr className="border-b border-gray-200 dark:border-dark-border-dark hover:bg-blue-50/30 dark:hover:bg-dark-selection/30">
+                      <td className="px-3 py-2 font-mono dark:text-dark-text">phi3</td>
+                      <td className="px-3 py-2 dark:text-dark-text">Conversational</td>
                       <td className={`px-3 py-2 text-center font-bold ${phi3Ready ? 'text-green-600' : 'text-red-500'}`}>{phi3Ready ? 'Ready' : 'Missing'}</td>
                       <td className="px-3 py-2 text-right">
                         {!phi3Ready && (
@@ -270,9 +270,9 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                         )}
                       </td>
                     </tr>
-                    <tr className="hover:bg-blue-50/30">
-                      <td className="px-3 py-2 font-mono">nomic-embed</td>
-                      <td className="px-3 py-2">Vector Search</td>
+                    <tr className="hover:bg-blue-50/30 dark:hover:bg-dark-selection/30">
+                      <td className="px-3 py-2 font-mono dark:text-dark-text">nomic-embed</td>
+                      <td className="px-3 py-2 dark:text-dark-text">Vector Search</td>
                       <td className={`px-3 py-2 text-center font-bold ${embedReady ? 'text-green-600' : 'text-red-500'}`}>{embedReady ? 'Ready' : 'Missing'}</td>
                       <td className="px-3 py-2 text-right">
                         {!embedReady && (
@@ -300,7 +300,7 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
               )}
 
               {aiStatus && (
-                <div className="bg-white border-2 border-gray-600 border-t-gray-800 border-l-gray-800 p-2 text-xs">
+                <div className="bg-white dark:bg-dark-input border-2 border-gray-600 dark:border-dark-border-dark border-t-gray-800 dark:border-t-dark-shadow border-l-gray-800 dark:border-l-dark-shadow p-2 text-xs dark:text-dark-text">
                   {aiStatus}
                 </div>
               )}
@@ -308,7 +308,7 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
               <button
                 onClick={checkAiModels}
                 disabled={aiPulling}
-                className="px-3 py-1 text-xs font-bold bg-[#c0c0c0] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 hover:bg-[#d4d0c8] active:border-inset disabled:opacity-50"
+                className="px-3 py-1 text-xs font-bold bg-[#c0c0c0] dark:bg-dark-panel dark:text-dark-text border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-2 border-r-2 border-gray-800 dark:border-dark-shadow hover:bg-[#d4d0c8] dark:hover:bg-dark-surface-alt active:border-inset disabled:opacity-50"
               >
                 Refresh Status
               </button>
@@ -318,11 +318,11 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
           {tab === 'branding' && (
             <div className="space-y-6 animate-fade-in">
               <div>
-                <h3 className="text-sm font-bold text-gray-700 mb-2">Application Logo</h3>
-                <p className="text-[10px] text-gray-500 mb-4 uppercase tracking-tighter">Recommended: 128x128 PNG with transparency</p>
+                <h3 className="text-sm font-bold text-gray-700 dark:text-dark-text mb-2">Application Logo</h3>
+                <p className="text-[10px] text-gray-500 dark:text-dark-text-muted mb-4 uppercase tracking-tighter">Recommended: 128x128 PNG with transparency</p>
                 
                 <div className="flex items-center gap-6">
-                  <div className="w-24 h-24 bg-white/50 border-2 border-gray-400 border-t-gray-600 border-l-gray-600 flex items-center justify-center relative overflow-hidden shadow-inner">
+                  <div className="w-24 h-24 bg-white/50 dark:bg-dark-input border-2 border-gray-400 dark:border-dark-border-dark border-t-gray-600 dark:border-t-dark-shadow border-l-gray-600 dark:border-l-dark-shadow flex items-center justify-center relative overflow-hidden shadow-inner">
                     {logoPath ? (
                       <img 
                         src={convertFileSrc(logoPath)} 
@@ -343,14 +343,14 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                     >
                       <span>📁</span> Change Logo
                     </button>
-                    <p className="text-[10px] text-gray-400 italic">Select a new image file to replace the default institution logo.</p>
+                    <p className="text-[10px] text-gray-400 dark:text-dark-text-muted italic">Select a new image file to replace the default institution logo.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="border-t border-gray-300 pt-4">
-                <h3 className="text-sm font-bold text-gray-700 mb-2">Institution Identity</h3>
-                <div className="bg-gray-100 p-3 border-2 border-gray-400 border-t-gray-600 border-l-gray-600 text-xs text-gray-600 italic">
+              <div className="border-t border-gray-300 dark:border-dark-border-light pt-4">
+                <h3 className="text-sm font-bold text-gray-700 dark:text-dark-text mb-2">Institution Identity</h3>
+                <div className="bg-gray-100 dark:bg-dark-panel p-3 border-2 border-gray-400 dark:border-dark-border-dark border-t-gray-600 dark:border-t-dark-shadow border-l-gray-600 dark:border-l-dark-shadow text-xs text-gray-600 dark:text-dark-text-muted italic">
                    Branding options are applied globally across the application. These changes will be visible on the Login screen and Dashboard.
                 </div>
               </div>

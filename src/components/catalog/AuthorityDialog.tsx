@@ -97,7 +97,7 @@ export const AuthorityDialog: React.FC<AuthorityDialogProps> = ({ onClose }) => 
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-      <BeveledBox variant="raised" className="w-full max-w-lg bg-classic-grey shadow-2xl flex flex-col">
+      <BeveledBox variant="raised" className="w-full max-w-lg bg-classic-grey dark:bg-dark-surface shadow-2xl flex flex-col">
         {/* Title Bar */}
         <div className="bg-classic-blue-gradient px-2 py-1 flex items-center justify-between text-white font-bold text-sm">
           <span>Authority Control</span>
@@ -109,27 +109,27 @@ export const AuthorityDialog: React.FC<AuthorityDialogProps> = ({ onClose }) => 
           <div className="flex gap-1">
             <button 
               onClick={() => setType('author')}
-              className={`btn-classic px-4 h-7 ${type === 'author' ? 'bg-gray-200 font-bold' : ''}`}
+              className={`btn-classic px-4 h-7 ${type === 'author' ? 'bg-gray-200 dark:bg-dark-surface-alt font-bold' : ''}`}
             >
               Author Authority
             </button>
             <button 
               onClick={() => setType('subject')}
-              className={`btn-classic px-4 h-7 ${type === 'subject' ? 'bg-gray-200 font-bold' : ''}`}
+              className={`btn-classic px-4 h-7 ${type === 'subject' ? 'bg-gray-200 dark:bg-dark-surface-alt font-bold' : ''}`}
             >
               Subject Authority
             </button>
           </div>
 
           {/* System Warning */}
-          <div className="text-red-600 font-bold text-center text-xs uppercase leading-tight bg-white/50 p-2 border border-red-200 italic">
+          <div className="text-red-600 dark:text-red-400 font-bold text-center text-xs uppercase leading-tight bg-white/50 dark:bg-dark-input/50 p-2 border border-red-200 dark:border-red-900/50 italic">
             NOTE : CLOSE ALL THE WORKSTATIONS BEFORE UPDATING THE AUTHORITY
           </div>
 
           {/* List Area */}
           <div className="flex-1 min-h-[200px]">
             {loading ? (
-              <div className="w-full h-full flex items-center justify-center border-2 border-gray-400 border-t-gray-600 border-l-gray-600 bg-white">
+              <div className="w-full h-full flex items-center justify-center border-2 border-gray-400 dark:border-dark-border-dark border-t-gray-600 dark:border-t-dark-shadow border-l-gray-600 dark:border-l-dark-shadow bg-white dark:bg-dark-input">
                 Loading...
               </div>
             ) : (
@@ -144,7 +144,7 @@ export const AuthorityDialog: React.FC<AuthorityDialogProps> = ({ onClose }) => 
 
           {/* Edit Field */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-700">Edit Selected Entry:</label>
+            <label className="text-xs font-bold text-gray-700 dark:text-dark-text">Edit Selected Entry:</label>
             <input 
               type="text" 
               value={editValue}

@@ -19,7 +19,7 @@ export const FieldGroup: React.FC<FieldGroupProps> = ({
     <div className={`flex items-center gap-2 ${className}`}>
       <label 
         htmlFor={id} 
-        className={`${labelWidth} text-sm font-medium text-gray-700 whitespace-nowrap`}
+        className={`${labelWidth} text-sm font-medium text-gray-700 dark:text-dark-text whitespace-nowrap`}
       >
         {label}
       </label>

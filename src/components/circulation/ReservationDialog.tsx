@@ -105,7 +105,7 @@ export const ReservationDialog: React.FC<ReservationDialogProps> = ({ onClose })
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-      <BeveledBox variant="raised" className="w-full max-w-3xl bg-classic-grey shadow-2xl flex flex-col">
+      <BeveledBox variant="raised" className="w-full max-w-3xl bg-classic-grey dark:bg-dark-surface shadow-2xl flex flex-col">
         {/* Title Bar */}
         <div className="bg-classic-blue-gradient px-2 py-1 flex items-center justify-between text-white font-bold text-sm">
           <span>Item Reservations</span>
@@ -115,10 +115,10 @@ export const ReservationDialog: React.FC<ReservationDialogProps> = ({ onClose })
         <div className="p-4 flex flex-col gap-3 min-h-[500px]">
           {/* Active Reservations List */}
           <div>
-            <p className="text-xs font-bold text-gray-700 mb-1">Active Reservations (IsServed = N)</p>
+            <p className="text-xs font-bold text-gray-700 dark:text-dark-text mb-1">Active Reservations (IsServed = N)</p>
             <div className="h-[220px] overflow-hidden">
               {loading ? (
-                <div className="w-full h-full flex items-center justify-center border-2 border-gray-400 border-t-gray-600 border-l-gray-600 bg-white text-xs text-gray-500">
+                <div className="w-full h-full flex items-center justify-center border-2 border-gray-400 dark:border-dark-border-dark border-t-gray-600 dark:border-t-dark-shadow border-l-gray-600 dark:border-l-dark-shadow bg-white dark:bg-dark-input text-xs text-gray-500 dark:text-dark-text-muted">
                   Loading...
                 </div>
               ) : (
@@ -147,10 +147,10 @@ export const ReservationDialog: React.FC<ReservationDialogProps> = ({ onClose })
 
           {/* Add New Reservation Form */}
           <div className="space-y-2">
-            <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">New Reservation</p>
+            <p className="text-xs font-bold text-gray-700 dark:text-dark-text uppercase tracking-wide">New Reservation</p>
             <div className="flex gap-2">
               <div className="flex flex-col flex-1">
-                <label className="text-[10px] text-gray-600 font-bold mb-0.5">Patron ID</label>
+                <label className="text-[10px] text-gray-600 dark:text-dark-text-muted font-bold mb-0.5">Patron ID</label>
                 <input
                   id="res-idno"
                   type="text"
@@ -161,7 +161,7 @@ export const ReservationDialog: React.FC<ReservationDialogProps> = ({ onClose })
                 />
               </div>
               <div className="flex flex-col flex-1">
-                <label className="text-[10px] text-gray-600 font-bold mb-0.5">Accession No.</label>
+                <label className="text-[10px] text-gray-600 dark:text-dark-text-muted font-bold mb-0.5">Accession No.</label>
                 <input
                   id="res-accession"
                   type="text"
@@ -183,7 +183,7 @@ export const ReservationDialog: React.FC<ReservationDialogProps> = ({ onClose })
               </div>
             </div>
             {error && <p className="text-red-600 text-[10px] font-bold">{error}</p>}
-            <p className="text-[10px] text-gray-500 italic">
+            <p className="text-[10px] text-gray-500 dark:text-dark-text-muted italic">
               Reservation auto-expires in 7 days. Status set to "Served" when item is issued.
             </p>
           </div>

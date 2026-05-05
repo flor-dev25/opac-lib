@@ -44,12 +44,12 @@ export const FinancialReportsDialog: React.FC<FinancialReportsDialogProps> = ({ 
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
-      <BeveledBox variant="raised" className="w-full max-w-4xl h-[80vh] flex flex-col bg-[#D4D0C8]">
+      <BeveledBox variant="raised" className="w-full max-w-4xl h-[80vh] flex flex-col bg-[#D4D0C8] dark:bg-dark-surface">
         <TitleBar title="Financial Reports & Fine Collection" onClose={onClose} />
         
         <div className="p-4 flex-1 flex flex-col gap-4 overflow-hidden">
           {loading ? (
-            <div className="flex-1 flex items-center justify-center italic text-gray-600">
+            <div className="flex-1 flex items-center justify-center italic text-gray-600 dark:text-dark-text-muted">
               Generating reports...
             </div>
           ) : (
@@ -58,11 +58,11 @@ export const FinancialReportsDialog: React.FC<FinancialReportsDialogProps> = ({ 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <GroupBox label="Collection Summary">
                   <div className="flex items-center gap-4 p-2">
-                    <div className="p-3 bg-green-100 border border-green-600 text-green-700">
+                    <div className="p-3 bg-green-100 dark:bg-dark-input border border-green-600 dark:border-dark-border-dark text-green-700 dark:text-green-400">
                       <Wallet size={32} />
                     </div>
                     <div>
-                      <div className="text-xs font-bold uppercase text-gray-600">Total Fines Collected</div>
+                      <div className="text-xs font-bold uppercase text-gray-600 dark:text-dark-text-muted">Total Fines Collected</div>
                       <div className="text-3xl font-bold text-green-800 font-mono">
                         ₱{data?.total_collected.toLocaleString()}
                       </div>
@@ -72,11 +72,11 @@ export const FinancialReportsDialog: React.FC<FinancialReportsDialogProps> = ({ 
 
                 <GroupBox label="Liability Summary">
                   <div className="flex items-center gap-4 p-2">
-                    <div className="p-3 bg-red-100 border border-red-600 text-red-700">
+                    <div className="p-3 bg-red-100 dark:bg-dark-input border border-red-600 dark:border-dark-border-dark text-red-700 dark:text-red-400">
                       <TrendingUp size={32} />
                     </div>
                     <div>
-                      <div className="text-xs font-bold uppercase text-gray-600">Total Outstanding Fines</div>
+                      <div className="text-xs font-bold uppercase text-gray-600 dark:text-dark-text-muted">Total Outstanding Fines</div>
                       <div className="text-3xl font-bold text-red-800 font-mono">
                         ₱{data?.total_outstanding.toLocaleString()}
                       </div>
@@ -87,8 +87,8 @@ export const FinancialReportsDialog: React.FC<FinancialReportsDialogProps> = ({ 
 
               {/* Recent History */}
               <GroupBox label="Recent Payment History" className="flex-1 flex flex-col overflow-hidden">
-                <div className="flex-1 flex flex-col overflow-hidden bg-white border-2 border-inset border-gray-400">
-                  <div className="bg-[#808080] text-white flex font-bold text-xs p-1 sticky top-0 z-10">
+                <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-dark-input border-2 border-inset border-gray-400 dark:border-dark-border-dark">
+                  <div className="bg-[#808080] dark:bg-dark-surface text-white dark:text-dark-text flex font-bold text-xs p-1 sticky top-0 z-10">
                     <div className="w-32 px-1">Date/Time</div>
                     <div className="w-24 px-1">ID No.</div>
                     <div className="flex-1 px-1">Patron Name</div>
@@ -98,8 +98,8 @@ export const FinancialReportsDialog: React.FC<FinancialReportsDialogProps> = ({ 
                   
                   <div className="flex-1 overflow-y-scroll">
                     {data?.recent_payments.map((payment, idx) => (
-                      <div key={idx} className="flex text-xs p-1 border-b border-gray-100 hover:bg-blue-50">
-                        <div className="w-32 px-1 text-gray-600">
+                      <div key={idx} className="flex text-xs p-1 border-b border-gray-100 dark:border-dark-border-dark hover:bg-blue-50 dark:hover:bg-dark-selection/30 dark:text-dark-text">
+                        <div className="w-32 px-1 text-gray-600 dark:text-dark-text-muted">
                           {new Date(payment.dte_pay).toLocaleString()}
                         </div>
                         <div className="w-24 px-1 font-mono">{payment.idno}</div>
@@ -107,11 +107,11 @@ export const FinancialReportsDialog: React.FC<FinancialReportsDialogProps> = ({ 
                         <div className="w-24 px-1 text-right font-bold text-green-700">
                           ₱{payment.amount_pay.toLocaleString()}
                         </div>
-                        <div className="w-24 px-1 text-right text-gray-500 uppercase">{payment.cashier}</div>
+                        <div className="w-24 px-1 text-right text-gray-500 dark:text-dark-text-muted uppercase">{payment.cashier}</div>
                       </div>
                     ))}
                     {data?.recent_payments.length === 0 && (
-                      <div className="p-8 text-center text-gray-400 italic">No payment records found.</div>
+                      <div className="p-8 text-center text-gray-400 dark:text-dark-text-muted italic">No payment records found.</div>
                     )}
                   </div>
                 </div>

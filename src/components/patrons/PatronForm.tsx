@@ -72,12 +72,12 @@ export const PatronForm: React.FC<PatronFormProps> = ({ initialData, onClose }) 
   };
 
   return (
-    <div className="flex flex-col h-full bg-classic-grey p-2 relative">
+    <div className="flex flex-col h-full bg-classic-grey dark:bg-dark-surface p-2 relative">
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <form onSubmit={handleSubmit(onSubmit as any)} className="flex flex-col h-full">
-        <BeveledBox variant="raised" className="flex-1 flex flex-col p-4 bg-[#E8F0F8]">
-          <div className="flex items-center justify-between mb-4 border-b border-white pb-2 shadow-[0_1px_0_rgba(128,128,128,0.5)]">
-            <h2 className="text-xl font-bold italic text-classic-blue">
+        <BeveledBox variant="raised" className="flex-1 flex flex-col p-4 bg-[#E8F0F8] dark:bg-dark-surface-alt">
+          <div className="flex items-center justify-between mb-4 border-b border-white dark:border-dark-highlight pb-2 shadow-[0_1px_0_rgba(128,128,128,0.5)] dark:shadow-[0_1px_0_rgba(26,26,26,0.5)]">
+            <h2 className="text-xl font-bold italic text-classic-blue dark:text-dark-accent">
               {isEdit ? 'Edit Patron' : 'New Patron Registration'}
             </h2>
           </div>
@@ -104,11 +104,11 @@ export const PatronForm: React.FC<PatronFormProps> = ({ initialData, onClose }) 
                 />
               </FieldGroup>
               <FieldGroup label="Group" id="group_name">
-                <div className="bg-white shadow-bevel-sunken px-1">
+                <div className="bg-white dark:bg-dark-input shadow-bevel-sunken px-1">
                   <select 
                     id="group_name" 
                     {...register('group_name')}
-                    className="w-full bg-transparent border-none outline-none text-sm h-8"
+                    className="w-full bg-transparent border-none outline-none text-sm h-8 dark:text-dark-text"
                   >
                     <option value="STUDENT">STUDENT</option>
                     <option value="FACULTY">FACULTY</option>
@@ -153,7 +153,7 @@ export const PatronForm: React.FC<PatronFormProps> = ({ initialData, onClose }) 
             </div>
           </div>
 
-          <div className="mt-6 flex justify-end gap-2 border-t border-white pt-4 shadow-[0_-1px_0_rgba(128,128,128,0.5)]">
+          <div className="mt-6 flex justify-end gap-2 border-t border-white dark:border-dark-highlight pt-4 shadow-[0_-1px_0_rgba(128,128,128,0.5)] dark:shadow-[0_-1px_0_rgba(26,26,26,0.5)]">
             <button type="submit" className="btn-classic px-8 h-8 font-bold">
               {isEdit ? 'Update' : 'Register'}
             </button>

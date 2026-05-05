@@ -111,6 +111,11 @@ Based on the dark mode implementation, the following components, layouts, and di
 - `src/components/dashboard/DeleteDialog.tsx` (Container background, Text colors)
 - `src/components/dashboard/ExportDialog.tsx` (Container background, Labels, Inputs)
 - `src/components/layout/AboutDialog.tsx` (Container, Logo circle, Info panels, Text)
+- `src/components/inventory/AuditDialog.tsx` (Container, Table, Status text)
+- `src/components/patrons/FinancialReportsDialog.tsx` (Summary boxes, History table)
+- `src/components/inventory/AcquisitionsDialog.tsx` (Parameters box, Report table)
+- `src/components/circulation/ReservationDialog.tsx` (Reservations grid, Form text)
+- `src/components/catalog/AuthorityDialog.tsx` (Toggles, Category lists, Warning box)
 
 **AI Components**
 - `src/components/ai/AIChatBadge.tsx` (Badge backgrounds, Chat panel, Message bubbles, Input field, Status bar)
