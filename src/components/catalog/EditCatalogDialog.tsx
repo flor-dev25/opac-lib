@@ -119,11 +119,11 @@ export const EditCatalogDialog: React.FC<EditCatalogDialogProps> = ({ controlno,
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
-      <BeveledBox variant="raised" className="w-full max-w-5xl h-[90vh] flex flex-col bg-[#D4D0C8]">
+      <BeveledBox variant="raised" className="w-full max-w-5xl h-[90vh] flex flex-col bg-[#D4D0C8] dark:bg-dark-surface">
         <TitleBar title="Edit Catalog Record" onClose={onClose} />
         
         {/* Sub-Toolbar (Parity with Wireframe 010) */}
-        <div className="flex gap-1 p-1 bg-[#D4D0C8] border-b border-white shadow-[0_1px_0_#808080]">
+        <div className="flex gap-1 p-1 bg-[#D4D0C8] dark:bg-dark-panel border-b border-white dark:border-dark-highlight shadow-[0_1px_0_#808080] dark:shadow-[0_1px_0_#1A1A1A]">
           <button className="flex flex-col items-center p-1 w-16 hover:bg-gray-200 border border-transparent hover:border-gray-400">
             <PlusSquare size={24} />
             <span className="text-[10px]">Add New</span>
@@ -152,15 +152,15 @@ export const EditCatalogDialog: React.FC<EditCatalogDialogProps> = ({ controlno,
           {/* Header Info */}
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold">Control No.</span>
-              <span className="text-sm font-bold text-[#008000] px-4 py-1 bg-white border-2 border-inset min-w-[150px]">
+              <span className="text-sm font-bold dark:text-dark-text">Control No.</span>
+              <span className="text-sm font-bold text-[#008000] dark:text-green-400 px-4 py-1 bg-white dark:bg-dark-input border-2 border-inset dark:border-dark-border-dark min-w-[150px]">
                 {controlno}
               </span>
             </div>
             {!isHoldingsMode && (
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold">Material</span>
-                <select {...register('material')} className="bg-white border-2 border-inset text-sm h-7 px-1 outline-none">
+                <span className="text-sm font-bold dark:text-dark-text">Material</span>
+                <select {...register('material')} className="bg-white dark:bg-dark-input dark:text-dark-text border-2 border-inset dark:border-dark-border-dark text-sm h-7 px-1 outline-none">
                   <option>Filipinian</option>
                   <option>General Collection</option>
                   <option>Reference</option>
@@ -274,7 +274,7 @@ export const EditCatalogDialog: React.FC<EditCatalogDialogProps> = ({ controlno,
                       <select 
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        className="bg-white border-2 border-inset text-black text-sm h-8 px-1"
+                        className="bg-white dark:bg-dark-input dark:text-dark-text border-2 border-inset dark:border-dark-border-dark text-black text-sm h-8 px-1"
                       >
                         <option>General Collection</option>
                         <option>Filipinian</option>
@@ -295,9 +295,9 @@ export const EditCatalogDialog: React.FC<EditCatalogDialogProps> = ({ controlno,
                     {/* Current Holdings Grid */}
                     <div className="mt-6 flex-1 flex flex-col overflow-hidden">
                       <label className="text-xs font-bold uppercase mb-1">Current Item Copies:</label>
-                      <div className="flex-1 bg-white border-2 border-inset border-blue-900 overflow-y-auto">
-                        <table className="w-full text-black text-xs">
-                          <thead className="bg-gray-200 sticky top-0 border-b">
+                      <div className="flex-1 bg-white dark:bg-dark-input border-2 border-inset border-blue-900 dark:border-dark-border-dark overflow-y-auto">
+                        <table className="w-full text-black dark:text-dark-text text-xs">
+                          <thead className="bg-gray-200 dark:bg-dark-surface sticky top-0 border-b dark:border-dark-border-dark">
                             <tr>
                               <th className="text-left p-1 border-r">Accession</th>
                               <th className="text-left p-1 border-r">Location</th>
@@ -306,7 +306,7 @@ export const EditCatalogDialog: React.FC<EditCatalogDialogProps> = ({ controlno,
                           </thead>
                           <tbody>
                             {holdings.map((h, i) => (
-                              <tr key={i} className="border-b border-gray-100 hover:bg-blue-50">
+                              <tr key={i} className="border-b border-gray-100 dark:border-dark-border-dark hover:bg-blue-50 dark:hover:bg-dark-selection/30">
                                 <td className="p-1 font-mono">{h.accession}</td>
                                 <td className="p-1">{h.location}</td>
                                 <td className="p-1 text-center flex justify-center gap-2">

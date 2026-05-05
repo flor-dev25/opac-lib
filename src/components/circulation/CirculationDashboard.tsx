@@ -25,7 +25,7 @@ export const CirculationDashboard: React.FC<CirculationDashboardProps> = ({ onCl
   ];
 
   const StatCard = ({ icon: Icon, label, value, color }: { icon: any, label: string, value: string | number, color: string }) => (
-    <BeveledBox variant="sunken" className="p-3 bg-white flex items-center gap-4 flex-1">
+    <BeveledBox variant="sunken" className="p-3 bg-white dark:bg-dark-input dark:text-dark-text flex items-center gap-4 flex-1">
       <div className={`p-2 rounded-sm ${color} bg-opacity-20`}>
         <Icon size={24} className={color.replace('bg-', 'text-')} />
       </div>
@@ -38,7 +38,7 @@ export const CirculationDashboard: React.FC<CirculationDashboardProps> = ({ onCl
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
-      <BeveledBox variant="raised" className="w-[1000px] h-[700px] flex flex-col bg-[#D4D0C8] shadow-2xl">
+      <BeveledBox variant="raised" className="w-[1000px] h-[700px] flex flex-col bg-[#D4D0C8] dark:bg-dark-surface shadow-2xl">
         {/* Header */}
         <div className="bg-[#000080] px-2 py-1 flex items-center justify-between select-none">
           <div className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export const CirculationDashboard: React.FC<CirculationDashboardProps> = ({ onCl
           {/* Overdue Items Section */}
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-bold uppercase text-gray-600">Overdue Items (Action Required)</h3>
+              <h3 className="text-xs font-bold uppercase text-gray-600 dark:text-dark-text">Overdue Items (Action Required)</h3>
               <button 
                 onClick={() => fetchOverdueItems()} 
                 className="text-[10px] font-bold text-blue-800 hover:underline"
@@ -101,7 +101,7 @@ export const CirculationDashboard: React.FC<CirculationDashboardProps> = ({ onCl
         </div>
 
         {/* Footer */}
-        <div className="bg-[#D4D0C8] border-t border-white shadow-[0_-1px_0_#808080] px-2 py-0.5 text-[10px] text-gray-700 flex justify-between select-none">
+        <div className="bg-[#D4D0C8] dark:bg-dark-panel border-t border-white dark:border-dark-highlight shadow-[0_-1px_0_#808080] dark:shadow-[0_-1px_0_#1A1A1A] px-2 py-0.5 text-[10px] text-gray-700 dark:text-dark-text flex justify-between select-none">
           <span>{isLoading ? 'Fetching data...' : 'All systems operational'}</span>
           <span>Records: {overdueItems.length}</span>
         </div>

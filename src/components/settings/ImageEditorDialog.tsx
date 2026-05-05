@@ -42,7 +42,7 @@ export const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({ sourcePath
 
   return (
     <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center backdrop-blur-md animate-fade-in">
-      <div className="bg-[#D4D0C8] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 w-[500px] shadow-2xl overflow-hidden flex flex-col">
+      <div className="bg-[#D4D0C8] dark:bg-dark-surface border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-2 border-r-2 border-gray-800 dark:border-dark-shadow w-[500px] shadow-2xl overflow-hidden flex flex-col">
         {/* Title Bar */}
         <div className="title-bar-gjc">
           <div className="flex items-center gap-2">
@@ -53,7 +53,7 @@ export const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({ sourcePath
 
         <div className="p-5 flex flex-col gap-6">
           {/* Preview Area */}
-          <div className="aspect-square w-full max-w-[280px] mx-auto bg-white border-2 border-gray-600 border-t-gray-800 border-l-gray-800 shadow-inner overflow-hidden flex items-center justify-center relative">
+          <div className="aspect-square w-full max-w-[280px] mx-auto bg-white dark:bg-dark-input border-2 border-gray-600 dark:border-dark-border-dark border-t-gray-800 dark:border-t-dark-shadow border-l-gray-800 dark:border-l-dark-shadow shadow-inner overflow-hidden flex items-center justify-center relative">
             <img 
               src={convertFileSrc(sourcePath)} 
               alt="Preview" 
@@ -65,7 +65,7 @@ export const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({ sourcePath
             />
             {autoCrop && (
                <div className="absolute inset-0 border-2 border-dashed border-[#A6CAF0] pointer-events-none flex items-center justify-center">
-                  <span className="text-[8px] text-[#000080] font-bold uppercase bg-white/20 px-1">1:1 Auto-Crop</span>
+                  <span className="text-[8px] text-[#000080] dark:text-blue-400 font-bold uppercase bg-white/20 dark:bg-dark-input/20 px-1">1:1 Auto-Crop</span>
                </div>
             )}
           </div>
@@ -93,7 +93,7 @@ export const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({ sourcePath
           )}
 
           <div className="flex justify-end gap-3 pt-2 border-t border-gray-400">
-             <button onClick={onClose} className="px-6 py-1.5 text-xs font-bold bg-[#c0c0c0] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 hover:bg-gray-100">Cancel</button>
+             <button onClick={onClose} className="px-6 py-1.5 text-xs font-bold bg-[#c0c0c0] dark:bg-dark-surface border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-2 border-r-2 border-gray-800 dark:border-dark-shadow hover:bg-gray-100 dark:hover:bg-dark-surface-alt">Cancel</button>
              <button 
                onClick={handleSave} 
                disabled={isProcessing}

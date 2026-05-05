@@ -86,8 +86,8 @@ export const AcquisitionsDialog: React.FC<AcquisitionsDialogProps> = ({ onClose 
 
           {/* Report Table */}
           <GroupBox label="Acquisitions History" className="flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 flex flex-col overflow-hidden bg-white border-2 border-inset border-gray-400">
-              <div className="bg-[#808080] text-white flex font-bold text-xs p-1 sticky top-0 z-10">
+            <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-dark-input border-2 border-inset border-gray-400 dark:border-dark-border-dark">
+              <div className="bg-[#808080] dark:bg-dark-surface text-white dark:text-dark-text flex font-bold text-xs p-1 sticky top-0 z-10 border-b border-gray-300 dark:border-dark-border-dark">
                 <div className="w-24 px-1">Accession</div>
                 <div className="flex-1 px-1">Title</div>
                 <div className="w-48 px-1">Author</div>

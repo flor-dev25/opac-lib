@@ -28,21 +28,21 @@ export function ExportDialog({ isOpen, onClose, onExport }: ExportDialogProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+      <div className="bg-white dark:bg-dark-surface rounded-xl p-6 max-w-md w-full mx-4">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-900">Export Report</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text">Export Report</h3>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-dark-surface-alt rounded-lg"
           >
-            <X className="w-5 h-5 text-gray-600" />
+            <X className="w-5 h-5 text-gray-600 dark:text-dark-text-muted" />
           </button>
         </div>
 
         <div className="space-y-4">
           {/* Format Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-2">
               Format
             </label>
             <select
@@ -58,7 +58,7 @@ export function ExportDialog({ isOpen, onClose, onExport }: ExportDialogProps) {
 
           {/* Date Range */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-2">
               Date Range
             </label>
             <select
@@ -76,11 +76,11 @@ export function ExportDialog({ isOpen, onClose, onExport }: ExportDialogProps) {
 
           {/* Include Options */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-2">
               Include
             </label>
             <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm text-gray-600">
+              <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-dark-text-muted">
                 <input
                   type="checkbox"
                   checked={includeCharts}
@@ -89,7 +89,7 @@ export function ExportDialog({ isOpen, onClose, onExport }: ExportDialogProps) {
                 />
                 Charts
               </label>
-              <label className="flex items-center gap-2 text-sm text-gray-600">
+              <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-dark-text-muted">
                 <input
                   type="checkbox"
                   checked={includeTables}
@@ -98,7 +98,7 @@ export function ExportDialog({ isOpen, onClose, onExport }: ExportDialogProps) {
                 />
                 Tables
               </label>
-              <label className="flex items-center gap-2 text-sm text-gray-600">
+              <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-dark-text-muted">
                 <input
                   type="checkbox"
                   checked={includeSummary}
@@ -111,7 +111,7 @@ export function ExportDialog({ isOpen, onClose, onExport }: ExportDialogProps) {
           </div>
 
           {/* Export Button */}
-          <div className="flex justify-end pt-4 border-t border-gray-200">
+          <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-dark-border-dark">
             <button
               onClick={handleExport}
               disabled={isExporting}

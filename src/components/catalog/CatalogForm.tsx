@@ -115,8 +115,8 @@ export const CatalogForm: React.FC = () => {
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-bold">Location</label>
-                    <div className="bg-white shadow-bevel-sunken px-1">
-                      <select className="w-full bg-transparent border-none outline-none text-sm h-8 text-black">
+                    <div className="bg-white dark:bg-dark-input shadow-bevel-sunken px-1">
+                      <select className="w-full bg-transparent border-none outline-none text-sm h-8 text-black dark:text-dark-text">
                         <option>General Collection</option>
                         <option>Reference</option>
                         <option>Reserved</option>

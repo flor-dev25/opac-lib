@@ -34,7 +34,7 @@ export const PaymentDialog: React.FC<PaymentDialogProps> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
-      <BeveledBox variant="raised" className="w-[400px] bg-[#D4D0C8] shadow-2xl flex flex-col">
+      <BeveledBox variant="raised" className="w-[400px] bg-[#D4D0C8] dark:bg-dark-surface shadow-2xl flex flex-col">
         {/* Header */}
         <div className="bg-[#000080] px-2 py-1 flex items-center justify-between select-none">
           <div className="flex items-center gap-2">
@@ -50,8 +50,8 @@ export const PaymentDialog: React.FC<PaymentDialogProps> = ({ onClose }) => {
         </div>
 
         <div className="p-6 space-y-6">
-          <BeveledBox variant="sunken" className="p-4 bg-white text-center">
-            <p className="text-[10px] font-bold uppercase text-gray-500 mb-1">Current Unpaid Balance</p>
+          <BeveledBox variant="sunken" className="p-4 bg-white dark:bg-dark-input text-center">
+            <p className="text-[10px] font-bold uppercase text-gray-500 dark:text-dark-text-muted mb-1">Current Unpaid Balance</p>
             <p className="text-3xl font-black text-red-600 tracking-tighter">
               ${selectedPatron.unpaid_fine.toFixed(2)}
             </p>
@@ -92,7 +92,7 @@ export const PaymentDialog: React.FC<PaymentDialogProps> = ({ onClose }) => {
           </form>
         </div>
 
-        <div className="bg-[#D4D0C8] border-t border-white px-2 py-0.5 text-[10px] text-gray-600 italic">
+        <div className="bg-[#D4D0C8] dark:bg-dark-panel border-t border-white dark:border-dark-highlight px-2 py-0.5 text-[10px] text-gray-600 dark:text-dark-text italic">
           Transaction will be logged to patron's account.
         </div>
       </BeveledBox>
