@@ -21,6 +21,16 @@ Complete parity implementation of Library Management System based on wireframe s
 
 ## Senior Agents
 
+### Agent: Lead Project Manager (LPM)
+- **Role**: Strategic orchestration, task decomposition
+- **Responsibilities**: GSD-2 workflow enforcement, ROADMAP.md, prioritization
+- **Assigned Tasks**: High-level planning and architectural alignment
+
+### Agent: Senior Documentator (SD)
+- **Role**: Source of Truth management
+- **Responsibilities**: PROJECT-TRACKER.md, STATE.md, decision registry, technical docs
+- **Assigned Tasks**: Maintaining system visibility and replication readiness
+
 ### Agent: Frontend Architect
 - **Role**: UI/UX implementation, component architecture
 - **Responsibilities**: React components, styling, responsive design
@@ -30,11 +40,6 @@ Complete parity implementation of Library Management System based on wireframe s
 - **Role**: API development, business logic
 - **Responsibilities**: Endpoints, authentication, data processing
 - **Assigned Tasks**: All backend implementation
-
-### Agent: Database Specialist
-- **Role**: Schema design, migrations, queries
-- **Responsibilities**: PostgreSQL schema, data integrity
-- **Assigned Tasks**: Database layer implementation
 
 ## Implementation Phases
 
@@ -71,7 +76,14 @@ Complete parity implementation of Library Management System based on wireframe s
 - [x] Dashboard Pagination (No-Scroll UX)
 - [x] Legacy Data Migration (6,000+ records)
 
-### Phase 7: AI Intelligence (M006)
+### Phase 7: Infrastructure & Replication (M007)
+- [x] GSD-2 & Caveman workflow integration
+- [x] Agent Role Definitions (LPM & SD)
+- [x] Windows 11 & Ollama prerequisites documentation
+- [x] Firebase sync target specification
+- [x] Multi-agent handoff readiness
+
+### Phase 8: AI Intelligence (M008)
 - [ ] Semantic Infrastructure (pgvector)
 - [ ] Offline LLM Integration (Gemma 2)
 - [ ] AI UI & Chat Badge
