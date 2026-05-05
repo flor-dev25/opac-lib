@@ -65,6 +65,8 @@
 - D057: Chose WebP as best-practice format for logo optimization.
 - D058: Enabled explicit `dialog` and `shell` permissions in Tauri v2 capabilities.
 - D059: Implemented timestamp-based logo filenames (`logo_<ts>.webp`) to prevent Windows file locking and browser caching issues.
+- D060: Reverted GJC branding (Green/Gold) to classic Windows 95/98 Blue/White theme.
+- D061: Unified all blue accents and gradients to match the "sky blue" (`#A6CAF0` to `#7FA8E0`) found in the dashboard TitleBar for design consistency.
 
 ## Blockers
 - ~~B001: `pgvector` extension binary not found on PostgreSQL host.~~ **RESOLVED** — pgvector v0.8.2 installed and verified.

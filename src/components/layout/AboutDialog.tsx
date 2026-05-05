@@ -39,7 +39,7 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ onClose }) => {
 
         <div className="p-6 text-center space-y-4">
           <div className="flex justify-center mb-2">
-            <div className="w-24 h-24 bg-gjc-green rounded-full flex items-center justify-center shadow-lg border-4 border-gjc-gold overflow-hidden">
+            <div className="w-24 h-24 bg-[#A6CAF0] rounded-full flex items-center justify-center shadow-lg border-4 border-white/50 overflow-hidden">
               {logoPath ? (
                 <img 
                   src={convertFileSrc(logoPath)} 
@@ -47,13 +47,13 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ onClose }) => {
                   className="w-full h-full object-contain p-2"
                 />
               ) : (
-                <span className="text-gjc-gold text-4xl font-bold italic">GJC</span>
+                <span className="text-white text-4xl font-bold italic">LIB</span>
               )}
             </div>
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-gjc-green italic">infoLib Library System</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-[#000080] italic">infoLib Library System</h2>
             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Premium School Edition</p>
           </div>
 

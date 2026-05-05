@@ -189,7 +189,7 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                   type="text"
                   value={dbUrl}
                   onChange={(e) => setDbUrl(e.target.value)}
-                  className="w-full border-2 border-gray-600 border-t-gray-800 border-l-gray-800 p-2 bg-white text-sm font-mono shadow-inner focus:ring-1 ring-gjc-green outline-none"
+                  className="w-full border-2 border-gray-600 border-t-gray-800 border-l-gray-800 p-2 bg-white text-sm font-mono shadow-inner focus:ring-1 ring-[#A6CAF0] outline-none"
                   placeholder="postgres://user:pass@host:port/db"
                 />
               </div>
@@ -290,7 +290,7 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
               {aiProgress && (
                 <div>
                   <div className="w-full bg-gray-200 h-2 border-2 border-gray-600 border-t-gray-800 border-l-gray-800 overflow-hidden">
-                    <div className="bg-[#00401A] h-full animate-pulse" style={{ width: '100%' }}></div>
+                    <div className="bg-[#A6CAF0] h-full animate-pulse" style={{ width: '100%' }}></div>
                   </div>
                   <p className="text-[10px] text-gray-500 mt-1">{aiProgress}</p>
                 </div>
@@ -327,8 +327,8 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                         className="w-full h-full object-contain"
                       />
                     ) : (
-                      <div className="w-16 h-16 bg-gjc-green/10 rounded-full flex items-center justify-center border-2 border-gjc-gold/30">
-                        <span className="text-gjc-gold/30 text-xl font-bold italic">GJC</span>
+                      <div className="w-16 h-16 bg-[#A6CAF0]/20 rounded-full flex items-center justify-center border-2 border-[#A6CAF0]/50">
+                        <span className="text-[#000080]/50 text-xl font-bold italic">LIB</span>
                       </div>
                     )}
                   </div>

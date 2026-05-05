@@ -55,13 +55,14 @@
     @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-glass;
   }
 
-  /* GJC Branded Elements */
+  /* GJC Branded Elements - Reverted to Classic Blue/White */
   .btn-gjc {
-    @apply bg-gjc-green text-gjc-gold font-bold px-4 py-1 border-t-2 border-l-2 border-white/30 border-b-2 border-r-2 border-black/40 hover:brightness-110 active:shadow-bevel-sunken transition-all duration-200;
+    @apply bg-classic-blue text-white font-bold px-4 py-1 border-t-2 border-l-2 border-white/30 border-b-2 border-r-2 border-black/40 hover:brightness-110 active:shadow-bevel-sunken transition-all duration-200;
   }
 
   .title-bar-gjc {
-    @apply flex items-center justify-between h-8 px-3 text-gjc-gold font-bold text-sm bg-gradient-to-r from-gjc-green to-[#006030] shadow-md;
+    @apply flex items-center justify-between h-8 px-3 text-white font-bold text-sm bg-gradient-to-b from-[#A6CAF0] to-[#7FA8E0] shadow-md;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
   }
 
   /* Animations */

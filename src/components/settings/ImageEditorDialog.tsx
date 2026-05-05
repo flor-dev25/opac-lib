@@ -64,8 +64,8 @@ export const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({ sourcePath
               }}
             />
             {autoCrop && (
-               <div className="absolute inset-0 border-2 border-dashed border-gjc-gold/50 pointer-events-none flex items-center justify-center">
-                  <span className="text-[8px] text-gjc-gold font-bold uppercase bg-white/20 px-1">1:1 Auto-Crop</span>
+               <div className="absolute inset-0 border-2 border-dashed border-[#A6CAF0] pointer-events-none flex items-center justify-center">
+                  <span className="text-[8px] text-[#000080] font-bold uppercase bg-white/20 px-1">1:1 Auto-Crop</span>
                </div>
             )}
           </div>
@@ -75,13 +75,13 @@ export const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({ sourcePath
              <button onClick={handleRotate} className="btn-classic text-xs py-2 flex items-center justify-center gap-2">
                 <span>🔄</span> Rotate 90°
              </button>
-             <button onClick={() => setAutoCrop(!autoCrop)} className={`btn-classic text-xs py-2 flex items-center justify-center gap-2 ${autoCrop ? 'bg-gjc-green/10 ring-1 ring-gjc-green/30' : ''}`}>
+             <button onClick={() => setAutoCrop(!autoCrop)} className={`btn-classic text-xs py-2 flex items-center justify-center gap-2 ${autoCrop ? 'bg-[#A6CAF0]/20 ring-1 ring-[#A6CAF0]' : ''}`}>
                 <span>📐</span> Auto-Crop (1:1)
              </button>
-             <button onClick={() => setFlipH(!flipH)} className={`btn-classic text-xs py-2 flex items-center justify-center gap-2 ${flipH ? 'bg-gjc-green/10 ring-1 ring-gjc-green/30' : ''}`}>
+             <button onClick={() => setFlipH(!flipH)} className={`btn-classic text-xs py-2 flex items-center justify-center gap-2 ${flipH ? 'bg-[#A6CAF0]/20 ring-1 ring-[#A6CAF0]' : ''}`}>
                 <span>↔️</span> Flip Horizontal
              </button>
-             <button onClick={() => setFlipV(!flipV)} className={`btn-classic text-xs py-2 flex items-center justify-center gap-2 ${flipV ? 'bg-gjc-green/10 ring-1 ring-gjc-green/30' : ''}`}>
+             <button onClick={() => setFlipV(!flipV)} className={`btn-classic text-xs py-2 flex items-center justify-center gap-2 ${flipV ? 'bg-[#A6CAF0]/20 ring-1 ring-[#A6CAF0]' : ''}`}>
                 <span>↕️</span> Flip Vertical
              </button>
           </div>
