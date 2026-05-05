@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { Channel } from '@tauri-apps/api/core';
+import { ImageEditorDialog } from '../../components/settings/ImageEditorDialog';
 
 export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const [tab, setTab] = useState<'db' | 'ai'>('db');
+  const [tab, setTab] = useState<'db' | 'ai' | 'branding'>('db');
 
   // DB State
   const [dbUrl, setDbUrl] = useState('');
@@ -18,10 +19,37 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
   const [phi3Ready, setPhi3Ready] = useState(false);
   const [embedReady, setEmbedReady] = useState(false);
 
+  const [logoPath, setLogoPath] = useState<string | null>(null);
+  const [tempSelectedLogo, setTempSelectedLogo] = useState<string | null>(null);
+
   useEffect(() => {
     loadDbConfig();
     checkAiModels();
+    loadLogo();
   }, []);
+
+  const loadLogo = async () => {
+    try {
+      const path = await invoke<string | null>('get_logo_path');
+      setLogoPath(path);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleLogoUpload = async () => {
+    try {
+      const selected = await open({
+        filters: [{ name: 'Image', extensions: ['png', 'jpg', 'jpeg', 'svg'] }],
+        multiple: false
+      });
+      if (selected && typeof selected === 'string') {
+        setTempSelectedLogo(selected);
+      }
+    } catch (e) {
+      setDbStatus(`Selection failed: ${e}`);
+    }
+  };
 
   const loadDbConfig = async () => {
     try {
@@ -148,6 +176,7 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
         <div className="flex px-4 pt-3 gap-1">
           <div className={tabClass('db')} onClick={() => setTab('db')}>Database</div>
           <div className={tabClass('ai')} onClick={() => setTab('ai')}>AI Engine</div>
+          <div className={tabClass('branding')} onClick={() => setTab('branding')}>Branding</div>
         </div>
 
         {/* Tab Content */}
@@ -282,7 +311,61 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
               </button>
             </div>
           )}
+
+          {tab === 'branding' && (
+            <div className="space-y-6 animate-fade-in">
+              <div>
+                <h3 className="text-sm font-bold text-gray-700 mb-2">Application Logo</h3>
+                <p className="text-[10px] text-gray-500 mb-4 uppercase tracking-tighter">Recommended: 128x128 PNG with transparency</p>
+                
+                <div className="flex items-center gap-6">
+                  <div className="w-24 h-24 bg-white/50 border-2 border-gray-400 border-t-gray-600 border-l-gray-600 flex items-center justify-center relative overflow-hidden shadow-inner">
+                    {logoPath ? (
+                      <img 
+                        src={convertFileSrc(logoPath)} 
+                        alt="App Logo" 
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-gjc-green/10 rounded-full flex items-center justify-center border-2 border-gjc-gold/30">
+                        <span className="text-gjc-gold/30 text-xl font-bold italic">GJC</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <button
+                      onClick={handleLogoUpload}
+                      className="btn-gjc px-4 py-2 text-xs flex items-center gap-2"
+                    >
+                      <span>📁</span> Change Logo
+                    </button>
+                    <p className="text-[10px] text-gray-400 italic">Select a new image file to replace the default institution logo.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-300 pt-4">
+                <h3 className="text-sm font-bold text-gray-700 mb-2">Institution Identity</h3>
+                <div className="bg-gray-100 p-3 border-2 border-gray-400 border-t-gray-600 border-l-gray-600 text-xs text-gray-600 italic">
+                   Branding options are applied globally across the application. These changes will be visible on the Login screen and Dashboard.
+                </div>
+              </div>
+            </div>
+          )}
         </div>
+
+        {tempSelectedLogo && (
+          <ImageEditorDialog 
+            sourcePath={tempSelectedLogo} 
+            onClose={() => setTempSelectedLogo(null)} 
+            onSaved={() => {
+              setTempSelectedLogo(null);
+              loadLogo();
+              setDbStatus('Branding logo optimized and saved.');
+            }}
+          />
+        )}
       </div>
     </div>
   );

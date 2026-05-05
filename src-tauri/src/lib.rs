@@ -641,6 +641,9 @@ pub fn run() {
       ai::pull_ollama_model,
       settings::get_db_config,
       settings::save_db_config,
+      settings::upload_logo,
+      settings::process_logo,
+      settings::get_logo_path,
       settings::export_settings,
       settings::import_settings
     ])

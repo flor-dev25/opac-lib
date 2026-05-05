@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 import { BeveledBox } from '../../components/common/BeveledBox';
 import { ErrorDialog } from '../../components/auth/ErrorDialog';
 import { useAuthStore } from '../../stores/authStore';
@@ -10,6 +11,20 @@ export const LoginPage: React.FC = () => {
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  const [logoPath, setLogoPath] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const loadLogo = async () => {
+      try {
+        const path = await invoke<string | null>('get_logo_path');
+        setLogoPath(path);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    loadLogo();
+  }, []);
 
   const handleLogin = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -48,8 +63,16 @@ export const LoginPage: React.FC = () => {
           <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#C5A059 1px, transparent 0)', backgroundSize: '20px 20px' }}></div>
           
           <div className="absolute left-8 top-1/2 -translate-y-1/2">
-             <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center border-2 border-gjc-gold/30">
-                <span className="text-gjc-gold/50 text-2xl font-bold italic">GJC</span>
+             <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center border-2 border-gjc-gold/30 overflow-hidden">
+                {logoPath ? (
+                  <img 
+                    src={convertFileSrc(logoPath)} 
+                    alt="Logo" 
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <span className="text-gjc-gold/50 text-2xl font-bold italic">GJC</span>
+                )}
              </div>
           </div>
 

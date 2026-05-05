@@ -1,10 +1,25 @@
 import React from 'react';
+import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 
 interface AboutDialogProps {
   onClose: () => void;
 }
 
 export const AboutDialog: React.FC<AboutDialogProps> = ({ onClose }) => {
+  const [logoPath, setLogoPath] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const loadLogo = async () => {
+      try {
+        const path = await invoke<string | null>('get_logo_path');
+        setLogoPath(path);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    loadLogo();
+  }, []);
+
   return (
     <div className="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center backdrop-blur-sm transition-all duration-300">
       <div className="bg-[#D4D0C8] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 w-[420px] shadow-2xl animate-fade-in">
@@ -25,7 +40,15 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ onClose }) => {
         <div className="p-6 text-center space-y-4">
           <div className="flex justify-center mb-2">
             <div className="w-24 h-24 bg-gjc-green rounded-full flex items-center justify-center shadow-lg border-4 border-gjc-gold overflow-hidden">
-              <span className="text-gjc-gold text-4xl font-bold italic">GJC</span>
+              {logoPath ? (
+                <img 
+                  src={convertFileSrc(logoPath)} 
+                  alt="Logo" 
+                  className="w-full h-full object-contain p-2"
+                />
+              ) : (
+                <span className="text-gjc-gold text-4xl font-bold italic">GJC</span>
+              )}
             </div>
           </div>
 

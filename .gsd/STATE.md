@@ -1,9 +1,9 @@
 # GSD State
 
-**Active Milestone:** M007 — Distribution & Premium Deployment (DONE)
-**Active Milestone:** M008 — Legacy Data Migration
-**Active Slice:** S03 — High-Performance Batch Import
-**Active Task:** Execute sanitized SQL import
+**Active Milestone:** M008 — Legacy Data Migration (PAUSED)
+**Active Milestone:** M009 — Branding & Personalization
+**Active Slice:** S01 — Logo Customization
+**Active Task:** T02 — Implement Enhanced Logo Editor (Preview, Crop, Rotate, Flip)
 **Phase:** Execution
 
 ## Recent Decisions
@@ -60,6 +60,8 @@
 - D052: Refactored SettingsPage into a tabbed interface with system status monitoring.
 - D053: Sanitized legacy SQL dump to fix Mojibake using byte-level replacement script.
 - D054: Source data identified as PostgreSQL SQL dump in docs/legacy-database/.
+- D055: Implemented logo customization in Settings using `upload_logo` command.
+- D056: Logo is persisted in `db_config.json` and resolved to absolute path via `get_logo_path`.
 
 ## Blockers
 - ~~B001: `pgvector` extension binary not found on PostgreSQL host.~~ **RESOLVED** — pgvector v0.8.2 installed and verified.
