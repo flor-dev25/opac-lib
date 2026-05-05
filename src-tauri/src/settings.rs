@@ -109,16 +109,28 @@ pub async fn process_logo(app: AppHandle, source_path: String, options: ProcessO
     }
 
     let config_dir = app.path().app_config_dir().expect("failed to get config dir");
-    let target_filename = "logo.webp";
-    let target_path = config_dir.join(target_filename);
+
+    // Delete old logo to prevent file accumulation
+    let old_config = load_config(&app);
+    if let Some(old_logo) = &old_config.app_logo {
+        let old_path = config_dir.join(old_logo);
+        let _ = fs::remove_file(&old_path); // best-effort, ignore if locked
+    }
+
+    let timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis();
+    let target_filename = format!("logo_{}.webp", timestamp);
+    let target_path = config_dir.join(&target_filename);
 
     img.save_with_format(&target_path, ImageFormat::WebP).map_err(|e| e.to_string())?;
 
     let mut config = load_config(&app);
-    config.app_logo = Some(target_filename.to_string());
+    config.app_logo = Some(target_filename.clone());
     save_config(&app, &config)?;
 
-    Ok(target_filename.to_string())
+    Ok(target_filename)
 }
 
 #[tauri::command]

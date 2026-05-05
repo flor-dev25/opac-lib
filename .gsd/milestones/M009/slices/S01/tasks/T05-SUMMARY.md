@@ -16,3 +16,4 @@ Provide users with tools to edit the logo during the upload process, including a
 ## Progress
 - [x] GSD documentation updated.
 - [x] Implementation completed (Rust `image` crate backend + React editor dialog).
+- [x] Fixed Windows file lock issue using timestamped filenames.
