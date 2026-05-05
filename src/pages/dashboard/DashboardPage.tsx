@@ -48,7 +48,7 @@ export const DashboardPage: React.FC = () => {
       <RecordNavigator />
       
       {/* Footer status bar for classic feel */}
-      <div className="bg-classic-grey border-t border-white shadow-[0_-1px_0_#808080] px-2 py-0.5 text-[10px] text-gray-700 flex justify-between">
+      <div className="bg-classic-grey dark:bg-dark-surface border-t border-white dark:border-dark-highlight shadow-[0_-1px_0_#808080] dark:shadow-[0_-1px_0_#1A1A1A] px-2 py-0.5 text-[10px] text-gray-700 dark:text-dark-text-muted flex justify-between">
         <span>Ready</span>
         <span>Records: {records.length}</span>
       </div>

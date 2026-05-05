@@ -12,7 +12,7 @@ export const RecordNavigator: React.FC = () => {
   const handleNext = () => currentPage < totalPages && setPage(currentPage + 1);
 
   return (
-    <div className="flex items-center gap-1 bg-[#D4D0C8] px-2 py-0.5 border-t border-white shadow-[0_-1px_0_#808080]">
+    <div className="flex items-center gap-1 bg-[#D4D0C8] dark:bg-dark-surface px-2 py-0.5 border-t border-white dark:border-dark-highlight shadow-[0_-1px_0_#808080] dark:shadow-[0_-1px_0_#1A1A1A]">
       <div className="flex gap-0.5">
         <button 
           onClick={handleFirst} 
@@ -30,7 +30,7 @@ export const RecordNavigator: React.FC = () => {
         </button>
       </div>
 
-      <div className="flex items-center gap-2 px-2 text-xs font-bold whitespace-nowrap">
+      <div className="flex items-center gap-2 px-2 text-xs font-bold whitespace-nowrap dark:text-dark-text">
         <span>Record:</span>
         <input 
           type="text" 
@@ -39,7 +39,7 @@ export const RecordNavigator: React.FC = () => {
             const val = parseInt(e.target.value);
             if (!isNaN(val) && val >= 1 && val <= totalPages) setPage(val);
           }}
-          className="input-classic w-10 h-5 text-center px-0 font-bold text-blue-800"
+          className="input-classic w-10 h-5 text-center px-0 font-bold text-blue-800 dark:text-dark-accent"
         />
         <span>of {totalPages}</span>
       </div>
@@ -61,8 +61,8 @@ export const RecordNavigator: React.FC = () => {
         </button>
       </div>
 
-      <div className="ml-4 h-5 w-[1px] bg-gray-400 shadow-[1px_0_0_white]" />
-      <span className="ml-2 text-[10px] text-gray-600 italic">
+      <div className="ml-4 h-5 w-[1px] bg-gray-400 dark:bg-dark-border-light shadow-[1px_0_0_white] dark:shadow-[1px_0_0_#404040]" />
+      <span className="ml-2 text-[10px] text-gray-600 dark:text-dark-text-muted italic">
         Total: {totalRecords} Records
       </span>
     </div>

@@ -94,8 +94,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#808080] p-0.5 sm:p-2 md:p-4 flex items-center justify-center">
-      <BeveledBox variant="raised" className="w-full h-full max-w-7xl mx-auto flex flex-col bg-[#D4D0C8]">
+    <div className="min-h-screen bg-[#808080] dark:bg-[#1A1A1A] p-0.5 sm:p-2 md:p-4 flex items-center justify-center">
+      <BeveledBox variant="raised" className="w-full h-full max-w-7xl mx-auto flex flex-col bg-[#D4D0C8] dark:bg-dark-surface">
         <TitleBar
           title="infoLib Library Management System"
           onClose={handleClose}

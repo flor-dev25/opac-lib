@@ -9,7 +9,7 @@ interface ErrorDialogProps {
 export const ErrorDialog: React.FC<ErrorDialogProps> = ({ message, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[1px]">
-      <BeveledBox className="w-[220px] h-[160px] flex flex-col overflow-hidden bg-classic-grey" padding="p-0">
+      <BeveledBox className="w-[220px] h-[160px] flex flex-col overflow-hidden bg-classic-grey dark:bg-dark-surface" padding="p-0">
         {/* Title Bar */}
         <div className="title-bar flex-shrink-0">
           <span>Login</span>
@@ -22,12 +22,12 @@ export const ErrorDialog: React.FC<ErrorDialogProps> = ({ message, onClose }) =>
         </div>
 
         {/* Content Area */}
-        <div className="flex-grow bg-white flex items-center justify-center p-4">
-          <p className="text-sm font-sans text-black text-center">{message}</p>
+        <div className="flex-grow bg-white dark:bg-dark-input flex items-center justify-center p-4">
+          <p className="text-sm font-sans text-black dark:text-dark-text text-center">{message}</p>
         </div>
 
         {/* Footer Area */}
-        <div className="h-14 bg-classic-grey flex items-center justify-center flex-shrink-0">
+        <div className="h-14 bg-classic-grey dark:bg-dark-surface flex items-center justify-center flex-shrink-0">
           <button 
             onClick={onClose}
             className="btn-classic min-w-[80px]"

@@ -3,9 +3,11 @@ import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { Channel } from '@tauri-apps/api/core';
 import { ImageEditorDialog } from '../../components/settings/ImageEditorDialog';
+import { useThemeStore } from '../../stores/themeStore';
 
 export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const [tab, setTab] = useState<'db' | 'ai' | 'branding'>('db');
+  const [tab, setTab] = useState<'db' | 'ai' | 'branding' | 'display'>('db');
+  const { mode, setMode } = useThemeStore();
 
   // DB State
   const [dbUrl, setDbUrl] = useState('');
@@ -151,13 +153,13 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
   const tabClass = (t: string) =>
     `px-4 py-1 text-sm font-bold cursor-pointer ${
       tab === t
-        ? 'bg-[#D4D0C8] border-t-2 border-l-2 border-white border-b-0 border-r-2 border-r-gray-800 -mb-[1px] relative z-10'
-        : 'bg-[#b0b0b0] border-t border-l border-white border-b border-r border-gray-800'
+        ? 'bg-[#D4D0C8] dark:bg-dark-surface border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-0 border-r-2 border-r-gray-800 dark:border-r-dark-shadow -mb-[1px] relative z-10'
+        : 'bg-[#b0b0b0] dark:bg-dark-panel border-t border-l border-white dark:border-dark-highlight border-b border-r border-gray-800 dark:border-dark-shadow'
     }`;
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center backdrop-blur-sm transition-all duration-300">
-      <div className="bg-[#D4D0C8] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 w-[580px] shadow-2xl animate-fade-in">
+      <div className="bg-[#D4D0C8] dark:bg-dark-surface border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-2 border-r-2 border-gray-800 dark:border-dark-shadow w-[580px] shadow-2xl animate-fade-in">
         {/* Title Bar */}
         <div className="title-bar-gjc">
           <div className="flex items-center gap-2">
@@ -177,10 +179,11 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
           <div className={tabClass('db')} onClick={() => setTab('db')}>Database</div>
           <div className={tabClass('ai')} onClick={() => setTab('ai')}>AI Engine</div>
           <div className={tabClass('branding')} onClick={() => setTab('branding')}>Branding</div>
+          <div className={tabClass('display')} onClick={() => setTab('display')}>Display</div>
         </div>
 
         {/* Tab Content */}
-        <div className="mx-4 mb-4 p-5 bg-[#D4D0C8] border-t-2 border-white border-l-2 border-white border-b-2 border-gray-600 border-r-2 border-gray-600 shadow-inner min-h-[300px]">
+        <div className="mx-4 mb-4 p-5 bg-[#D4D0C8] dark:bg-dark-surface border-t-2 border-white dark:border-dark-highlight border-l-2 border-white dark:border-dark-highlight border-b-2 border-gray-600 dark:border-dark-shadow border-r-2 border-gray-600 dark:border-dark-shadow shadow-inner min-h-[300px]">
           {tab === 'db' && (
             <div className="space-y-4 animate-fade-in">
               <div>
@@ -349,6 +352,48 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                 <h3 className="text-sm font-bold text-gray-700 mb-2">Institution Identity</h3>
                 <div className="bg-gray-100 p-3 border-2 border-gray-400 border-t-gray-600 border-l-gray-600 text-xs text-gray-600 italic">
                    Branding options are applied globally across the application. These changes will be visible on the Login screen and Dashboard.
+                </div>
+              </div>
+            </div>
+          )}
+
+          {tab === 'display' && (
+            <div className="space-y-5 animate-fade-in">
+              <div>
+                <h3 className="text-sm font-bold text-gray-700 dark:text-dark-text mb-1">Appearance</h3>
+                <p className="text-[10px] text-gray-500 dark:text-dark-text-muted mb-4 uppercase tracking-tighter">Select your preferred color scheme</p>
+              </div>
+
+              <div className="bg-white dark:bg-dark-input border-2 border-gray-600 dark:border-dark-border-dark border-t-gray-800 dark:border-t-dark-shadow border-l-gray-800 dark:border-l-dark-shadow shadow-inner p-4 space-y-3">
+                {([['light', '☀️', 'Light', 'Classic Windows 95/98 appearance'], ['dark', '🌙', 'Dark', 'Dark Win95/98 style — easy on the eyes'], ['system', '💻', 'System', 'Follow operating system preference']] as const).map(([value, icon, label, desc]) => (
+                  <label
+                    key={value}
+                    className={`flex items-center gap-3 p-2.5 cursor-pointer border-2 transition-all duration-150 ${
+                      mode === value
+                        ? 'border-[#A6CAF0] dark:border-dark-accent bg-blue-50/50 dark:bg-dark-selection/30'
+                        : 'border-transparent hover:bg-gray-50 dark:hover:bg-dark-panel/50'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="theme"
+                      value={value}
+                      checked={mode === value}
+                      onChange={() => setMode(value)}
+                      className="accent-[#000080] dark:accent-dark-accent w-4 h-4"
+                    />
+                    <span className="text-base">{icon}</span>
+                    <div>
+                      <div className="text-sm font-bold text-black dark:text-dark-text">{label}</div>
+                      <div className="text-[10px] text-gray-500 dark:text-dark-text-muted">{desc}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+
+              <div className="border-t border-gray-300 dark:border-dark-border-light pt-4">
+                <div className="bg-gray-100 dark:bg-dark-panel p-3 border-2 border-gray-400 dark:border-dark-border-dark border-t-gray-600 dark:border-t-dark-shadow border-l-gray-600 dark:border-l-dark-shadow text-xs text-gray-600 dark:text-dark-text-muted italic">
+                  Theme preference is saved locally and applied instantly across the entire application.
                 </div>
               </div>
             </div>

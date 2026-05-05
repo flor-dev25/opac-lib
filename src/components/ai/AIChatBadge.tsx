@@ -101,7 +101,7 @@ export const AIChatBadge: React.FC = () => {
       >
         <BeveledBox 
           variant="raised" 
-          className={`p-3 rounded-full flex items-center justify-center bg-[#D4D0C8] border-2 ${isHovered ? 'border-purple-400' : 'border-gray-400'} transition-colors duration-300`}
+          className={`p-3 rounded-full flex items-center justify-center bg-[#D4D0C8] dark:bg-dark-panel border-2 ${isHovered ? 'border-purple-400' : 'border-gray-400 dark:border-dark-border-light'} transition-colors duration-300`}
         >
           {isOpen ? (
             <Sparkles className="w-6 h-6 text-purple-700 animate-pulse" />
@@ -112,7 +112,7 @@ export const AIChatBadge: React.FC = () => {
         
         {isHovered && !isOpen && (
           <div className="absolute bottom-full right-0 mb-2 whitespace-nowrap">
-            <BeveledBox variant="sunken" className="px-2 py-1 bg-white text-[10px] font-bold text-gray-600 uppercase tracking-wider">
+            <BeveledBox variant="sunken" className="px-2 py-1 bg-white dark:bg-dark-input text-[10px] font-bold text-gray-600 dark:text-dark-text-muted uppercase tracking-wider">
               Ask infoLib AI
             </BeveledBox>
           </div>
@@ -121,7 +121,7 @@ export const AIChatBadge: React.FC = () => {
 
       {isOpen && (
         <div className="absolute bottom-16 right-0 w-80 h-[400px] flex flex-col">
-          <BeveledBox variant="raised" className="flex-1 bg-[#D4D0C8] flex flex-col shadow-2xl min-h-0">
+          <BeveledBox variant="raised" className="flex-1 bg-[#D4D0C8] dark:bg-dark-surface flex flex-col shadow-2xl min-h-0">
             <div className="bg-gradient-to-r from-purple-900 to-indigo-900 p-1 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2 px-1">
                 <Sparkles className="w-3 h-3 text-white" />
@@ -145,7 +145,7 @@ export const AIChatBadge: React.FC = () => {
             </div>
 
             <div className="flex-1 p-2 overflow-hidden flex flex-col gap-2 min-h-0">
-              <BeveledBox variant="sunken" className="flex-1 bg-white p-2 overflow-y-auto text-[12px] font-mono leading-tight min-h-0" ref={scrollRef}>
+              <BeveledBox variant="sunken" className="flex-1 bg-white dark:bg-dark-input p-2 overflow-y-auto text-[12px] font-mono leading-tight min-h-0" ref={scrollRef}>
                 {messages.map((msg, i) => (
                   <div key={i} className={`flex gap-2 mb-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                     {msg.role === 'ai' ? (
@@ -153,7 +153,7 @@ export const AIChatBadge: React.FC = () => {
                     ) : (
                       <User className="w-4 h-4 text-blue-700 shrink-0" />
                     )}
-                    <div className={`p-2 border ${msg.role === 'ai' ? 'bg-purple-50 border-purple-200' : 'bg-blue-50 border-blue-200'} whitespace-pre-wrap`}>
+                    <div className={`p-2 border ${msg.role === 'ai' ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-200 dark:border-purple-800 dark:text-dark-text' : 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 dark:text-dark-text'} whitespace-pre-wrap`}>
                       {msg.text}
                     </div>
                   </div>
@@ -161,7 +161,7 @@ export const AIChatBadge: React.FC = () => {
                 {isThinking && (
                   <div className="flex gap-2 mb-4">
                     <Bot className="w-4 h-4 text-purple-700 shrink-0 animate-bounce" />
-                    <div className="bg-purple-50 p-2 border border-purple-200 italic text-gray-500">
+                    <div className="bg-purple-50 dark:bg-purple-900/30 p-2 border border-purple-200 dark:border-purple-800 italic text-gray-500 dark:text-dark-text-muted">
                       AI is thinking...
                     </div>
                   </div>
@@ -169,14 +169,14 @@ export const AIChatBadge: React.FC = () => {
               </BeveledBox>
 
               <div className="flex gap-1 h-8 shrink-0">
-                <BeveledBox variant="sunken" className="flex-1 bg-white px-2 flex items-center">
+                <BeveledBox variant="sunken" className="flex-1 bg-white dark:bg-dark-input px-2 flex items-center">
                   <input 
                     type="text" 
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Search by meaning (e.g. 'folk stories')..." 
-                    className="w-full bg-transparent outline-none text-[12px]"
+                    className="w-full bg-transparent outline-none text-[12px] dark:text-dark-text dark:placeholder-dark-text-muted"
                   />
                 </BeveledBox>
                 <button 
@@ -184,14 +184,14 @@ export const AIChatBadge: React.FC = () => {
                   disabled={isThinking}
                   className="group"
                 >
-                  <BeveledBox variant="raised" className="px-3 h-full bg-[#D4D0C8] flex items-center justify-center cursor-pointer active:bg-gray-400 disabled:opacity-50">
+                  <BeveledBox variant="raised" className="px-3 h-full bg-[#D4D0C8] dark:bg-dark-panel flex items-center justify-center cursor-pointer active:bg-gray-400 disabled:opacity-50">
                     <Send className={`w-3 h-3 ${isThinking ? 'text-gray-400' : 'text-gray-700 group-hover:text-purple-700'}`} />
                   </BeveledBox>
                 </button>
               </div>
             </div>
 
-            <div className="bg-[#D4D0C8] border-t border-gray-400 px-2 py-0.5 text-[9px] text-gray-600 flex justify-between uppercase font-bold">
+            <div className="bg-[#D4D0C8] dark:bg-dark-surface border-t border-gray-400 dark:border-dark-border-light px-2 py-0.5 text-[9px] text-gray-600 dark:text-dark-text-muted flex justify-between uppercase font-bold">
               <span>{isThinking ? 'Processing...' : 'Ready'}</span>
               <span className="text-purple-700">Phi-3 + Nomic</span>
             </div>

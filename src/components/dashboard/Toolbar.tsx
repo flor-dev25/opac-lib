@@ -40,7 +40,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete
   };
 
   return (
-    <div className="flex items-center gap-1 p-1 bg-classic-grey border-b border-white shadow-[0_1px_0_#808080] overflow-x-auto">
+    <div className="flex items-center gap-1 p-1 bg-classic-grey dark:bg-dark-surface border-b border-white dark:border-dark-highlight shadow-[0_1px_0_#808080] dark:shadow-[0_1px_0_#1A1A1A] overflow-x-auto">
       {isAdvanced && (
         <>
           <ToolbarItem 
@@ -93,7 +93,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete
             label="Reserve" 
             onClick={onReservation} 
           />
-          <div className="w-[1px] h-16 bg-gray-400 mx-1 shadow-[1px_0_0_white]" />
+          <div className="w-[1px] h-16 bg-gray-400 dark:bg-dark-border-light mx-1 shadow-[1px_0_0_white] dark:shadow-[1px_0_0_#404040]" />
         </>
       )}
 
@@ -120,7 +120,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete
         onClick={onExport} 
       />
       
-      <div className="w-[1px] h-16 bg-gray-400 mx-1 shadow-[1px_0_0_white]" />
+      <div className="w-[1px] h-16 bg-gray-400 dark:bg-dark-border-light mx-1 shadow-[1px_0_0_white] dark:shadow-[1px_0_0_#404040]" />
       
       <ToolbarItem 
         icon={BookOpen} 
@@ -158,10 +158,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete
       
       {/* Branding Logo Placeholder */}
       <div className="pr-4 text-right">
-        <h1 className="text-xl font-bold tracking-tighter text-classic-blue italic">
+        <h1 className="text-xl font-bold tracking-tighter text-classic-blue dark:text-dark-accent italic">
           infoLib.
         </h1>
-        <p className="text-[9px] text-gray-600 font-bold uppercase">
+        <p className="text-[9px] text-gray-600 dark:text-dark-text-muted font-bold uppercase">
           Library Information System
         </p>
       </div>

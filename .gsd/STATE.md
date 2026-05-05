@@ -2,9 +2,9 @@
 
 **Active Milestone:** M008 — Legacy Data Migration (PAUSED)
 **Active Milestone:** M009 — Branding & Personalization
-**Active Slice:** S01 — Logo Customization
-**Active Task:** T02 — Implement Enhanced Logo Editor (Preview, Crop, Rotate, Flip)
-**Phase:** Execution
+**Active Slice:** S02 — Theme Engine
+**Active Task:** T03 — Implement Dark Mode & Theme Scalability
+**Phase:** Review
 
 ## Recent Decisions
 - D001: Use React + Tailwind for UI implementation (Parity-first).
@@ -68,9 +68,12 @@
 - D060: Reverted GJC branding (Green/Gold) to classic Windows 95/98 Blue/White theme.
 - D061: Unified all blue accents and gradients to match the "sky blue" (`#A6CAF0` to `#7FA8E0`) found in the dashboard TitleBar for design consistency.
 
+- D062: Implemented comprehensive Win95/98 Dark Mode using Tailwind `.dark` selector strategy.
+- D063: Created `THEME-ENGINE-GUIDE.md` per management request to ensure future theme scalability.
+- D064: Refactored `index.css` to centralize theme tokens, avoiding inline class bloat.
+
 ## Blockers
-- ~~B001: `pgvector` extension binary not found on PostgreSQL host.~~ **RESOLVED** — pgvector v0.8.2 installed and verified.
 - **B002**: Awaiting final raw data export from GJC Library legacy terminal.
 
 ## Next Action
-Analyze `migration_log.txt` and raw export files to map legacy fields to PostgreSQL schema.
+Review `THEME-ENGINE-GUIDE.md` with stakeholders. Await legacy data for migration.

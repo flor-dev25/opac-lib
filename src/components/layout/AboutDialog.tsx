@@ -22,7 +22,7 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center backdrop-blur-sm transition-all duration-300">
-      <div className="bg-[#D4D0C8] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 w-[420px] shadow-2xl animate-fade-in">
+      <div className="bg-[#D4D0C8] dark:bg-dark-surface border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-2 border-r-2 border-gray-800 dark:border-dark-shadow w-[420px] shadow-2xl animate-fade-in">
         {/* Title Bar */}
         <div className="title-bar-gjc">
           <div className="flex items-center gap-2">
@@ -39,7 +39,7 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ onClose }) => {
 
         <div className="p-6 text-center space-y-4">
           <div className="flex justify-center mb-2">
-            <div className="w-24 h-24 bg-[#A6CAF0] rounded-full flex items-center justify-center shadow-lg border-4 border-white/50 overflow-hidden">
+            <div className="w-24 h-24 bg-[#A6CAF0] dark:bg-dark-title rounded-full flex items-center justify-center shadow-lg border-4 border-white/50 dark:border-dark-highlight/50 overflow-hidden">
               {logoPath ? (
                 <img 
                   src={convertFileSrc(logoPath)} 
@@ -53,19 +53,19 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ onClose }) => {
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-[#000080] italic">infoLib Library System</h2>
-            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Premium School Edition</p>
+            <h2 className="text-2xl font-bold tracking-tight text-[#000080] dark:text-dark-accent italic">infoLib Library System</h2>
+            <p className="text-[10px] text-gray-500 dark:text-dark-text-muted font-bold uppercase tracking-widest">Premium School Edition</p>
           </div>
 
-          <div className="bg-white/50 p-4 border-2 border-gray-600 border-t-gray-800 border-l-gray-800 shadow-inner space-y-2">
-            <p className="text-sm font-bold text-gray-800">Version 1.0.0 (Production)</p>
-            <p className="text-xs text-gray-600 leading-relaxed">
+          <div className="bg-white/50 dark:bg-dark-input/50 p-4 border-2 border-gray-600 dark:border-dark-border-dark border-t-gray-800 dark:border-t-dark-shadow border-l-gray-800 dark:border-l-dark-shadow shadow-inner space-y-2">
+            <p className="text-sm font-bold text-gray-800 dark:text-dark-text">Version 1.0.0 (Production)</p>
+            <p className="text-xs text-gray-600 dark:text-dark-text-muted leading-relaxed">
               Developed for <strong>General de Jesus College</strong> Library.<br />
               All rights reserved &copy; 2026.
             </p>
           </div>
 
-          <div className="text-[10px] text-gray-500 font-mono">
+          <div className="text-[10px] text-gray-500 dark:text-dark-text-muted font-mono">
             Tauri v2.0-rc | React 18 | PostgreSQL 18
           </div>
 
@@ -77,7 +77,7 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ onClose }) => {
           </button>
         </div>
 
-        <div className="bg-gray-300 h-1 w-full" />
+        <div className="bg-gray-300 dark:bg-dark-border-light h-1 w-full" />
       </div>
     </div>
   );

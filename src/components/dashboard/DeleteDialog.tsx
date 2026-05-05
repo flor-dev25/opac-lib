@@ -10,7 +10,7 @@ interface DeleteDialogProps {
 export const DeleteDialog: React.FC<DeleteDialogProps> = ({ controlNo, onConfirm, onCancel }) => {
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[110] p-4">
-      <BeveledBox variant="raised" className="w-[350px] bg-classic-grey shadow-2xl flex flex-col overflow-hidden">
+      <BeveledBox variant="raised" className="w-[350px] bg-classic-grey dark:bg-dark-surface shadow-2xl flex flex-col overflow-hidden">
         {/* Title Bar */}
         <div className="bg-classic-blue-gradient px-2 py-1 flex items-center justify-between text-white font-bold text-sm">
           <span>Delete</span>
@@ -19,8 +19,8 @@ export const DeleteDialog: React.FC<DeleteDialogProps> = ({ controlNo, onConfirm
 
         <div className="p-6 space-y-6 flex flex-col items-center">
           <div className="text-center space-y-2">
-            <p className="text-sm font-medium">Delete the Record?</p>
-            <p className="text-sm font-bold text-blue-800">'{controlNo}'</p>
+            <p className="text-sm font-medium dark:text-dark-text">Delete the Record?</p>
+            <p className="text-sm font-bold text-blue-800 dark:text-dark-accent">'{controlNo}'</p>
           </div>
 
           <div className="flex gap-4">

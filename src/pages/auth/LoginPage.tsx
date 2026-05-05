@@ -43,7 +43,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#404040]">
+    <div className="min-h-screen flex items-center justify-center bg-[#404040] dark:bg-[#1A1A1A]">
       <BeveledBox className="w-[520px] h-[380px] flex flex-col overflow-hidden animate-fade-in" padding="p-0">
         {/* Title Bar */}
         <div className="title-bar-gjc">
@@ -58,7 +58,7 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* Top Branding Section */}
-        <div className="h-[180px] flex-shrink-0 relative overflow-hidden bg-gradient-to-b from-[#A6CAF0] to-[#7FA8E0]">
+        <div className="h-[180px] flex-shrink-0 relative overflow-hidden bg-gradient-to-b from-[#A6CAF0] to-[#7FA8E0] dark:from-[#1E3A6E] dark:to-[#2A4F8A]">
           {/* Subtle Grid Pattern */}
           <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#FFFFFF 1px, transparent 0)', backgroundSize: '20px 20px' }}></div>
           
@@ -84,11 +84,11 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* Bottom Login Form Section */}
-        <div className="flex-grow bg-classic-grey flex items-center justify-center">
+        <div className="flex-grow bg-classic-grey dark:bg-dark-surface flex items-center justify-center">
           <form onSubmit={handleLogin}>
-            <BeveledBox variant="sunken" className="bg-[#E0E0E0] w-[380px] p-8 flex flex-col gap-4">
+            <BeveledBox variant="sunken" className="bg-[#E0E0E0] dark:bg-dark-surface-alt w-[380px] p-8 flex flex-col gap-4">
               <div className="flex items-center gap-4">
-                <label className="w-24 text-sm font-sans text-black">User Name</label>
+                <label className="w-24 text-sm font-sans text-black dark:text-dark-text">User Name</label>
                 <input 
                   type="text" 
                   className="input-classic flex-grow" 
@@ -100,7 +100,7 @@ export const LoginPage: React.FC = () => {
               </div>
               
               <div className="flex items-center gap-4">
-                <label className="w-24 text-sm font-sans text-black">Password</label>
+                <label className="w-24 text-sm font-sans text-black dark:text-dark-text">Password</label>
                 <input 
                   type="password" 
                   className="input-classic flex-grow" 
