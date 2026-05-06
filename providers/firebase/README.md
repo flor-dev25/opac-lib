@@ -1,11 +1,11 @@
-# Firebase Connection Health
+# Firebase Synchronization
 
-Documentation-only placeholder for Firebase connectivity verification.
+Documentation for Firebase connectivity and synchronization verification.
 
 ## Setup
 
-Firebase API and configuration details are not yet available. Once provided, update the `.env` file with the necessary credentials.
+Firebase API and configuration details should be provided in the root `.env` or specific environment variables. The application uses the `syncStore` to manage credentials and connection state.
 
 ## Verify Health
 
-(Command will be added once implementation is ready)
+Auto-sync is implemented in the main application. Manual sync can be triggered from the Toolbar. Log monitoring is available via the Sync ComboButton in the application header.

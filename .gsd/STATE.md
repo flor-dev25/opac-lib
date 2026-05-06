@@ -67,6 +67,10 @@
 - D059: Implemented timestamp-based logo filenames (`logo_<ts>.webp`) to prevent Windows file locking and browser caching issues.
 - D060: Reverted GJC branding (Green/Gold) to classic Windows 95/98 Blue/White theme.
 - D061: Unified all blue accents and gradients to match the "sky blue" (`#A6CAF0` to `#7FA8E0`) found in the dashboard TitleBar for design consistency.
+- D062: Implemented Firebase Auto-Sync architecture with background interval processing.
+- D063: Added Sync/Logs ComboButton to the main Toolbar for manual override and status monitoring.
+- D064: Deprecated Supabase provider in favor of Firebase strictly, while maintaining Supabase healthcheck for legacy infrastructure monitoring.
+- D065: Finalized Windows 95/98 Dark Mode remediations across all components.
 
 - D062: Implemented comprehensive Win95/98 Dark Mode using Tailwind `.dark` selector strategy.
 - D063: Created `THEME-ENGINE-GUIDE.md` per management request to ensure future theme scalability.
@@ -76,4 +80,4 @@
 - **B002**: Awaiting final raw data export from GJC Library legacy terminal.
 
 ## Next Action
-Review `THEME-ENGINE-GUIDE.md` with stakeholders. Await legacy data for migration.
+Project wrap-up. Manual verification of Firebase auto-sync logic. Final delivery preparation.

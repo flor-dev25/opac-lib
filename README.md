@@ -82,8 +82,8 @@ Responsible for maintaining the "Source of Truth". This role ensures that all sy
 
 The system is architected for modular provider support:
 
-*   **Primary Sync**: **Firebase** (Real-time synchronization for multi-device support).
-*   **Legacy/Local**: **Supabase** (PostgreSQL connection for complex querying).
+*   **Primary Sync**: **Firebase** (Real-time synchronization for multi-device support). [Setup Guide](docs/FIREBASE-SETUP-2026.md)
+*   **Health Monitoring**: **Supabase** (Healthchecks for legacy infrastructure).
 
 ---
 

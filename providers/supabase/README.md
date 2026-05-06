@@ -1,6 +1,6 @@
-# Supabase Connection Health
+# Supabase Connection Health (Legacy Monitoring)
 
-Minimal setup for verifying the Supabase database connection through the shared pooler.
+Minimal setup for verifying the legacy Supabase database connection through the shared pooler. Note: Supabase is no longer the primary data provider; Firebase is used for active synchronization.
 
 ## Why Shared Pooler
 

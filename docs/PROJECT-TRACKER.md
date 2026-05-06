@@ -81,6 +81,8 @@ Complete parity implementation of Library Management System based on wireframe s
 - [x] Agent Role Definitions (LPM & SD)
 - [x] Windows 11 & Ollama prerequisites documentation
 - [x] Firebase sync target specification
+- [x] Firebase Auto-Sync logic implementation
+- [x] Toolbar Sync/Logs ComboButton UI
 - [x] Multi-agent handoff readiness
 
 ### Phase 8: AI Intelligence (M008)

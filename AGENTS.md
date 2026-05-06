@@ -18,7 +18,7 @@ This document defines the specialized agent roles for the **InfoLib** project. E
 - Use **Caveman Lite** for internal planning.
 - Prioritize **Windows 11** performance (use `powershell` for terminal tasks).
 - **Tooling Preference**: Favor **Bun** for scripts/frontend tasks; **Rust/Cargo** for backend.
-- Sync all progress to **Firebase** immediately upon milestone completion.
+- **Firebase Sync**: Automatic synchronization is active. Progress is synced to Firebase immediately upon state changes and periodically every 5 minutes.
 
 ---
 
@@ -49,4 +49,4 @@ This document defines the specialized agent roles for the **InfoLib** project. E
 ---
 
 > [!IMPORTANT]
-> All agents must adhere to the **Windows 11** environment constraints and utilize the local **Ollama** provider. Synchronization with **Firebase** is mandatory for all state-changing operations.
+> All agents must adhere to the **Windows 11** environment constraints and utilize the local **Ollama** provider. Synchronization with **Firebase** is mandatory and is handled automatically by the `syncStore`. Supabase is retained only for infrastructure health monitoring.

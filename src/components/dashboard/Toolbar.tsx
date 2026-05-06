@@ -1,6 +1,7 @@
 import React from 'react';
 import { FilePlus, Trash2, Download, BookOpen, Info, LogOut, Users, LayoutDashboard, Edit, ArrowUpRight, ArrowDownLeft, Activity, Wallet, ScanBarcode, TrendingUp, BookPlus, BookmarkPlus, Settings, ToggleLeft } from 'lucide-react';
 import { ToolbarItem } from './ToolbarItem';
+import { SyncComboButton } from './SyncComboButton';
 import { useAuthStore } from '../../stores/authStore';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -19,9 +20,10 @@ interface ToolbarProps {
   onAcquisitions?: () => void;
   onReservation?: () => void;
   onSettings?: () => void;
+  onShowLogs?: () => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete, onExport, onEdit, onCheckout, onReturn, onDashboard, onPayment, onAudit, onFinancialReports, onAcquisitions, onReservation, onSettings }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete, onExport, onEdit, onCheckout, onReturn, onDashboard, onPayment, onAudit, onFinancialReports, onAcquisitions, onReservation, onSettings, onShowLogs }) => {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
   const [isAdvanced, setIsAdvanced] = React.useState(false);
@@ -137,6 +139,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete
         label="Exit" 
         onClick={handleLogout} 
       />
+      
+      <div className="w-[1px] h-16 bg-gray-400 dark:bg-dark-border-light mx-1 shadow-[1px_0_0_white] dark:shadow-[1px_0_0_#404040]" />
+      
+      <SyncComboButton onShowLogs={onShowLogs || (() => {})} />
       
       {/* Spacer */}
       <div className="flex-1 min-w-[20px]" />

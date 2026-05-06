@@ -18,9 +18,11 @@ import { AIChatBadge } from '../ai/AIChatBadge';
 import { SettingsPage } from '../../pages/settings/SettingsPage';
 import { AboutDialog } from './AboutDialog';
 import { ImageEditorDialog } from '../settings/ImageEditorDialog';
+import { SyncLogsDialog } from '../dashboard/SyncLogsDialog';
 import { useAuthStore } from '../../stores/authStore';
 import { useCatalogStore } from '../../stores/catalogStore';
 import { usePatronStore } from '../../stores/patronStore';
+import { useSyncStore } from '../../stores/syncStore';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { invoke } from '@tauri-apps/api/core';
 
@@ -33,6 +35,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const { records, selectedId, deleteRecord, isEditDialogOpen, editingControlNo, setEditDialogOpen, setEditingControlNo } = useCatalogStore();
   const { patrons, selectedIdno, deletePatron } = usePatronStore();
+  const { autoSyncEnabled, syncNow } = useSyncStore();
   const location = useLocation();
   const isPatrons = location.pathname.startsWith('/patrons');
 
@@ -49,6 +52,22 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showAudit, setShowAudit] = React.useState(false);
   const [showReservation, setShowReservation] = React.useState(false);
   const [showSettings, setShowSettings] = React.useState(false);
+  const [showSyncLogs, setShowSyncLogs] = React.useState(false);
+
+  // Auto-Sync Effect
+  React.useEffect(() => {
+    if (!autoSyncEnabled) return;
+    
+    // Initial sync
+    syncNow();
+    
+    // Periodic sync every 5 minutes
+    const interval = setInterval(() => {
+      syncNow();
+    }, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, [autoSyncEnabled, syncNow]);
 
   const selectedRecord = records.find(r => r.id === selectedId);
   const selectedPatron = patrons.find(p => p.idno === selectedIdno);
@@ -141,6 +160,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               onAcquisitions={() => setShowAcquisitions(true)}
               onReservation={() => setShowReservation(true)}
               onSettings={() => setShowSettings(true)}
+              onShowLogs={() => setShowSyncLogs(true)}
             />
           </header>
 
@@ -187,6 +207,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <AIChatBadge />
       {showSettings && <SettingsPage onClose={() => setShowSettings(false)} />}
       {showAbout && <AboutDialog onClose={() => setShowAbout(false)} />}
+      {showSyncLogs && <SyncLogsDialog onClose={() => setShowSyncLogs(false)} />}
     </div>
   );
 };
