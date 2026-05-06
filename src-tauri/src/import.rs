@@ -19,6 +19,7 @@ use crate::settings;
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ImportSummary {
     pub backup_path: String,
+    pub before_counts: HashMap<String, usize>,
     pub inserted: HashMap<String, usize>,
     pub skipped: HashMap<String, usize>,
     pub invalid: Vec<InvalidRow>,
@@ -437,6 +438,18 @@ pub async fn import_mdb_database(
     // Load existing keys for dedup
     let pool = state.get_pool().await?;
     let keys = load_existing_keys(&pool).await?;
+    
+    let mut before_counts: HashMap<String, usize> = HashMap::new();
+    before_counts.insert("tblAuthor".to_string(), keys.tbl_author.len());
+    before_counts.insert("tblSubject".to_string(), keys.tbl_subject.len());
+    before_counts.insert("tblCat".to_string(), keys.tbl_cat.len());
+    before_counts.insert("tblHoldings".to_string(), keys.tbl_holdings.len());
+    before_counts.insert("tblUser".to_string(), keys.tbl_user.len());
+    before_counts.insert("tblGroup".to_string(), keys.tbl_group.len());
+    before_counts.insert("tblLocation".to_string(), keys.tbl_location.len());
+    before_counts.insert("tblMaterial".to_string(), keys.tbl_material.len());
+    before_counts.insert("tblPassword".to_string(), keys.tbl_password.len());
+    before_counts.insert("tblReserve".to_string(), keys.tbl_reserve.len());
 
     // T04+T05 — validate + import (or just validate in dry_run)
     let (inserted, skipped, invalids) = if dry_run {
@@ -466,6 +479,7 @@ pub async fn import_mdb_database(
 
     Ok(ImportSummary {
         backup_path,
+        before_counts,
         inserted,
         skipped,
         invalid: invalids,

@@ -15,7 +15,7 @@ Provide a one-click management tool to import data from the university's legacy 
 3. System auto-backs up the current PostgreSQL database before any import.
 4. System reads the `.mdb` file natively via Rust ODBC (`odbc-api` crate), validates data, and inserts into PostgreSQL in a single transaction.
 5. Incoming data is validated before insertion (duplicate detection, encoding sanity, FK integrity).
-6. Import summary dialog shows: records added, duplicates skipped, errors encountered.
+6. Import summary dialog shows: Before/After comparison, records added, duplicates skipped, errors encountered.
 7. Zero data loss on the existing PostgreSQL data.
 
 ## Slices
@@ -37,7 +37,7 @@ Backend (Rust - src-tauri/src/import.rs)
   ├─ 2. read_mdb_via_odbc()    → odbc-api crate → Vec<TableData>
   ├─ 3. validate_incoming()    → dedup, encoding, FK checks
   ├─ 4. import_transaction()   → sqlx transaction → PostgreSQL
-  └─ 5. return ImportSummary   → { inserted, skipped, errors }
+  └─ 5. return ImportSummary   → { before_counts, inserted, skipped, errors }
 ```
 
 ## Risk Assessment
