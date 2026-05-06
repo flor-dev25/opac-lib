@@ -65,7 +65,7 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#404040] dark:bg-[#1A1A1A]">
-      <BeveledBox className="w-[520px] h-[380px] flex flex-col overflow-hidden animate-fade-in" padding="p-0">
+      <BeveledBox className="w-[520px] min-h-[380px] h-auto flex flex-col overflow-hidden animate-fade-in" padding="p-0">
         {/* Title Bar */}
         <div className="title-bar-gjc">
           <div className="flex items-center gap-2">
