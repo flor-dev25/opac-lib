@@ -12,21 +12,21 @@ export const TitleBar: React.FC<TitleBarProps> = ({
 }) => {
   return (
     <div className="h-8 bg-gradient-to-b from-[#A6CAF0] to-[#7FA8E0] dark:from-[#1E3A6E] dark:to-[#2A4F8A] flex items-center justify-between px-2 select-none">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <UserProfile />
-        <span className="text-white dark:text-dark-text text-sm font-medium drop-shadow-sm ml-1">
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="w-5 h-5 bg-[#D4D0C8] dark:bg-dark-panel border border-[#808080] dark:border-dark-border-dark shadow-bevel-raised flex items-center justify-center hover:bg-[#E0E0E0] dark:hover:bg-dark-surface-alt active:shadow-bevel-sunken"
+            aria-label="Close"
+          >
+            <span className="text-black dark:text-dark-text text-[10px] font-bold">✕</span>
+          </button>
+        )}
+        <span className="text-white dark:text-dark-text text-sm font-medium drop-shadow-sm ml-2">
           {title}
         </span>
       </div>
-      {onClose && (
-        <button
-          onClick={onClose}
-          className="w-6 h-6 bg-[#D4D0C8] dark:bg-dark-panel border border-[#808080] dark:border-dark-border-dark shadow-bevel-raised flex items-center justify-center hover:bg-[#E0E0E0] dark:hover:bg-dark-surface-alt active:shadow-bevel-sunken"
-          aria-label="Close"
-        >
-          <span className="text-[#000080] dark:text-dark-accent text-xs font-bold">×</span>
-        </button>
-      )}
     </div>
   );
 };
