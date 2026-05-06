@@ -83,6 +83,8 @@ Complete parity implementation of Library Management System based on wireframe s
 - [x] Firebase sync target specification
 - [x] Firebase Auto-Sync logic implementation
 - [x] Toolbar Sync/Logs ComboButton UI
+- [x] Social Login integration (Google) & Token Management
+- [x] Offline connectivity UI degradation for login
 - [x] Multi-agent handoff readiness
 
 ### Phase 8: AI Intelligence (M008)

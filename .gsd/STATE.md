@@ -79,5 +79,13 @@
 ## Blockers
 - **B002**: Awaiting final raw data export from GJC Library legacy terminal.
 
+- D066: Upgraded authentication to support Social Login (Google), controlled via `VITE_ENABLE_SOCIAL_LOGIN` feature flag.
+- D067: Implemented offline detection to dynamically disable social login UI components with fallback messaging.
+- D068: Architected access token lifecycle management with auto-refresh mechanism.
+- D069: Updated database schema `tblPassword` to support `auth_provider` and `social_id`.
+
+## Caveman Mode
+**Status:** Active. Fast, terse agentic execution protocol enabled.
+
 ## Next Action
-Project wrap-up. Manual verification of Firebase auto-sync logic. Final delivery preparation.
+Handoff to Lead Project Manager (LPM) for next feature planning or final review.

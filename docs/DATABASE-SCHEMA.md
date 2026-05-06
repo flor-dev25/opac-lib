@@ -306,21 +306,25 @@ pub struct Material {
 ```
 
 ### 12. tblPassword
-**Purpose:** User authentication credentials.
+**Purpose:** User authentication credentials and identities.
 
 | Column | Type | Description |
 |--------|------|-------------|
 | username | TEXT | Username |
-| passwrd | TEXT | Password (should be hashed) |
+| passwrd | TEXT | Password (hashed) - nullable for social users |
 | usergroup | TEXT | User group for permissions |
+| auth_provider | TEXT | Authentication provider (e.g., 'local', 'google') |
+| social_id | TEXT | Unique ID from social provider (nullable) |
 
 **Rust Model:**
 ```rust
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Password {
     pub username: String,
-    pub passwrd: String,
+    pub passwrd: Option<String>,
     pub usergroup: String,
+    pub auth_provider: String,
+    pub social_id: Option<String>,
 }
 ```
 

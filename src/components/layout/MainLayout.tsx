@@ -17,7 +17,6 @@ import { EditCatalogDialog } from '../catalog/EditCatalogDialog';
 import { AIChatBadge } from '../ai/AIChatBadge';
 import { SettingsPage } from '../../pages/settings/SettingsPage';
 import { AboutDialog } from './AboutDialog';
-import { ImageEditorDialog } from '../settings/ImageEditorDialog';
 import { SyncLogsDialog } from '../dashboard/SyncLogsDialog';
 import { useAuthStore } from '../../stores/authStore';
 import { useCatalogStore } from '../../stores/catalogStore';
