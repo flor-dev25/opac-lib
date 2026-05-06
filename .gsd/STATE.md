@@ -90,9 +90,11 @@
 - D074: Implemented `DEV_DATABASE_URL` env var bypass in `settings.rs` to skip NSIS-installed `db_config.json` during development. Activated `dotenvy` in `main.rs` (was a dead dependency).
 - D075: Planned M010 — Legacy Access Database Import. Pure Rust implementation via `odbc-api` crate. No Python runtime dependency.
 - D076: S01 (backend) defines 6-task pipeline: auto-backup → ODBC check → MDB read → validate → transact → wire. S02 (frontend) defines 4-step import dialog (Advanced Mode only).
+- D077: Implemented M010-S02 (Frontend). Added `ImportMdbDialog` and `ImportSummaryView`. Added `DatabaseBackup` icon to `Toolbar` (visible in Advanced Mode). Wired to `MainLayout`.
 
 ## Caveman Mode
 **Status:** Active. Fast, terse agentic execution protocol enabled.
 
 ## Next Action
-Proceed to M010-S01-T01: Implement auto-backup command in `import.rs`. Add `odbc-api` to `Cargo.toml`.
+## Next Action
+M010 completed. Handoff to Lead Project Manager (LPM) for next feature planning or final review.

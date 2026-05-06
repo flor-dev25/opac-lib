@@ -18,6 +18,7 @@ import { AIChatBadge } from '../ai/AIChatBadge';
 import { SettingsPage } from '../../pages/settings/SettingsPage';
 import { AboutDialog } from './AboutDialog';
 import { SyncLogsDialog } from '../dashboard/SyncLogsDialog';
+import { ImportMdbDialog } from '../management/ImportMdbDialog';
 import { useAuthStore } from '../../stores/authStore';
 import { useCatalogStore } from '../../stores/catalogStore';
 import { usePatronStore } from '../../stores/patronStore';
@@ -52,6 +53,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showReservation, setShowReservation] = React.useState(false);
   const [showSettings, setShowSettings] = React.useState(false);
   const [showSyncLogs, setShowSyncLogs] = React.useState(false);
+  const [showImportMdb, setShowImportMdb] = React.useState(false);
 
   // Auto-Sync Effect
   React.useEffect(() => {
@@ -160,6 +162,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               onReservation={() => setShowReservation(true)}
               onSettings={() => setShowSettings(true)}
               onShowLogs={() => setShowSyncLogs(true)}
+              onImportMdb={() => setShowImportMdb(true)}
             />
           </header>
 
@@ -207,6 +210,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {showSettings && <SettingsPage onClose={() => setShowSettings(false)} />}
       {showAbout && <AboutDialog onClose={() => setShowAbout(false)} />}
       {showSyncLogs && <SyncLogsDialog onClose={() => setShowSyncLogs(false)} />}
+      {showImportMdb && <ImportMdbDialog onClose={() => setShowImportMdb(false)} />}
     </div>
   );
 };

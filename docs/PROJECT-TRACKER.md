@@ -113,7 +113,7 @@ Complete parity implementation of Library Management System based on wireframe s
 - [x] M010-S01-T04: Validation pipeline (dedup, encoding, FK checks)
 - [x] M010-S01-T05: Import transaction with ON CONFLICT DO NOTHING
 - [x] M010-S01-T06: Wire Tauri command into lib.rs
-- [ ] M010-S02-T01: "Import" toolbar button (Advanced Mode only)
-- [ ] M010-S02-T02: 4-step Import dialog (File → Validate → Import → Summary)
-- [ ] M010-S02-T03: Error handling (ODBC missing, backup fail, transaction fail)
-- [ ] M010-S02-T04: Dashboard refresh after successful import
+- [x] M010-S02-T01: "Import" toolbar button (Advanced Mode only)
+- [x] M010-S02-T02: 4-step Import dialog (File → Validate → Import → Summary)
+- [x] M010-S02-T03: Error handling (ODBC missing, backup fail, transaction fail)
+- [x] M010-S02-T04: Dashboard refresh after successful import
