@@ -2,6 +2,7 @@ mod models;
 mod db;
 mod ai;
 mod settings;
+mod import;
 use tauri::{
   menu::{Menu, MenuItem},
   tray::TrayIconBuilder,
@@ -645,7 +646,8 @@ pub fn run() {
       settings::process_logo,
       settings::get_logo_path,
       settings::export_settings,
-      settings::import_settings
+      settings::import_settings,
+      import::import_mdb_database
     ])
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_shell::init())
