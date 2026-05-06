@@ -91,6 +91,7 @@
 - D075: Planned M010 — Legacy Access Database Import. Pure Rust implementation via `odbc-api` crate. No Python runtime dependency.
 - D076: S01 (backend) defines 6-task pipeline: auto-backup → ODBC check → MDB read → validate → transact → wire. S02 (frontend) defines 4-step import dialog (Advanced Mode only).
 - D077: Implemented M010-S02 (Frontend). Added `ImportMdbDialog` and `ImportSummaryView`. Added `DatabaseBackup` icon to `Toolbar` (visible in Advanced Mode). Wired to `MainLayout`.
+- D078: Fixed dark mode visibility in `ImportMdbDialog` for selected file path by using standard `input-classic` class. Verified M010 requirements in `REQUIREMENTS.md`.
 
 ## Caveman Mode
 **Status:** Active. Fast, terse agentic execution protocol enabled.

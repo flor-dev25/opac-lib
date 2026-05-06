@@ -108,7 +108,7 @@ export const ImportMdbDialog: React.FC<ImportMdbDialogProps> = ({ onClose }) => 
                   value={mdbPath || ''} 
                   readOnly 
                   placeholder="No file selected..."
-                  className="flex-1 px-2 py-1 text-sm border-t border-l border-gray-500 border-b border-r border-white bg-white dark:bg-dark-bg dark:text-white dark:border-dark-border"
+                  className="input-classic flex-1"
                 />
                 <button 
                   onClick={handleBrowse}
