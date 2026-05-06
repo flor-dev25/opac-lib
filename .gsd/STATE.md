@@ -84,6 +84,8 @@
 - D068: Architected access token lifecycle management with auto-refresh mechanism.
 - D069: Updated database schema `tblPassword` to support `auth_provider` and `social_id`.
 - D070: Verified codebase integrity via `tsc --noEmit` and addressed all lint/type issues in auth and layout components.
+- D071: Implemented Win95-styled `UserProfile` component in the main window TitleBar.
+- D072: Integrated role-based metadata (Administrator, Librarian, etc.) into the authentication state and UI.
 
 ## Caveman Mode
 **Status:** Active. Fast, terse agentic execution protocol enabled.

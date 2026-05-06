@@ -5,6 +5,7 @@ interface User {
   username: string;
   email?: string;
   avatarUrl?: string;
+  role?: 'Administrator' | 'Librarian' | 'Staff' | 'Patron';
 }
 
 interface AuthTokens {
@@ -57,7 +58,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
         const mockExpiresAt = Date.now() + 60 * 60 * 1000; // 1 hour lifespan
         const tokens = { accessToken: 'mock_jwt_token', refreshToken: 'mock_refresh', expiresAt: mockExpiresAt };
         
-        set({ isAuthenticated: true, user: { username }, tokens, isLoading: false });
+        set({ isAuthenticated: true, user: { username, role: 'Administrator' }, tokens, isLoading: false });
         scheduleTokenRefresh(mockExpiresAt);
 
         try {
@@ -83,7 +84,12 @@ export const useAuthStore = create<AuthState>((set, get) => {
       
       set({ 
         isAuthenticated: true, 
-        user: { username: 'Google User', email: 'user@gmail.com' }, 
+        user: { 
+          username: 'Google User', 
+          email: 'user@gmail.com', 
+          role: 'Librarian',
+          avatarUrl: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Felix'
+        }, 
         tokens,
         isLoading: false 
       });
