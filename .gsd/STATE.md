@@ -87,9 +87,10 @@
 - D071: Implemented Win95-styled `UserProfile` component in the main window TitleBar.
 - D072: Integrated role-based metadata (Administrator, Librarian, etc.) into the authentication state and UI.
 - D073: Repositioned both `UserProfile` and `Close` buttons to the top-right group per user request.
+- D074: Implemented `DEV_DATABASE_URL` env var bypass in `settings.rs` to skip NSIS-installed `db_config.json` during development. Activated `dotenvy` in `main.rs` (was a dead dependency).
 
 ## Caveman Mode
 **Status:** Active. Fast, terse agentic execution protocol enabled.
 
 ## Next Action
-Handoff to Lead Project Manager (LPM) for next feature planning or final review.
+Restart `bunx tauri dev` to verify DEV_DATABASE_URL bypass loads 6,619 catalog records.

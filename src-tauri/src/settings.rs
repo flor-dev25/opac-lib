@@ -36,6 +36,25 @@ pub fn get_settings_path(app: &AppHandle) -> PathBuf {
 }
 
 pub fn load_config(app: &AppHandle) -> AppConfig {
+    // DEV MODE BYPASS: If DEV_DATABASE_URL is set, use it directly
+    // This allows `bunx tauri dev` to work without NSIS installer setup
+    if let Ok(dev_url) = std::env::var("DEV_DATABASE_URL") {
+        println!("[Settings] DEV MODE: Using DEV_DATABASE_URL bypass");
+        let mut config = AppConfig::default();
+        config.database_url = dev_url;
+
+        // Still load logo from config file if it exists
+        let path = get_settings_path(app);
+        if path.exists() {
+            if let Ok(data) = fs::read_to_string(&path) {
+                if let Ok(file_config) = serde_json::from_str::<AppConfig>(&data) {
+                    config.app_logo = file_config.app_logo;
+                }
+            }
+        }
+        return config;
+    }
+
     let path = get_settings_path(app);
     if path.exists() {
         let data = fs::read_to_string(&path).unwrap_or_default();
