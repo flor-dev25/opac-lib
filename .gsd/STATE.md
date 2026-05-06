@@ -86,6 +86,7 @@
 - D070: Verified codebase integrity via `tsc --noEmit` and addressed all lint/type issues in auth and layout components.
 - D071: Implemented Win95-styled `UserProfile` component in the main window TitleBar.
 - D072: Integrated role-based metadata (Administrator, Librarian, etc.) into the authentication state and UI.
+- D073: Repositioned both `UserProfile` and `Close` buttons to the top-right group per user request.
 
 ## Caveman Mode
 **Status:** Active. Fast, terse agentic execution protocol enabled.
