@@ -10,6 +10,7 @@
 - [ ] Export functionality to Text, Printer, and Delimited formats.
 - [ ] Premium "Colorized" Installer (GJC Branding: Green #00401A, Gold #C5A059).
 - [ ] NSIS-level PostgreSQL/Ollama bundling with **system detection** (skip if already installed).
+- [ ] **Legacy Access Database Import**: Management-only toolbar button to import `.mdb` files from the legacy VB6/Access system. Pure Rust via `odbc-api`. Includes auto-backup, deduplication, encoding sanitization, FK validation, and import summary report.
 - [ ] Custom NSIS credentials page for DB host/port/user/pass/dbname.
 - [ ] In-app Settings dialog (Database + AI Engine tabs) accessible from Toolbar.
 - [ ] Secure Settings Backup (Export/Import to secured drive).

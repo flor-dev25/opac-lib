@@ -88,9 +88,11 @@
 - D072: Integrated role-based metadata (Administrator, Librarian, etc.) into the authentication state and UI.
 - D073: Repositioned both `UserProfile` and `Close` buttons to the top-right group per user request.
 - D074: Implemented `DEV_DATABASE_URL` env var bypass in `settings.rs` to skip NSIS-installed `db_config.json` during development. Activated `dotenvy` in `main.rs` (was a dead dependency).
+- D075: Planned M010 — Legacy Access Database Import. Pure Rust implementation via `odbc-api` crate. No Python runtime dependency.
+- D076: S01 (backend) defines 6-task pipeline: auto-backup → ODBC check → MDB read → validate → transact → wire. S02 (frontend) defines 4-step import dialog (Advanced Mode only).
 
 ## Caveman Mode
 **Status:** Active. Fast, terse agentic execution protocol enabled.
 
 ## Next Action
-Restart `bunx tauri dev` to verify DEV_DATABASE_URL bypass loads 6,619 catalog records.
+Proceed to M010-S01-T01: Implement auto-backup command in `import.rs`. Add `odbc-api` to `Cargo.toml`.

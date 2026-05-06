@@ -105,3 +105,15 @@ Complete parity implementation of Library Management System based on wireframe s
 - 🟡 In Progress
 - ⬜ Pending
 - 🔴 Blocked
+
+### Phase 10: Legacy Access Database Import (M010)
+- [ ] M010-S01-T01: Auto-backup (pg_dump) before import
+- [ ] M010-S01-T02: ODBC driver pre-check with user-facing error
+- [ ] M010-S01-T03: Read MDB tables via `odbc-api` Rust crate
+- [ ] M010-S01-T04: Validation pipeline (dedup, encoding, FK checks)
+- [ ] M010-S01-T05: Import transaction with ON CONFLICT DO NOTHING
+- [ ] M010-S01-T06: Wire Tauri command into lib.rs
+- [ ] M010-S02-T01: "Import" toolbar button (Advanced Mode only)
+- [ ] M010-S02-T02: 4-step Import dialog (File → Validate → Import → Summary)
+- [ ] M010-S02-T03: Error handling (ODBC missing, backup fail, transaction fail)
+- [ ] M010-S02-T04: Dashboard refresh after successful import
