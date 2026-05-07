@@ -187,7 +187,7 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
           </div>
           <button
             onClick={onClose}
-            className="w-5 h-5 bg-[#c0c0c0] border-t border-l border-white border-b border-r border-gray-800 text-[10px] font-bold leading-none hover:bg-red-500 hover:text-white transition-colors"
+            className="w-5 h-5 bg-[#c0c0c0] dark:bg-dark-panel dark:text-dark-text border-t border-l border-white dark:border-dark-highlight border-b border-r border-gray-800 dark:border-dark-shadow text-[10px] font-bold leading-none hover:bg-red-500 hover:text-white transition-colors"
           >
             ✕
           </button>
@@ -249,7 +249,7 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                   </button>
                   <button
                     onClick={handleImport}
-                    className="px-4 py-1 text-xs bg-[#c0c0c0] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 hover:bg-[#d4d0c8] active:border-inset transition-colors"
+                    className="px-4 py-1 text-xs bg-[#c0c0c0] dark:bg-dark-panel dark:text-dark-text border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-2 border-r-2 border-gray-800 dark:border-dark-shadow hover:bg-[#d4d0c8] dark:hover:bg-dark-surface-alt active:border-inset transition-colors"
                   >
                     Import JSON
                   </button>

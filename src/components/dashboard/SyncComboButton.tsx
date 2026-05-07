@@ -18,7 +18,7 @@ export const SyncComboButton: React.FC<SyncComboButtonProps> = ({ onShowLogs }) 
             disabled={isSyncing}
             className={`
               flex flex-col items-center justify-center w-16 h-20 gap-1
-              btn-classic
+              btn-classic !px-1
               ${isSyncing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200 dark:hover:bg-dark-surface-alt'}
             `}
             title="Sync with Firebase"
@@ -33,10 +33,10 @@ export const SyncComboButton: React.FC<SyncComboButtonProps> = ({ onShowLogs }) 
           
           <button
             onClick={onShowLogs}
-            className="flex items-center justify-center w-6 h-20 btn-classic hover:bg-gray-200 dark:hover:bg-dark-surface-alt border-l-0"
+            className="flex items-center justify-center w-6 h-20 btn-classic hover:bg-gray-200 dark:hover:bg-dark-surface-alt border-l-0 !px-0"
             title="View Sync Logs Dialog"
           >
-            <ChevronDown size={16} className="text-black dark:text-dark-text opacity-70" />
+            <ChevronDown size={20} strokeWidth={2.5} className="text-black dark:text-white" />
           </button>
         </div>
       </div>

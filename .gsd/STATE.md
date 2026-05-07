@@ -188,9 +188,12 @@
 - D083: Mitigated PC crashing during dual sync by reducing `futures` concurrency limit from 10 to 2, preventing PostgreSQL connection pool exhaustion. Hardened UI to strictly restrict the loading spinner to `index === 0` (only the latest activity) in SyncLogsDialog, combined with active cleanup of zombie sessions on every `syncNow` trigger.
 - D084: Made SyncLogsDialog header title and Tauri Rust terminal logs dynamically reflect the currently active sync targets (Firebase, Supabase, or Dual) instead of hardcoding "Firebase/Dual Synchronization".
 - D085: Authored `docs/SYNC-FLOW.md` featuring a comprehensive Mermaid architecture diagram to document the complete end-to-end cloud synchronization lifecycle.
+- D086: Executed UI Hardening phase: fixed dark mode visibility for AI badge, sync button, and password reveal icon. Resolved layout clipping in Financial Reports. Upgraded Authority Dialog with fixed height, real-time search, and 20-item pagination. Standardized all dialogs to use the global `TitleBar` component.
 
 ## Caveman Mode
 **Status:** Active. Fast, terse agentic execution protocol enabled.
 
 ## Next Action
-Proceed to next milestone or user request.
+- UI Hardening & Consistency: DONE.
+- Dual Sync Stabilization: DONE.
+- Await user feedback on production-tier synchronization performance.
