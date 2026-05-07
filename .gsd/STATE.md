@@ -189,12 +189,12 @@
 - D084: Made SyncLogsDialog header title and Tauri Rust terminal logs dynamically reflect the currently active sync targets (Firebase, Supabase, or Dual) instead of hardcoding "Firebase/Dual Synchronization".
 - D085: Authored `docs/SYNC-FLOW.md` featuring a comprehensive Mermaid architecture diagram to document the complete end-to-end cloud synchronization lifecycle.
 - D086: Executed UI Hardening phase: fixed dark mode visibility for AI badge, sync button, and password reveal icon. Resolved layout clipping in Financial Reports. Upgraded Authority Dialog with fixed height, real-time search, and 20-item pagination. Standardized all dialogs to use the global `TitleBar` component. Corrected Sync Button arrow clipping by overriding global padding defaults with `!px-0`.
+- D087: Implemented admin-configurable Auto-Sync Scheduler. Replaced hardcoded 5-min interval with a smart 60s polling loop that checks admin-set time (24h) and day-of-week (everyday or custom). Added schedule UI to Settings (time picker, frequency mode, day selector). Implemented silent reset (schedule changes auto-apply via `useEffect` dependency). Added TODO placeholder for auto email notifications on sync activity. Updated `SYNC-FLOW.md` with Section 6 documenting the scheduler architecture, failure scenarios, and email notification roadmap.
 
 ## Caveman Mode
 **Status:** Active. Fast, terse agentic execution protocol enabled.
 
 ## Next Action
-- UI Hardening & Consistency: DONE.
-- Dual Sync Stabilization: DONE.
-- Multi-Remote Push: VERIFIED.
-- Await user feedback on production-tier synchronization performance.
+- Admin Sync Scheduler: DONE.
+- TODO: Auto email notification for sync activity logs (planned for future milestone).
+- Await user QA feedback on scheduled sync behavior.

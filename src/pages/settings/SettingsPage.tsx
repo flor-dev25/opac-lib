@@ -4,14 +4,15 @@ import { open, save } from '@tauri-apps/plugin-dialog';
 import { Channel } from '@tauri-apps/api/core';
 import { ImageEditorDialog } from '../../components/settings/ImageEditorDialog';
 import { useThemeStore } from '../../stores/themeStore';
-import { useSyncStore } from '../../stores/syncStore';
+import { useSyncStore, type DayOfWeek, type SyncSchedule } from '../../stores/syncStore';
 
 export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [tab, setTab] = useState<'db' | 'ai' | 'branding' | 'display'>('db');
   const { mode, setMode } = useThemeStore();
-  const { syncTargets: savedSyncTargets } = useSyncStore();
+  const { syncTargets: savedSyncTargets, schedule: savedSchedule } = useSyncStore();
 
   const [localSyncTargets, setLocalSyncTargets] = useState({ ...savedSyncTargets });
+  const [localSchedule, setLocalSchedule] = useState<SyncSchedule>({ ...savedSchedule });
 
   // DB State
   const [dbUrl, setDbUrl] = useState('');
@@ -121,13 +122,11 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
 
   const handleSaveSyncTargets = async () => {
     try {
-      // Assuming toggleSyncTarget toggles the value, wait, we need to set it directly.
-      // We will need to update the syncStore toggleSyncTarget to setSyncTargets instead.
-      // Let's use invoke or just update Zustand. But wait, if we update the Zustand store, it triggers the save.
-      const confirmSave = await window.confirm("Save new synchronization targets? The application will apply these settings for the next sync operation.");
+      const confirmSave = await window.confirm("Save synchronization settings? The scheduler will silently reset to apply the new schedule.");
       if (confirmSave) {
         useSyncStore.setState({ syncTargets: localSyncTargets });
-        setDbStatus('Sync targets saved successfully. Settings applied silently.');
+        useSyncStore.getState().setSchedule(localSchedule);
+        setDbStatus('Sync targets & schedule saved. Auto-sync will silently reset to the new schedule.');
       }
     } catch (e) {
       setDbStatus(`Failed to save targets: ${e}`);
@@ -284,13 +283,89 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                     </div>
                   </label>
                 </div>
+
+                {/* Auto-Sync Schedule */}
+                <div className="border-t border-gray-300 dark:border-dark-border-light pt-3 mt-3">
+                  <p className="text-[10px] font-bold mb-2 uppercase tracking-wider text-gray-500 dark:text-dark-text-muted">Auto-Sync Schedule</p>
+                  <div className="bg-white dark:bg-dark-input border-2 border-gray-600 dark:border-dark-border-dark border-t-gray-800 dark:border-t-dark-shadow border-l-gray-800 dark:border-l-dark-shadow shadow-inner p-3 space-y-3">
+                    {/* Time Picker */}
+                    <div className="flex items-center gap-3">
+                      <label className="text-xs font-bold text-gray-700 dark:text-dark-text whitespace-nowrap">Sync Time:</label>
+                      <input
+                        type="time"
+                        value={localSchedule.time}
+                        onChange={(e) => setLocalSchedule(s => ({ ...s, time: e.target.value }))}
+                        className="input-classic h-7 w-28 text-xs text-center font-mono"
+                      />
+                      <span className="text-[10px] text-gray-400 dark:text-dark-text-muted italic">24-hour format</span>
+                    </div>
+
+                    {/* Frequency Mode */}
+                    <div className="flex items-center gap-4">
+                      <label className="text-xs font-bold text-gray-700 dark:text-dark-text">Frequency:</label>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="syncMode"
+                          checked={localSchedule.mode === 'everyday'}
+                          onChange={() => setLocalSchedule(s => ({ ...s, mode: 'everyday' }))}
+                          className="accent-[#000080]"
+                        />
+                        <span className="text-xs dark:text-dark-text">Everyday</span>
+                      </label>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="syncMode"
+                          checked={localSchedule.mode === 'custom'}
+                          onChange={() => setLocalSchedule(s => ({ ...s, mode: 'custom' }))}
+                          className="accent-[#000080]"
+                        />
+                        <span className="text-xs dark:text-dark-text">Custom Days</span>
+                      </label>
+                    </div>
+
+                    {/* Day-of-Week Selector (only visible in custom mode) */}
+                    {localSchedule.mode === 'custom' && (
+                      <div className="flex gap-1 flex-wrap">
+                        {(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as DayOfWeek[]).map(day => {
+                          const isActive = localSchedule.selectedDays.includes(day);
+                          return (
+                            <button
+                              key={day}
+                              type="button"
+                              onClick={() => setLocalSchedule(s => ({
+                                ...s,
+                                selectedDays: isActive
+                                  ? s.selectedDays.filter(d => d !== day)
+                                  : [...s.selectedDays, day]
+                              }))}
+                              className={`px-2.5 py-1 text-[10px] font-bold border-2 transition-colors ${
+                                isActive
+                                  ? 'bg-[#000080] text-white border-[#000060] dark:bg-dark-accent dark:border-dark-accent'
+                                  : 'bg-[#c0c0c0] dark:bg-dark-panel text-gray-700 dark:text-dark-text border-t-white dark:border-t-dark-highlight border-l-white dark:border-l-dark-highlight border-b-gray-800 dark:border-b-dark-shadow border-r-gray-800 dark:border-r-dark-shadow hover:bg-[#d4d0c8] dark:hover:bg-dark-surface-alt'
+                              }`}
+                            >
+                              {day}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* TODO: Auto Email Notification */}
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700/50 p-2 text-[10px] text-yellow-800 dark:text-yellow-300 italic">
+                      📧 <strong>TODO:</strong> Auto email notification for sync activity logs (success, failure, skipped days) will be implemented in a future update.
+                    </div>
+                  </div>
+                </div>
                 
                 <div className="mt-2 flex justify-end">
                   <button
                     onClick={handleSaveSyncTargets}
                     className="px-4 py-1.5 text-xs bg-[#c0c0c0] dark:bg-dark-panel dark:text-dark-text border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-2 border-r-2 border-gray-800 dark:border-dark-shadow hover:bg-[#d4d0c8] dark:hover:bg-dark-surface-alt active:border-inset transition-colors font-bold"
                   >
-                    Save & Confirm Sync Targets
+                    Save & Confirm Sync Settings
                   </button>
                 </div>
               </div>

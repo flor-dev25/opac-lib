@@ -35,7 +35,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const { records, selectedId, deleteRecord, isEditDialogOpen, editingControlNo, setEditDialogOpen, setEditingControlNo } = useCatalogStore();
   const { patrons, selectedIdno, deletePatron } = usePatronStore();
-  const { autoSyncEnabled, syncNow } = useSyncStore();
+  const { autoSyncEnabled, syncNow, schedule } = useSyncStore();
   const location = useLocation();
   const isPatrons = location.pathname.startsWith('/patrons');
 
@@ -55,20 +55,43 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showSyncLogs, setShowSyncLogs] = React.useState(false);
   const [showImportMdb, setShowImportMdb] = React.useState(false);
 
-  // Auto-Sync Effect
+  // Smart Scheduled Auto-Sync: checks every 60s if the admin-configured time window has been reached
+  const lastScheduledFire = React.useRef<string | null>(null);
+
   React.useEffect(() => {
     if (!autoSyncEnabled) return;
-    
-    // Initial sync
-    syncNow();
-    
-    // Periodic sync every 5 minutes
-    const interval = setInterval(() => {
-      syncNow();
-    }, 5 * 60 * 1000);
-    
+
+    const DAY_MAP: Record<number, string> = { 1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri', 6: 'Sat', 0: 'Sun' };
+
+    const checkSchedule = () => {
+      const now = new Date();
+      const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const todayName = DAY_MAP[now.getDay()];
+
+      // Prevent duplicate fire for same day
+      if (lastScheduledFire.current === todayKey) return;
+
+      // Check if today is an active sync day
+      const isDayActive = schedule.mode === 'everyday' || schedule.selectedDays.includes(todayName as any);
+      if (!isDayActive) return;
+
+      // Fire if current time matches or has passed the scheduled time (within the day)
+      if (currentTime >= schedule.time) {
+        lastScheduledFire.current = todayKey;
+        console.log(`[AutoSync] Scheduled sync triggered at ${currentTime} (configured: ${schedule.time})`);
+        syncNow();
+      }
+    };
+
+    // Check immediately on mount
+    checkSchedule();
+
+    // Poll every 60 seconds (silent reset: schedule changes are picked up automatically)
+    const interval = setInterval(checkSchedule, 60 * 1000);
+
     return () => clearInterval(interval);
-  }, [autoSyncEnabled, syncNow]);
+  }, [autoSyncEnabled, syncNow, schedule]);
 
   const selectedRecord = records.find(r => r.id === selectedId);
   const selectedPatron = patrons.find(p => p.idno === selectedIdno);

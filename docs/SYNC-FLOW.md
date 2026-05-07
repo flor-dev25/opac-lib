@@ -6,68 +6,16 @@ This document outlines the complete, end-to-end data flow for the infoLib Dual S
 
 The following diagram illustrates the complete synchronization lifecycle, from trigger to completion.
 
-```mermaid
-flowchart TD
-    %% Define Styles
-    classDef ui fill:#A6CAF0,stroke:#000080,stroke-width:2px,color:#000
-    classDef rust fill:#C5A059,stroke:#00401A,stroke-width:2px,color:#000
-    classDef db fill:#D4D0C8,stroke:#808080,stroke-width:2px,color:#000
-    classDef cloud fill:#00401A,stroke:#C5A059,stroke-width:2px,color:#FFF
-
-    %% 1. Trigger Phase
-    subgraph Frontend [UI / React Layer]
-        A([Trigger Sync]) -->|Manual Click or 5-Min Interval| B[Zustand Sync Store]
-        B -->|1. Cleanup Zombies| C[Set isSyncing = true]
-        C -->|2. Generate Temp Session ID| D[Listen for 'sync_progress' events]
-        D -->|3. Invoke backend command| E[Tauri IPC: run_dual_sync]
-    end
-
-    %% 2. Backend Processing Phase
-    subgraph Backend [Rust Core / Tauri Layer]
-        E --> F{Evaluate Sync Targets}
-        F -->|Supabase Enabled| G[Check Cloud Connectivity]
-        F -->|Firebase Enabled| H[Execute Firebase REST Sync]
-        
-        %% Supabase Branch
-        G -->|Ping: SELECT 1| I{Is Online?}
-        I -->|No| J[Emit Error Event: 'Offline/Unreachable']
-        I -->|Yes| K[Fetch local records via SQLx]
-        
-        K --> L[Stream over rows]
-        L --> M[futures::for_each_concurrent limit: 2]
-    end
-
-    %% 3. Database Layer
-    subgraph Databases [Data Sources]
-        K <-.->|Read| LocalDB[(Local PostgreSQL)]
-        M -->|UPSERT ON CONFLICT| N[(Supabase Cloud SQL)]
-    end
-
-    %% 4. Event Streaming & Completion
-    subgraph EventLoop [Real-Time Feedback Loop]
-        M -.->|Emit Success/Error per Table| O(Tauri Emitter)
-        H -.->|Emit Success/Error| O
-        J -.-> O
-        O -.->|sync_progress event| D
-    end
-
-    %% 5. Resolution
-    M --> P[Calculate Total Synced]
-    H --> P
-    P --> Q[Return SyncResult to UI]
-    Q --> R[Zustand: Mark Completed / Update UI]
-
-    %% Apply Styles
-    class A,B,C,D,R ui
-    class E,F,G,H,I,J,K,L,M,O,P,Q rust
-    class LocalDB db
-    class N cloud
-```
+![System Architecture Flowchart](./assets/sync-architecture.png)
 
 ## Step-by-Step Breakdown
 
 ### 1. The Trigger (Frontend)
-The process begins when a user clicks **"Sync Now"** in the `SyncLogsDialog`, or when the **5-minute background Auto-Sync** interval fires.
+The process begins in one of two ways:
+* **Manual**: The user clicks **"Sync Now"** in the `SyncLogsDialog`.
+* **Scheduled**: The **Admin-Configured Auto-Sync Scheduler** fires at the designated time and day (see Section 6 below).
+
+Regardless of trigger source:
 * The `syncStore` (Zustand) intercepts the request.
 * **Zombie Cleanup**: Before doing anything, it scans for any old processes that were stuck in a "syncing" state (due to an app crash or force quit) and forces them to a "failed" state.
 * The UI sets `isSyncing = true`, rendering a single blue loading spinner exclusively on the top-most active log entry.
@@ -89,9 +37,52 @@ Once connectivity is verified, the system processes tables sequentially based on
 * **Concurrency Engine**: Rust utilizes `futures_util::stream` to process the rows.
     * It pushes the data to the cloud at a concurrency limit of **2 threads**.
     * *Why 2 threads?* It provides a balance between high-speed batching and strict hardware safety, preventing PostgreSQL connection pool exhaustion and preventing the user's PC from crashing under load.
-* Data is inserted into the cloud using an `INSERT ... ON CONFLICT (...) DO UPDATE` SQL command. This means records are dynamically updated if they exist, or cleanly inserted if they are new.
+* Data is inserted into the cloud using an `INSERT ... ON CONFLICT ("Accession") DO UPDATE` SQL command. This is an **"Upsert"** logic that ensures data integrity:
+    * **Conflict Detection**: If a record with the same unique identifier (e.g., `Accession`) already exists in the cloud, the engine prevents a crash and instead performs a surgical update of all fields (`Location`, `Status`, `DueDate`, etc.).
+    * **State Verification**: If the record is new, it is inserted cleanly. If the existing cloud record is already identical to the local state, logs may show `rows_affected=0`, signifying that the system successfully verified the mirror without needing to write redundant data.
 
 ### 5. Resolution & UI Polish
 As tables complete, Rust emits event logs (`info`, `success`, `error`) across the IPC channel. The React frontend catches these payloads and expands the accordion logs in real-time.
 * Once all targets resolve, Rust returns the final aggregated `SyncResult`.
 * The `syncStore` saves the execution timestamp, drops the blue loading spinner into a green "Completed" checkmark, and closes the active session.
+
+---
+
+## Admin-Configured Sync Scheduler (Section 6)
+
+The system supports a fully configurable, admin-managed sync schedule. This replaces the previous hardcoded 5-minute interval with an intelligent, time-aware scheduler.
+
+### Configuration (Settings → Database → Auto-Sync Schedule)
+| Setting | Description | Default |
+|---------|-------------|---------|
+| **Sync Time** | The exact time (24h format) to trigger auto-sync | `16:00` |
+| **Frequency Mode** | `Everyday` (runs daily) or `Custom Days` (runs only on selected days) | `Everyday` |
+| **Selected Days** | When in Custom mode, the specific days of the week to run (Mon-Sun) | N/A |
+
+### How It Works
+1. A **60-second polling loop** runs inside `MainLayout.tsx`. Every tick, it:
+    * Reads the current system time.
+    * Compares it against the admin-configured `schedule.time`.
+    * Checks if today's day-of-week is an active sync day (based on `mode` and `selectedDays`).
+2. If all conditions are met **and** the sync has not already fired today, the scheduler triggers `syncNow()`.
+3. A `lastScheduledFire` ref (keyed by date) ensures **exactly one sync per eligible day**.
+
+### Silent Reset Behavior
+When the admin saves new schedule settings in the Settings dialog:
+* The `schedule` object in `syncStore` is updated immediately.
+* Because `MainLayout`'s `useEffect` has `schedule` in its dependency array, the polling loop **silently tears down and restarts** with the new configuration — no app restart required.
+
+### Failure Scenarios
+| Scenario | System Behavior |
+|----------|----------------|
+| **No Internet** | Supabase `SELECT 1` ping fails → session logged as `failed` with reason |
+| **Power Loss / PC Crash** | On next app launch, zombie cleanup marks the interrupted session as `failed` |
+| **App Not Running at Scheduled Time** | The scheduler checks `currentTime >= schedule.time` on mount, so if the app is opened later that day, it will still fire the missed sync |
+| **Admin Changes Schedule Mid-Day** | Silent reset picks up the new time immediately; if the new time has already passed today, it fires once |
+
+### TODO: Auto Email Notifications
+> 📧 **Planned Feature**: Automatic email alerts for sync activity will be implemented in a future milestone. The system will send daily/weekly digest emails to the admin containing:
+> * Sync success/failure status per day
+> * Skipped days (when the app was not running)
+> * Error details for failed sync attempts
+> * Summary of records synced per target (Firebase/Supabase)

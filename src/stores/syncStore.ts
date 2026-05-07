@@ -18,6 +18,17 @@ export interface SyncSession {
   expanded: boolean;
 }
 
+export type DayOfWeek = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
+
+export interface SyncSchedule {
+  /** 24h time string, e.g. "16:00" */
+  time: string;
+  /** 'everyday' syncs daily; 'custom' uses selectedDays */
+  mode: 'everyday' | 'custom';
+  /** Active days when mode is 'custom' */
+  selectedDays: DayOfWeek[];
+}
+
 interface SyncState {
   isSyncing: boolean;
   lastSync: string | null;
@@ -27,12 +38,15 @@ interface SyncState {
     firebase: boolean;
     supabase: boolean;
   };
+  /** Admin-configurable scheduled sync */
+  schedule: SyncSchedule;
   syncNow: () => Promise<void>;
   addSession: (id: string) => void;
   updateSession: (id: string, updates: Partial<SyncSession>) => void;
   addLogDetail: (sessionId: string, detail: Omit<SyncLogDetail, 'timestamp'>) => void;
   toggleAutoSync: () => void;
   toggleSyncTarget: (target: 'firebase' | 'supabase') => void;
+  setSchedule: (schedule: SyncSchedule) => void;
   clearLogs: () => void;
   toggleSessionExpanded: (id: string) => void;
 }
@@ -53,6 +67,11 @@ export const useSyncStore = create<SyncState>()(
       syncTargets: {
         firebase: true,
         supabase: true,
+      },
+      schedule: {
+        time: '16:00',
+        mode: 'everyday' as const,
+        selectedDays: [] as DayOfWeek[],
       },
 
       addSession: (id) => set((state) => ({
@@ -143,6 +162,8 @@ export const useSyncStore = create<SyncState>()(
         syncTargets: { ...state.syncTargets, [target]: !state.syncTargets[target] }
       })),
 
+      setSchedule: (schedule) => set({ schedule }),
+
       clearLogs: () => set({ sessions: [] }),
 
       toggleSessionExpanded: (id) => set((state) => ({
@@ -154,6 +175,7 @@ export const useSyncStore = create<SyncState>()(
       partialize: (state) => ({ 
         autoSyncEnabled: state.autoSyncEnabled,
         syncTargets: state.syncTargets,
+        schedule: state.schedule,
         lastSync: state.lastSync,
         sessions: state.sessions.map(s => ({ 
           ...s, 
