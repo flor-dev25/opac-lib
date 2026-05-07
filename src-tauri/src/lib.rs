@@ -3,6 +3,7 @@ mod db;
 mod ai;
 mod settings;
 mod import;
+mod sync;
 use tauri::{
   menu::{Menu, MenuItem},
   tray::TrayIconBuilder,
@@ -647,7 +648,8 @@ pub fn run() {
       settings::get_logo_path,
       settings::export_settings,
       settings::import_settings,
-      import::import_mdb_database
+      import::import_mdb_database,
+      sync::run_dual_sync
     ])
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_shell::init())
@@ -671,7 +673,10 @@ pub fn run() {
       }
 
       let pool_arc = std::sync::Arc::new(tokio::sync::Mutex::new(None));
+      let remote_pool_arc = std::sync::Arc::new(tokio::sync::Mutex::new(None));
+      
       let pool_for_setup = pool_arc.clone();
+      let remote_pool_for_setup = remote_pool_arc.clone();
 
       tauri::async_runtime::spawn(async move {
         if let Ok(pool) = db::init_db(&handle).await {
@@ -680,9 +685,21 @@ pub fn run() {
         } else {
           eprintln!("Initial database connection failed. App will start in Setup Mode.");
         }
+
+        // Initialize Supabase Cloud Mirror
+        if let Ok(remote_pool) = db::init_remote_db().await {
+          let mut lock = remote_pool_for_setup.lock().await;
+          *lock = Some(remote_pool);
+          println!("Connected to Supabase Cloud Mirror.");
+        } else {
+          eprintln!("Supabase Cloud connection failed (Offline or unconfigured).");
+        }
       });
 
-      app.manage(DbState { pool: pool_arc });
+      app.manage(DbState { 
+        pool: pool_arc,
+        remote_pool: remote_pool_arc,
+      });
 
       let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
       let show_i = MenuItem::with_id(app, "show", "Show infoLib", true, None::<&str>)?;

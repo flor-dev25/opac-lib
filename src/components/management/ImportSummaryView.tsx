@@ -1,5 +1,5 @@
 import React from 'react';
-import { BeveledBox } from '../common/BeveledBox';
+
 
 interface InvalidRow {
   table: string;

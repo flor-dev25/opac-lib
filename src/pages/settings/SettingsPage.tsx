@@ -4,10 +4,14 @@ import { open, save } from '@tauri-apps/plugin-dialog';
 import { Channel } from '@tauri-apps/api/core';
 import { ImageEditorDialog } from '../../components/settings/ImageEditorDialog';
 import { useThemeStore } from '../../stores/themeStore';
+import { useSyncStore } from '../../stores/syncStore';
 
 export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [tab, setTab] = useState<'db' | 'ai' | 'branding' | 'display'>('db');
   const { mode, setMode } = useThemeStore();
+  const { syncTargets: savedSyncTargets } = useSyncStore();
+
+  const [localSyncTargets, setLocalSyncTargets] = useState({ ...savedSyncTargets });
 
   // DB State
   const [dbUrl, setDbUrl] = useState('');
@@ -112,6 +116,21 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
       }
     } catch (e) {
       setDbStatus(`Import failed: ${e}`);
+    }
+  };
+
+  const handleSaveSyncTargets = async () => {
+    try {
+      // Assuming toggleSyncTarget toggles the value, wait, we need to set it directly.
+      // We will need to update the syncStore toggleSyncTarget to setSyncTargets instead.
+      // Let's use invoke or just update Zustand. But wait, if we update the Zustand store, it triggers the save.
+      const confirmSave = await window.confirm("Save new synchronization targets? The application will apply these settings for the next sync operation.");
+      if (confirmSave) {
+        useSyncStore.setState({ syncTargets: localSyncTargets });
+        setDbStatus('Sync targets saved successfully. Settings applied silently.');
+      }
+    } catch (e) {
+      setDbStatus(`Failed to save targets: ${e}`);
     }
   };
 
@@ -233,6 +252,45 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                     className="px-4 py-1 text-xs bg-[#c0c0c0] border-t-2 border-l-2 border-white border-b-2 border-r-2 border-gray-800 hover:bg-[#d4d0c8] active:border-inset transition-colors"
                   >
                     Import JSON
+                  </button>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-400 pt-4 mt-2">
+                <p className="text-[10px] font-bold mb-2 uppercase tracking-wider text-gray-500 dark:text-dark-text-muted">Cloud Synchronization</p>
+                <div className="bg-white dark:bg-dark-input border-2 border-gray-600 dark:border-dark-border-dark border-t-gray-800 dark:border-t-dark-shadow border-l-gray-800 dark:border-l-dark-shadow shadow-inner p-3 space-y-2">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={localSyncTargets.supabase} 
+                      onChange={() => setLocalSyncTargets(s => ({ ...s, supabase: !s.supabase }))} 
+                      className="accent-[#000080]" 
+                    />
+                    <div>
+                      <div className="text-xs font-bold text-gray-800 dark:text-dark-text">Supabase (PostgreSQL)</div>
+                      <div className="text-[10px] text-gray-500 dark:text-dark-text-muted">1:1 Heavy relational database mirror</div>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={localSyncTargets.firebase} 
+                      onChange={() => setLocalSyncTargets(s => ({ ...s, firebase: !s.firebase }))} 
+                      className="accent-[#000080]" 
+                    />
+                    <div>
+                      <div className="text-xs font-bold text-gray-800 dark:text-dark-text">Firebase (NoSQL)</div>
+                      <div className="text-[10px] text-gray-500 dark:text-dark-text-muted">Lightweight mobile application mirror</div>
+                    </div>
+                  </label>
+                </div>
+                
+                <div className="mt-2 flex justify-end">
+                  <button
+                    onClick={handleSaveSyncTargets}
+                    className="px-4 py-1.5 text-xs bg-[#c0c0c0] dark:bg-dark-panel dark:text-dark-text border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-2 border-r-2 border-gray-800 dark:border-dark-shadow hover:bg-[#d4d0c8] dark:hover:bg-dark-surface-alt active:border-inset transition-colors font-bold"
+                  >
+                    Save & Confirm Sync Targets
                   </button>
                 </div>
               </div>

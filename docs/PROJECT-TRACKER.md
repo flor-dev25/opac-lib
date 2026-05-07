@@ -117,3 +117,8 @@ Complete parity implementation of Library Management System based on wireframe s
 - [x] M010-S02-T02: 4-step Import dialog (File → Validate → Import → Summary)
 - [x] M010-S02-T03: Error handling (ODBC missing, backup fail, transaction fail)
 - [x] M010-S02-T04: Dashboard refresh after successful import
+
+### Phase 11: Dual Sync Architecture (M011)
+- [x] M011-S01: Backend Supabase Connection Pool
+- [x] M011-S02: Dual Sync Execution Logic (Rust)
+- [x] M011-S03: Frontend Integration (SyncStore & UI)

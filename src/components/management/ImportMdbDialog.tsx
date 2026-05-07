@@ -35,30 +35,7 @@ export const ImportMdbDialog: React.FC<ImportMdbDialogProps> = ({ onClose }) => 
     }
   };
 
-  const handleValidate = async () => {
-    if (!mdbPath) return;
-    setStep('validating');
-    setErrorMsg(null);
-    setIsOdbcMissing(false);
 
-    try {
-      // Dry run for validation (using the same backend command but dry_run=true)
-      const res = await invoke<ImportSummaryData>('import_mdb_database', { mdbPath, dryRun: true });
-      setSummary(res);
-      // We skip a dedicated UI for dry run for now and jump straight to import if valid, 
-      // but the S02 spec says "Pre-Import Checklist". Let's show it if we want, 
-      // but to keep it simple and robust, let's just do the actual import.
-      // Actually, spec says: Show validation results, then "Start Import" button.
-      // We will re-use summary for validation results.
-    } catch (err: any) {
-      if (err === 'odbc_missing') {
-        setIsOdbcMissing(true);
-      } else {
-        setErrorMsg(err.toString());
-      }
-      setStep('error');
-    }
-  };
 
   const handleImport = async () => {
     if (!mdbPath) return;
@@ -71,7 +48,11 @@ export const ImportMdbDialog: React.FC<ImportMdbDialogProps> = ({ onClose }) => 
       setStep('summary');
       await fetchRecords(); // Refresh dashboard
     } catch (err: any) {
-      setErrorMsg(err.toString());
+      if (err === 'odbc_missing') {
+        setIsOdbcMissing(true);
+      } else {
+        setErrorMsg(err.toString());
+      }
       setStep('error');
     }
   };
