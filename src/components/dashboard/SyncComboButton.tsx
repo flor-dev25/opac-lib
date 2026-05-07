@@ -36,7 +36,7 @@ export const SyncComboButton: React.FC<SyncComboButtonProps> = ({ onShowLogs }) 
             className="flex items-center justify-center w-6 h-20 btn-classic hover:bg-gray-200 dark:hover:bg-dark-surface-alt border-l-0"
             title="View Sync Logs Dialog"
           >
-            <ChevronDown size={14} />
+            <ChevronDown size={16} className="text-black dark:text-dark-text opacity-70" />
           </button>
         </div>
       </div>

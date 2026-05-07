@@ -86,8 +86,8 @@ export const FinancialReportsDialog: React.FC<FinancialReportsDialogProps> = ({ 
               </div>
 
               {/* Recent History */}
-              <GroupBox label="Recent Payment History" className="flex-1 flex flex-col overflow-hidden">
-                <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-dark-input border-2 border-inset border-gray-400 dark:border-dark-border-dark">
+              <GroupBox label="Recent Payment History" className="flex-1 flex flex-col mt-2">
+                <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-dark-input border-2 border-inset border-gray-400 dark:border-dark-border-dark mt-1">
                   <div className="bg-[#808080] dark:bg-dark-surface text-white dark:text-dark-text flex font-bold text-xs p-1 sticky top-0 z-10">
                     <div className="w-32 px-1">Date/Time</div>
                     <div className="w-24 px-1">ID No.</div>

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { X, DatabaseBackup, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
 import { BeveledBox } from '../common/BeveledBox';
 import { ImportSummaryView, ImportSummaryData } from './ImportSummaryView';
+import { TitleBar } from '../layout/TitleBar';
 import { useCatalogStore } from '../../stores/catalogStore';
 
 interface ImportMdbDialogProps {
@@ -60,20 +61,10 @@ export const ImportMdbDialog: React.FC<ImportMdbDialogProps> = ({ onClose }) => 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <BeveledBox variant="raised" className="w-full max-w-lg flex flex-col bg-[#D4D0C8] dark:bg-dark-surface shadow-2xl">
-        {/* Title Bar */}
-        <div className="h-7 bg-gradient-to-r from-classic-blue to-[#1084d0] dark:from-dark-accent dark:to-dark-highlight flex items-center justify-between px-2 cursor-default">
-          <div className="flex items-center gap-2">
-            <DatabaseBackup className="w-4 h-4 text-white" />
-            <span className="text-white font-bold text-sm tracking-wide">Import Legacy Access Database</span>
-          </div>
-          <button 
-            onClick={step !== 'validating' && step !== 'importing' ? onClose : undefined}
-            disabled={step === 'validating' || step === 'importing'}
-            className="w-5 h-5 flex items-center justify-center bg-[#D4D0C8] dark:bg-dark-surface hover:bg-classic-grey dark:hover:bg-dark-highlight active:bg-gray-400 disabled:opacity-50 border-t border-l border-white dark:border-dark-highlight border-b border-r border-b-gray-800 border-r-gray-800"
-          >
-            <X className="w-4 h-4 text-black dark:text-white" />
-          </button>
-        </div>
+        <TitleBar 
+          title="Import Legacy Access Database" 
+          onClose={step !== 'validating' && step !== 'importing' ? onClose : undefined} 
+        />
 
         {/* Content */}
         <div className="p-4 flex-1">

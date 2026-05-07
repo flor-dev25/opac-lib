@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BeveledBox } from '../common/BeveledBox';
 import { DataGrid } from '../common/DataGrid';
+import { TitleBar } from '../layout/TitleBar';
 import { invoke } from '@tauri-apps/api/core';
 
 interface ReservationDialogProps {
@@ -106,11 +107,7 @@ export const ReservationDialog: React.FC<ReservationDialogProps> = ({ onClose })
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
       <BeveledBox variant="raised" className="w-full max-w-3xl bg-classic-grey dark:bg-dark-surface shadow-2xl flex flex-col">
-        {/* Title Bar */}
-        <div className="bg-classic-blue-gradient px-2 py-1 flex items-center justify-between text-white font-bold text-sm">
-          <span>Item Reservations</span>
-          <button onClick={onClose} className="hover:bg-red-500 px-1">✕</button>
-        </div>
+        <TitleBar title="Item Reservations" onClose={onClose} />
 
         <div className="p-4 flex flex-col gap-3 min-h-[500px]">
           {/* Active Reservations List */}

@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { BeveledBox } from '../common/BeveledBox';
 import { DataGrid } from '../common/DataGrid';
+import { TitleBar } from '../layout/TitleBar';
 import { invoke } from '@tauri-apps/api/core';
+import { Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 interface AuthorityDialogProps {
   onClose: () => void;
@@ -17,10 +19,14 @@ interface Subject {
   subject_code: number;
 }
 
+const ITEMS_PER_PAGE = 20;
+
 export const AuthorityDialog: React.FC<AuthorityDialogProps> = ({ onClose }) => {
   const [type, setType] = useState<'author' | 'subject'>('author');
   const [selectedId, setSelectedId] = useState<number | undefined>(undefined);
   const [editValue, setEditValue] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   
   const [authors, setAuthors] = useState<Author[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -47,19 +53,39 @@ export const AuthorityDialog: React.FC<AuthorityDialogProps> = ({ onClose }) => 
     loadData();
     setSelectedId(undefined);
     setEditValue('');
+    setSearchTerm('');
+    setCurrentPage(1);
   }, [type]);
 
-  const data = type === 'author' 
-    ? authors.map(a => ({ id: a.author_code, name: a.author }))
-    : subjects.map(s => ({ id: s.subject_code, name: s.subject }));
+  const allData = useMemo(() => {
+    const raw = type === 'author' 
+      ? authors.map(a => ({ id: a.author_code, name: a.author }))
+      : subjects.map(s => ({ id: s.subject_code, name: s.subject }));
+    
+    if (!searchTerm.trim()) return raw;
+    
+    const term = searchTerm.toLowerCase().trim();
+    return raw.filter(item => item.name.toLowerCase().includes(term));
+  }, [type, authors, subjects, searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(allData.length / ITEMS_PER_PAGE));
+  
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [totalPages, currentPage]);
+
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return allData.slice(start, start + ITEMS_PER_PAGE);
+  }, [allData, currentPage]);
 
   const columns = [{ key: 'name', header: type === 'author' ? 'Author Name' : 'Subject Heading', width: '100%' }];
 
   useEffect(() => {
-    const selected = data.find(item => item.id === selectedId);
+    const selected = allData.find(item => item.id === selectedId);
     if (selected) setEditValue(selected.name);
     else setEditValue('');
-  }, [selectedId, data]);
+  }, [selectedId, allData]);
 
   const handleUpdate = async () => {
     if (!selectedId || !editValue.trim()) return;
@@ -97,53 +123,110 @@ export const AuthorityDialog: React.FC<AuthorityDialogProps> = ({ onClose }) => 
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-      <BeveledBox variant="raised" className="w-full max-w-lg bg-classic-grey dark:bg-dark-surface shadow-2xl flex flex-col">
-        {/* Title Bar */}
-        <div className="bg-classic-blue-gradient px-2 py-1 flex items-center justify-between text-white font-bold text-sm">
-          <span>Authority Control</span>
-          <button onClick={onClose} className="hover:bg-red-500 px-1">✕</button>
-        </div>
+      <BeveledBox variant="raised" className="w-full max-w-lg bg-classic-grey dark:bg-dark-surface shadow-2xl flex flex-col h-[600px]">
+        <TitleBar title="Authority Control" onClose={onClose} />
 
-        <div className="p-4 space-y-4 flex-1 flex flex-col min-h-[400px]">
-          {/* Category Toggle */}
-          <div className="flex gap-1">
-            <button 
-              onClick={() => setType('author')}
-              className={`btn-classic px-4 h-7 ${type === 'author' ? 'bg-gray-200 dark:bg-dark-surface-alt font-bold' : ''}`}
-            >
-              Author Authority
-            </button>
-            <button 
-              onClick={() => setType('subject')}
-              className={`btn-classic px-4 h-7 ${type === 'subject' ? 'bg-gray-200 dark:bg-dark-surface-alt font-bold' : ''}`}
-            >
-              Subject Authority
-            </button>
+        <div className="p-4 space-y-3 flex-1 flex flex-col overflow-hidden">
+          {/* Category Toggle and Search */}
+          <div className="flex flex-col gap-2 shrink-0">
+            <div className="flex gap-1">
+              <button 
+                onClick={() => setType('author')}
+                className={`btn-classic px-4 h-7 ${type === 'author' ? 'bg-gray-200 dark:bg-dark-surface-alt font-bold' : ''}`}
+              >
+                Author Authority
+              </button>
+              <button 
+                onClick={() => setType('subject')}
+                className={`btn-classic px-4 h-7 ${type === 'subject' ? 'bg-gray-200 dark:bg-dark-surface-alt font-bold' : ''}`}
+              >
+                Subject Authority
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
+                <input 
+                  type="text"
+                  placeholder="Search entries..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="input-classic w-full h-8 pl-8 text-xs"
+                />
+              </div>
+            </div>
           </div>
 
           {/* System Warning */}
-          <div className="text-red-600 dark:text-red-400 font-bold text-center text-xs uppercase leading-tight bg-white/50 dark:bg-dark-input/50 p-2 border border-red-200 dark:border-red-900/50 italic">
+          <div className="text-red-600 dark:text-red-400 font-bold text-center text-[10px] uppercase leading-tight bg-white/50 dark:bg-dark-input/50 p-1.5 border border-red-200 dark:border-red-900/50 italic shrink-0">
             NOTE : CLOSE ALL THE WORKSTATIONS BEFORE UPDATING THE AUTHORITY
           </div>
 
           {/* List Area */}
-          <div className="flex-1 min-h-[200px]">
+          <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-dark-input border-2 border-inset border-gray-400 dark:border-dark-border-dark min-h-0">
             {loading ? (
-              <div className="w-full h-full flex items-center justify-center border-2 border-gray-400 dark:border-dark-border-dark border-t-gray-600 dark:border-t-dark-shadow border-l-gray-600 dark:border-l-dark-shadow bg-white dark:bg-dark-input">
+              <div className="flex-1 flex items-center justify-center italic text-xs text-gray-500">
                 Loading...
               </div>
             ) : (
-              <DataGrid 
-                columns={columns} 
-                data={data} 
-                selectedId={selectedId}
-                onRowClick={(row) => setSelectedId(row.id)}
-              />
+              <div className="flex-1 overflow-hidden">
+                <DataGrid 
+                  columns={columns} 
+                  data={paginatedData} 
+                  selectedId={selectedId}
+                  onRowClick={(row) => setSelectedId(row.id)}
+                />
+              </div>
             )}
+
+            {/* Pagination Navigator */}
+            <div className="flex items-center justify-between gap-1 bg-[#D4D0C8] dark:bg-dark-surface px-2 py-1 border-t border-white dark:border-dark-highlight shrink-0">
+              <div className="flex gap-0.5">
+                <button 
+                  onClick={() => setCurrentPage(1)} 
+                  disabled={currentPage === 1}
+                  className="btn-classic px-1 h-6 flex items-center justify-center disabled:opacity-50"
+                >
+                  <ChevronsLeft size={14} />
+                </button>
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} 
+                  disabled={currentPage === 1}
+                  className="btn-classic px-1 h-6 flex items-center justify-center disabled:opacity-50"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+              </div>
+
+              <div className="text-[10px] font-bold dark:text-dark-text">
+                Page {currentPage} of {totalPages} ({allData.length} total)
+              </div>
+
+              <div className="flex gap-0.5">
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} 
+                  disabled={currentPage === totalPages}
+                  className="btn-classic px-1 h-6 flex items-center justify-center disabled:opacity-50"
+                >
+                  <ChevronRight size={14} />
+                </button>
+                <button 
+                  onClick={() => setCurrentPage(totalPages)} 
+                  disabled={currentPage === totalPages}
+                  className="btn-classic px-1 h-6 flex items-center justify-center disabled:opacity-50"
+                >
+                  <ChevronsRight size={14} />
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Edit Field */}
-          <div className="space-y-1">
+          <div className="space-y-1 shrink-0">
             <label className="text-xs font-bold text-gray-700 dark:text-dark-text">Edit Selected Entry:</label>
             <input 
               type="text" 
@@ -156,10 +239,10 @@ export const AuthorityDialog: React.FC<AuthorityDialogProps> = ({ onClose }) => 
           </div>
 
           {/* Dialog Actions */}
-          <div className="flex justify-end gap-2 pt-2">
-            <button onClick={handleUpdate} disabled={!selectedId} className="btn-classic px-6 h-8 font-bold disabled:opacity-50">Update</button>
-            <button onClick={handleDelete} disabled={!selectedId} className="btn-classic px-6 h-8 text-red-700 disabled:opacity-50">Delete</button>
-            <button onClick={onClose} className="btn-classic px-6 h-8">Exit</button>
+          <div className="flex justify-end gap-2 shrink-0 pt-1">
+            <button onClick={handleUpdate} disabled={!selectedId} className="btn-classic px-6 h-8 font-bold text-sm disabled:opacity-50">Update</button>
+            <button onClick={handleDelete} disabled={!selectedId} className="btn-classic px-6 h-8 text-red-700 text-sm disabled:opacity-50">Delete</button>
+            <button onClick={onClose} className="btn-classic px-8 h-8 text-sm">Exit</button>
           </div>
         </div>
       </BeveledBox>

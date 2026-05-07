@@ -89,7 +89,7 @@ export const AIChatBadge: React.FC = () => {
   return (
     <div 
       className="fixed bottom-6 right-6 z-50 transition-all duration-300 ease-in-out"
-      style={{ opacity: isHovered || isOpen ? 1 : 0.3 }}
+      style={{ opacity: isHovered || isOpen ? 1 : (document.documentElement.classList.contains('dark') ? 0.6 : 0.3) }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -104,9 +104,9 @@ export const AIChatBadge: React.FC = () => {
           className={`p-3 rounded-full flex items-center justify-center bg-[#D4D0C8] dark:bg-dark-panel border-2 ${isHovered ? 'border-purple-400' : 'border-gray-400 dark:border-dark-border-light'} transition-colors duration-300`}
         >
           {isOpen ? (
-            <Sparkles className="w-6 h-6 text-purple-700 animate-pulse" />
+            <Sparkles className="w-6 h-6 text-purple-700 dark:text-purple-400 animate-pulse" />
           ) : (
-            <Bot className="w-6 h-6 text-gray-700 group-hover:text-purple-700 transition-colors" />
+            <Bot className="w-6 h-6 text-gray-700 dark:text-dark-text group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors" />
           )}
         </BeveledBox>
         

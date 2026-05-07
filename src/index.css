@@ -108,6 +108,10 @@
   .dark .input-classic:focus {
     box-shadow: 1.5px 1.5px 0px #1A1A1A inset, -1.5px -1.5px 0px #6B9BD2 inset;
   }
+  .dark input[type="password"]::-ms-reveal,
+  .dark input[type="password"]::-webkit-contacts-auto-fill-button {
+    filter: invert(100%);
+  }
 
   /* Window Container */
   .dark .window-classic {
