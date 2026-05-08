@@ -122,3 +122,15 @@ Complete parity implementation of Library Management System based on wireframe s
 - [x] M011-S01: Backend Supabase Connection Pool
 - [x] M011-S02: Dual Sync Execution Logic (Rust)
 - [x] M011-S03: Frontend Integration (SyncStore & UI)
+
+### Phase 12: Attendance System (M012)
+- [ ] M012-S01: Door PC Client (Time-in Only)
+- [ ] M012-S02: Admin Dashboard (Real-time Stats)
+- [ ] M012-S03: CSV Data Import Pipeline (Students/Faculty)
+- [ ] M012-S04: Attendance PDF Reports (Daily/Weekly/Monthly)
+
+### Phase 13: Premium Services & Hardening (M013)
+- [ ] M013-S01: Twilio SMS Integration
+- [ ] M013-S02: Online AI API (Deepseek)
+- [ ] M013-S03: PostgreSQL Auto-Detection Installer
+- [ ] M013-S04: Global Email Notification System
