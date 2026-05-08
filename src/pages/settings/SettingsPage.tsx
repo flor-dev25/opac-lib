@@ -7,7 +7,7 @@ import { useThemeStore } from '../../stores/themeStore';
 import { useSyncStore, type DayOfWeek, type SyncSchedule } from '../../stores/syncStore';
 
 export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const [tab, setTab] = useState<'db' | 'ai' | 'branding' | 'display'>('db');
+  const [tab, setTab] = useState<'db' | 'ai' | 'branding' | 'display' | 'circulation'>('db');
   const { mode, setMode } = useThemeStore();
   const { syncTargets: savedSyncTargets, schedule: savedSchedule } = useSyncStore();
 
@@ -18,6 +18,10 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
   const [dbUrl, setDbUrl] = useState('');
   const [dbStatus, setDbStatus] = useState('');
   const [dbTesting, setDbTesting] = useState(false);
+
+  // Circulation State
+  const [loanPeriod, setLoanPeriod] = useState(7);
+  const [fineRate, setFineRate] = useState(5.0);
 
   // AI State
   const [aiStatus, setAiStatus] = useState('');
@@ -62,8 +66,12 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
     try {
       const config: any = await invoke('get_db_config');
       setDbUrl(config.database_url);
+      setLoanPeriod(config.loan_period_days || 7);
+      setFineRate(config.fine_per_day || 5.0);
     } catch (e) {
-      setDbUrl('postgres://postgres:password@localhost:5432/infolib');
+      setDbUrl('postgres://postgres:password@localhost:5432/lib_mgmt');
+      setLoanPeriod(7);
+      setFineRate(5.0);
     }
   };
 
@@ -82,8 +90,14 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
 
   const saveDbConfig = async () => {
     try {
-      await invoke('save_db_config', { config: { database_url: dbUrl } });
-      setDbStatus('Configuration saved. Restart app to apply changes.');
+      await invoke('save_db_config', { 
+        config: { 
+          database_url: dbUrl,
+          loan_period_days: loanPeriod,
+          fine_per_day: fineRate
+        } 
+      });
+      setDbStatus('Configuration saved. Restart app to apply database changes.');
     } catch (e) {
       setDbStatus(`Save failed: ${e}`);
     }
@@ -169,20 +183,20 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
   };
 
   const tabClass = (t: string) =>
-    `px-4 py-1 text-sm font-bold cursor-pointer ${
+    `px-4 py-1 text-sm font-bold cursor-pointer transition-all duration-200 ${
       tab === t
-        ? 'bg-[#D4D0C8] dark:bg-dark-surface border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-0 border-r-2 border-r-gray-800 dark:border-r-dark-shadow -mb-[1px] relative z-10'
-        : 'bg-[#b0b0b0] dark:bg-dark-panel border-t border-l border-white dark:border-dark-highlight border-b border-r border-gray-800 dark:border-dark-shadow'
+        ? 'bg-[#D4D0C8] dark:bg-dark-surface border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-0 border-r-2 border-r-gray-800 dark:border-r-dark-shadow -mb-[1px] relative z-10 text-[#000080] dark:text-dark-accent shadow-[2px_-2px_4px_rgba(0,0,0,0.1)]'
+        : 'bg-[#b0b0b0] dark:bg-dark-panel border-t border-l border-white dark:border-dark-highlight border-b border-r border-gray-800 dark:border-dark-shadow text-gray-700 dark:text-dark-text-muted hover:bg-[#c0c0c0] dark:hover:bg-dark-panel/80'
     }`;
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center backdrop-blur-sm transition-all duration-300">
-      <div className="bg-[#D4D0C8] dark:bg-dark-surface border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-2 border-r-2 border-gray-800 dark:border-dark-shadow w-[580px] shadow-2xl animate-fade-in">
+      <div className="bg-[#D4D0C8] dark:bg-dark-surface border-t-2 border-l-2 border-white dark:border-dark-highlight border-b-2 border-r-2 border-gray-800 dark:border-dark-shadow w-[580px] shadow-2xl animate-fade-in overflow-hidden rounded-sm">
         {/* Title Bar */}
-        <div className="title-bar-gjc">
+        <div className="title-bar-gjc flex items-center justify-between px-2 py-1 select-none">
           <div className="flex items-center gap-2">
             <span className="text-lg">⚙</span>
-            <span>infoLib Settings</span>
+            <span className="font-bold tracking-tight">infoLib Settings</span>
           </div>
           <button
             onClick={onClose}
@@ -193,8 +207,9 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
         </div>
 
         {/* Tab Headers */}
-        <div className="flex px-4 pt-3 gap-1">
+        <div className="flex px-4 pt-3 gap-1 overflow-x-auto no-scrollbar">
           <div className={tabClass('db')} onClick={() => setTab('db')}>Database</div>
+          <div className={tabClass('circulation')} onClick={() => setTab('circulation')}>Circulation</div>
           <div className={tabClass('ai')} onClick={() => setTab('ai')}>AI Engine</div>
           <div className={tabClass('branding')} onClick={() => setTab('branding')}>Branding</div>
           <div className={tabClass('display')} onClick={() => setTab('display')}>Display</div>
@@ -368,6 +383,61 @@ export const SettingsPage: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                     Save & Confirm Sync Settings
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {tab === 'circulation' && (
+            <div className="space-y-6 animate-fade-in">
+              <div>
+                <p className="text-[10px] font-bold mb-2 uppercase tracking-wider text-gray-500 dark:text-dark-text-muted italic">Institutional Circulation Rules</p>
+                <div className="bg-white dark:bg-dark-input border-2 border-gray-600 dark:border-dark-border-dark border-t-gray-800 dark:border-t-dark-shadow border-l-gray-800 dark:border-l-dark-shadow shadow-inner p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-dark-text">Default Loan Period:</label>
+                      <p className="text-[10px] text-gray-500 dark:text-dark-text-muted italic">Number of days allowed before an item is overdue</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        value={loanPeriod}
+                        onChange={(e) => setLoanPeriod(parseInt(e.target.value) || 0)}
+                        className="input-classic w-20 text-center font-bold"
+                      />
+                      <span className="text-xs font-bold text-gray-600 dark:text-dark-text-muted">Days</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-gray-200 dark:border-dark-border-dark pt-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-dark-text">Fine Rate (Per Day):</label>
+                      <p className="text-[10px] text-gray-500 dark:text-dark-text-muted italic">Daily penalty amount for overdue items (in PHP)</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-600 dark:text-dark-text-muted">₱</span>
+                      <input
+                        type="number"
+                        step="0.5"
+                        value={fineRate}
+                        onChange={(e) => setFineRate(parseFloat(e.target.value) || 0)}
+                        className="input-classic w-20 text-center font-bold"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 dark:bg-dark-panel p-3 border-2 border-gray-400 dark:border-dark-border-dark border-t-gray-600 dark:border-t-dark-shadow border-l-gray-600 dark:border-l-dark-shadow text-[11px] text-[#000080] dark:text-dark-accent italic leading-relaxed">
+                ℹ️ Changes to circulation rules will apply to all <strong>future</strong> checkouts. Existing loans will maintain their original due dates but will use the updated fine rate upon return.
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={saveDbConfig}
+                  className="btn-gjc px-8 py-2 text-xs flex items-center gap-2 shadow-lg"
+                >
+                  <span>💾</span> Apply Circulation Rules
+                </button>
               </div>
             </div>
           )}

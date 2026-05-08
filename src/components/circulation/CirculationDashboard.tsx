@@ -70,7 +70,7 @@ export const CirculationDashboard: React.FC<CirculationDashboardProps> = ({ onCl
             <StatCard 
               icon={Wallet} 
               label="Total Fines" 
-              value={`$${stats?.total_fines || 0}`} 
+              value={`₱${stats?.total_fines || 0}`} 
               color="bg-green-600" 
             />
           </div>

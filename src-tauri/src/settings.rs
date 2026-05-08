@@ -22,7 +22,14 @@ pub struct AppConfig {
     /// Path to Ollama installation (bundled or system). Written by NSIS installer.
     #[serde(default)]
     pub ollama_home: Option<String>,
+    #[serde(default = "default_loan_period")]
+    pub loan_period_days: i32,
+    #[serde(default = "default_fine_per_day")]
+    pub fine_per_day: f64,
 }
+
+fn default_loan_period() -> i32 { 7 }
+fn default_fine_per_day() -> f64 { 5.0 }
 
 impl Default for AppConfig {
     fn default() -> Self {
@@ -31,6 +38,8 @@ impl Default for AppConfig {
             app_logo: None,
             pg_home: None,
             ollama_home: None,
+            loan_period_days: 7,
+            fine_per_day: 5.0,
         }
     }
 }

@@ -11,7 +11,7 @@ use tauri::{
 };
 use db::DbState;
 use ai::AiState;
-use models::{CatalogRecord, CatalogEntry, Holdings, Patron, Circulation, CirculationStats, OverdueItem, AuditResult, FinancialSummary, AcquisitionRecord, Author, Subject, Reservation};
+use models::{CatalogRecord, CatalogEntry, Holdings, Patron, Circulation, CirculationStats, OverdueItem, AuditResult, FinancialSummary, AcquisitionRecord, Author, Subject, Reservation, PaymentRecord};
 use chrono::Utc;
 use sqlx::Row;
 
@@ -156,9 +156,11 @@ async fn delete_patron(idno: String, state: tauri::State<'_, DbState>) -> Result
 }
 
 #[tauri::command]
-async fn check_out_item(accession: String, idno: String, state: tauri::State<'_, DbState>) -> Result<(), String> {
+async fn check_out_item(accession: String, idno: String, app: tauri::AppHandle, state: tauri::State<'_, DbState>) -> Result<(), String> {
+  let config = settings::load_config(&app);
   let now = Utc::now();
-  let due = now + chrono::Duration::days(7); // default 7 days
+  let due = now + chrono::Duration::days(config.loan_period_days as i64);
+  
   sqlx::query(
     r#"INSERT INTO "public"."tblRent" ("Accession", "dteBorrow", "dteDue", "Idno") VALUES ($1, $2, $3, $4)"#
   )
@@ -180,41 +182,145 @@ async fn check_out_item(accession: String, idno: String, state: tauri::State<'_,
 }
 
 #[tauri::command]
-async fn return_item(accession: String, state: tauri::State<'_, DbState>) -> Result<(), String> {
+async fn return_item(accession: String, app: tauri::AppHandle, state: tauri::State<'_, DbState>) -> Result<f64, String> {
+  let config = settings::load_config(&app);
   let now = Utc::now();
-  sqlx::query(r#"UPDATE "public"."tblRent" SET "dteReturn" = $1 WHERE "Accession" = $2 AND "dteReturn" IS NULL"#)
-  .bind(now)
+  let pool = state.get_pool().await?;
+
+  // 1. Get the loan record
+  let loan = sqlx::query(
+    r#"SELECT "dteDue", "Idno" FROM "public"."tblRent" WHERE "Accession" = $1 AND "dteReturn" IS NULL"#
+  )
   .bind(&accession)
-  .execute(&state.get_pool().await?)
+  .fetch_optional(&pool)
   .await
   .map_err(|e| e.to_string())?;
 
-  sqlx::query(r#"UPDATE "public"."tblHoldings" SET "Status" = 'Available' WHERE "Accession" = $1"#)
-  .bind(&accession)
-  .execute(&state.get_pool().await?)
+  let mut fine_amount = 0.0;
+  if let Some(row) = loan {
+    let dte_due: chrono::DateTime<chrono::Utc> = row.try_get("dteDue").map_err(|e| e.to_string())?;
+    let idno: String = row.try_get("Idno").map_err(|e| e.to_string())?;
+
+    if now > dte_due {
+      let duration = now.signed_duration_since(dte_due);
+      let days = duration.num_days();
+      if days > 0 {
+        fine_amount = days as f64 * config.fine_per_day;
+        
+        // Update user's unpaid fine
+        sqlx::query(r#"UPDATE "public"."tblUser" SET "UnpaidFine" = COALESCE("UnpaidFine", 0) + $1 WHERE "Idno" = $2"#)
+          .bind(fine_amount as i32)
+          .bind(&idno)
+          .execute(&pool)
+          .await
+          .map_err(|e| e.to_string())?;
+      }
+    }
+
+    // 2. Update the rent record
+    sqlx::query(r#"UPDATE "public"."tblRent" SET "dteReturn" = $1 WHERE "Accession" = $2 AND "dteReturn" IS NULL"#)
+      .bind(now)
+      .bind(&accession)
+      .execute(&pool)
+      .await
+      .map_err(|e| e.to_string())?;
+
+    // 3. Update holding status
+    sqlx::query(r#"UPDATE "public"."tblHoldings" SET "Status" = 'Available' WHERE "Accession" = $1"#)
+      .bind(&accession)
+      .execute(&pool)
+      .await
+      .map_err(|e| e.to_string())?;
+  } else {
+    return Err("No active loan found for this accession.".to_string());
+  }
+
+  Ok(fine_amount)
+}
+
+#[tauri::command]
+async fn get_active_loans(idno: String, state: tauri::State<'_, DbState>) -> Result<Vec<Circulation>, String> {
+  let rows = sqlx::query(
+    r#"SELECT "Accession", "dteBorrow", "dteDue", "dteReturn", "FineCode", "Idno" 
+       FROM "public"."tblRent" 
+       WHERE "Idno" = $1 AND "dteReturn" IS NULL"#
+  )
+  .bind(idno)
+  .fetch_all(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
 
-  Ok(())
+  let loans = rows.into_iter().map(|row| Circulation {
+    accession: row.try_get("Accession").unwrap_or_default(),
+    dte_borrow: row.try_get("dteBorrow").unwrap_or_else(|_| Utc::now()),
+    dte_due: row.try_get("dteDue").unwrap_or_else(|_| Utc::now()),
+    dte_return: row.try_get("dteReturn").ok(),
+    fine_code: row.try_get("FineCode").ok(),
+    idno: row.try_get("Idno").unwrap_or_default(),
+  }).collect();
+
+  Ok(loans)
 }
 
 #[tauri::command]
-async fn get_active_loans(_state: tauri::State<'_, DbState>) -> Result<Vec<Circulation>, String> {
-  Ok(vec![]) // simplified for now
-}
+async fn get_circulation_stats(state: tauri::State<'_, DbState>) -> Result<CirculationStats, String> {
+  let pool = state.get_pool().await?;
+  let now = Utc::now();
 
-#[tauri::command]
-async fn get_circulation_stats(_state: tauri::State<'_, DbState>) -> Result<CirculationStats, String> {
+  let active = sqlx::query(r#"SELECT COUNT(*) as count FROM "public"."tblRent" WHERE "dteReturn" IS NULL"#)
+    .fetch_one(&pool).await.map_err(|e| e.to_string())?;
+  
+  let overdue = sqlx::query(r#"SELECT COUNT(*) as count FROM "public"."tblRent" WHERE "dteReturn" IS NULL AND "dteDue" < $1"#)
+    .bind(now)
+    .fetch_one(&pool).await.map_err(|e| e.to_string())?;
+
+  let fines = sqlx::query(r#"SELECT SUM("UnpaidFine") as total FROM "public"."tblUser""#)
+    .fetch_one(&pool).await.map_err(|e| e.to_string())?;
+
   Ok(CirculationStats {
-    total_active: 0,
-    total_overdue: 0,
-    total_fines: 0,
+    total_active: active.try_get("count").unwrap_or(0),
+    total_overdue: overdue.try_get("count").unwrap_or(0),
+    total_fines: fines.try_get::<Option<i32>, _>("total").unwrap_or_default().unwrap_or(0),
   })
 }
 
 #[tauri::command]
-async fn get_overdue_items(_state: tauri::State<'_, DbState>) -> Result<Vec<OverdueItem>, String> {
-  Ok(vec![])
+async fn get_overdue_items(state: tauri::State<'_, DbState>) -> Result<Vec<OverdueItem>, String> {
+  let now = Utc::now();
+  let rows = sqlx::query(
+    r#"
+    SELECT 
+      r."Accession", 
+      c."Title", 
+      u."Name" as patron_name, 
+      r."Idno", 
+      r."dteDue"
+    FROM "public"."tblRent" r
+    JOIN "public"."tblHoldings" h ON r."Accession" = h."Accession"
+    JOIN "public"."tblCat" c ON h."controlno" = c."controlno"
+    JOIN "public"."tblUser" u ON r."Idno" = u."Idno"
+    WHERE r."dteReturn" IS NULL AND r."dteDue" < $1
+    "#
+  )
+  .bind(now)
+  .fetch_all(&state.get_pool().await?)
+  .await
+  .map_err(|e| e.to_string())?;
+
+  let items = rows.into_iter().map(|row| {
+    let due_date: chrono::DateTime<chrono::Utc> = row.try_get("dteDue").unwrap_or_else(|_| Utc::now());
+    let days_overdue = now.signed_duration_since(due_date).num_days();
+    OverdueItem {
+      accession: row.try_get("Accession").unwrap_or_default(),
+      title: row.try_get("Title").unwrap_or_default(),
+      patron_name: row.try_get("patron_name").unwrap_or_default(),
+      idno: row.try_get("Idno").unwrap_or_default(),
+      due_date,
+      days_overdue,
+    }
+  }).collect();
+
+  Ok(items)
 }
 
 #[tauri::command]
@@ -258,11 +364,40 @@ async fn pay_fine(idno: String, amount: i32, state: tauri::State<'_, DbState>) -
 }
 
 #[tauri::command]
-async fn get_financial_reports(_state: tauri::State<'_, DbState>) -> Result<FinancialSummary, String> {
+async fn get_financial_reports(state: tauri::State<'_, DbState>) -> Result<FinancialSummary, String> {
+  let pool = state.get_pool().await?;
+
+  let collected = sqlx::query(r#"SELECT SUM("AmountPay") as total FROM "public"."tblFineCode""#)
+    .fetch_one(&pool).await.map_err(|e| e.to_string())?;
+
+  let outstanding = sqlx::query(r#"SELECT SUM("UnpaidFine") as total FROM "public"."tblUser""#)
+    .fetch_one(&pool).await.map_err(|e| e.to_string())?;
+
+  let rows = sqlx::query(
+    r#"
+    SELECT f."AmountPay", f."Idno", f."dtePay", f."Cashier", u."Name" as patron_name
+    FROM "public"."tblFineCode" f
+    LEFT JOIN "public"."tblUser" u ON f."Idno" = u."Idno"
+    ORDER BY f."dtePay" DESC
+    LIMIT 50
+    "#
+  )
+  .fetch_all(&pool)
+  .await
+  .map_err(|e| e.to_string())?;
+
+  let recent_payments = rows.into_iter().map(|row| PaymentRecord {
+    amount_pay: row.try_get("AmountPay").unwrap_or(0),
+    idno: row.try_get("Idno").unwrap_or_default(),
+    dte_pay: row.try_get("dtePay").unwrap_or_else(|_| Utc::now()),
+    cashier: row.try_get("Cashier").unwrap_or_else(|_| "System".to_string()),
+    patron_name: row.try_get("patron_name").ok(),
+  }).collect();
+
   Ok(FinancialSummary {
-      total_collected: 0,
-      total_outstanding: 0,
-      recent_payments: vec![],
+    total_collected: collected.try_get::<Option<i32>, _>("total").unwrap_or_default().unwrap_or(0),
+    total_outstanding: outstanding.try_get::<Option<i32>, _>("total").unwrap_or_default().unwrap_or(0),
+    recent_payments,
   })
 }
 

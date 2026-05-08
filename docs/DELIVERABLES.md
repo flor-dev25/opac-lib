@@ -14,7 +14,7 @@ This document defines the formal requirements and deliverables for the **infoLib
 | **LMS-04** | **Legacy OPAC Parity** | ✅ Integrated | Full database architecture parity with legacy systems. |
 | **LMS-05** | **Legacy MDB Import** | ✅ Integrated | High-speed import tool for legacy `.mdb` (Microsoft Access) data files. |
 | **LMS-06** | **Cloud Sync System** | ✅ Integrated | Real-time dual-sync with Supabase (PostgreSQL) and Firebase. |
-| **LMS-07** | **Circulation Engine** | 🟡 In Progress | Borrowing and returning books. Needs admin settings for payments and due dates. |
+| **LMS-07** | **Circulation Engine** | ✅ Integrated | Borrowing/Returning with admin-configurable due dates and fine rates. |
 | **LMS-08** | **Branding Engine** | ✅ Integrated | Editable organization name and custom logo upload support. |
 | **LMS-09** | **Theme Engine** | ✅ Integrated | Global theme settings (Light, Dark, High-Contrast Win95 schemes). |
 | **LMS-10** | **Admin Management** | 🟡 In Progress | Basic auth active. Needs "Admin add Admins" UI for multi-user management. |

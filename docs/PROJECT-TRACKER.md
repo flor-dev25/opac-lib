@@ -134,3 +134,9 @@ Complete parity implementation of Library Management System based on wireframe s
 - [ ] M013-S02: Online AI API (Deepseek)
 - [x] M013-S03: LMS-01 Offline Installer (NSIS + PG Auto-Provisioning + Ollama Bundling)
 - [ ] M013-S04: Global Email Notification System
+
+### Phase 14: Circulation Engine (M014)
+- [x] M014-S01: Admin Configuration (Loan Period/Fine Rate)
+- [x] M014-S02: Automated Fine Calculation Logic
+- [x] M014-S03: Circulation Dashboard (Live Stats)
+- [x] M014-S04: Financial Reporting (Collections)

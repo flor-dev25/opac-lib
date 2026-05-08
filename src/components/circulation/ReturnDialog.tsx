@@ -86,7 +86,7 @@ export const ReturnDialog: React.FC<ReturnDialogProps> = ({ onClose }) => {
                 {success}
                 {fine !== null && fine > 0 && (
                   <div className="mt-1 text-red-600 uppercase">
-                    Overdue Fine: ${fine.toFixed(2)} added to patron's account.
+                    Overdue Fine: ₱{fine.toFixed(2)} added to patron's account.
                   </div>
                 )}
               </div>
