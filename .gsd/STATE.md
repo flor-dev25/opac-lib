@@ -198,6 +198,16 @@
 **Status:** Active. Fast, terse agentic execution protocol enabled.
 
 ## Next Action
+- LMS-01 Installer: ✅ COMPLETE. NSIS offline installer with PG auto-provisioning and Ollama bundling.
 - Attendance System: Initiate M012-S01 (Door PC Client) development.
 - Attendance System: Design CSV student/faculty import schema.
 - Premium: Research Twilio SMS implementation for Overdue alerts.
+
+## M013 Decisions
+- D091: Created M013-PLAN.md — Phase 13 LMS-01 Offline Installer architectural blueprint.
+- D092: Extended PG detection to cover versions 16, 17, and 18 (PATH, service, file path).
+- D093: Added `pg_home` and `ollama_home` fields to `AppConfig` struct for runtime dep location.
+- D094: Installer preserves existing `db_config.json` on re-install (Install Safe).
+- D095: Changed default DB name from `infolib` to `lib_mgmt` across settings.rs and NSIS hooks.
+- D096: NSIS sends `WM_WININICHANGE` broadcast after registry changes for immediate env propagation.
+- D097: Bundle targets narrowed from `"all"` to `["nsis"]` — only Windows NSIS needed.

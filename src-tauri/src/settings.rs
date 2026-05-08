@@ -16,13 +16,21 @@ pub struct ProcessOptions {
 pub struct AppConfig {
     pub database_url: String,
     pub app_logo: Option<String>,
+    /// Path to PostgreSQL installation (bundled or system). Written by NSIS installer.
+    #[serde(default)]
+    pub pg_home: Option<String>,
+    /// Path to Ollama installation (bundled or system). Written by NSIS installer.
+    #[serde(default)]
+    pub ollama_home: Option<String>,
 }
 
 impl Default for AppConfig {
     fn default() -> Self {
         Self {
-            database_url: "postgres://postgres:password@localhost:5432/infolib".to_string(),
+            database_url: "postgres://postgres:password@localhost:5432/lib_mgmt".to_string(),
             app_logo: None,
+            pg_home: None,
+            ollama_home: None,
         }
     }
 }

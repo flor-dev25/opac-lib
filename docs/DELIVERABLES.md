@@ -8,7 +8,7 @@ This document defines the formal requirements and deliverables for the **infoLib
 
 | ID | Feature | Status | Notes |
 |:---|:---|:---|:---|
-| **LMS-01** | **Offline Installer** | ⬜ Pending | Must support PostgreSQL auto-detection and secure credential creation/setup. |
+| **LMS-01** | **Offline Installer** | ✅ Integrated | NSIS bundler with PG auto-detection, Ollama bundling, credential page, and db_config.json provisioning. |
 | **LMS-02** | **Offline AI Chat** | ✅ Integrated | Powered by Ollama (Phi-3) for local reasoning without internet. |
 | **LMS-03** | **Gmail Login** | ✅ Integrated | Includes smart internet detection to toggle between offline and online auth. |
 | **LMS-04** | **Legacy OPAC Parity** | ✅ Integrated | Full database architecture parity with legacy systems. |
@@ -53,7 +53,7 @@ Features requiring external API integrations and recurring service credits.
 ## 🛠️ Implementation Todo List
 
 - [ ] **Email Auto-Send**: Implement automatic email dispatch for sync activity logs (Success/Failure/Skipped).
-- [ ] **PostgreSQL Auto-Installer**: Script the silent installation and initialization of PostgreSQL for Windows.
+- [x] **PostgreSQL Auto-Installer**: Silent installation and initialization of PostgreSQL via NSIS installer hooks.
 - [ ] **Attendance CSV Pipeline**: Build the Rust parser for student/faculty CSV bulk uploads.
 - [ ] **Twilio Integration**: Develop the message queue for SMS notifications.
 

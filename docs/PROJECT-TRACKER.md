@@ -132,5 +132,5 @@ Complete parity implementation of Library Management System based on wireframe s
 ### Phase 13: Premium Services & Hardening (M013)
 - [ ] M013-S01: Twilio SMS Integration
 - [ ] M013-S02: Online AI API (Deepseek)
-- [ ] M013-S03: PostgreSQL Auto-Detection Installer
+- [x] M013-S03: LMS-01 Offline Installer (NSIS + PG Auto-Provisioning + Ollama Bundling)
 - [ ] M013-S04: Global Email Notification System
