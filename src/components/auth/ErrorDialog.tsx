@@ -8,7 +8,7 @@ interface ErrorDialogProps {
 
 export const ErrorDialog: React.FC<ErrorDialogProps> = ({ message, onClose }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[1px]">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/20 backdrop-blur-[1px]">
       <BeveledBox className="w-[220px] h-[160px] flex flex-col overflow-hidden bg-classic-grey dark:bg-dark-surface" padding="p-0">
         {/* Title Bar */}
         <div className="title-bar flex-shrink-0">

@@ -44,7 +44,7 @@ export const CheckoutDialog: React.FC<CheckoutDialogProps> = ({ onClose }) => {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
       <BeveledBox variant="raised" className="w-[800px] max-h-[90vh] flex flex-col bg-[#D4D0C8] shadow-2xl">
         {/* Header */}
         <div className="bg-classic-blue px-2 py-1 flex items-center justify-between select-none">

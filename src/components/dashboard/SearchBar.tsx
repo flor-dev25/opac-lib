@@ -41,13 +41,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
             id="search-scope"
             value={scope}
             onChange={(e) => setScope(e.target.value)}
-            className="bg-transparent border-none outline-none text-sm h-5 px-1 cursor-pointer dark:text-dark-text"
+            className="bg-white dark:bg-dark-input border-none outline-none text-sm h-5 px-1 cursor-pointer dark:text-dark-text"
           >
-            <option>Keyword</option>
-            <option>Title</option>
-            <option>Author</option>
-            <option>Call Number</option>
-            <option>Subject</option>
+            <option value="Keyword" className="bg-white dark:bg-dark-input dark:text-dark-text">Keyword</option>
+            <option value="Title" className="bg-white dark:bg-dark-input dark:text-dark-text">Title</option>
+            <option value="Author" className="bg-white dark:bg-dark-input dark:text-dark-text">Author</option>
+            <option value="Call Number" className="bg-white dark:bg-dark-input dark:text-dark-text">Call Number</option>
+            <option value="Subject" className="bg-white dark:bg-dark-input dark:text-dark-text">Subject</option>
           </select>
         </div>
       </div>

@@ -50,7 +50,7 @@ export function Toast({ isOpen, onClose, title, message, type = 'info', duration
   if (!isVisible) return null
 
   return (
-    <div className="fixed top-4 right-4 z-50 animate-in">
+    <div className="fixed top-4 right-4 z-[2000] animate-in">
       <div className={`bg-white dark:bg-dark-surface rounded-lg shadow-lg border border-gray-200 dark:border-dark-border-dark p-4 max-w-md flex items-start gap-3`}>
         <div className={`w-6 h-6 ${bgColors[type]} rounded-full flex items-center justify-center flex-shrink-0`}>
           <Icon className={`w-4 h-4 ${colors[type]}`} />

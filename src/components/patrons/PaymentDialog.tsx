@@ -33,7 +33,7 @@ export const PaymentDialog: React.FC<PaymentDialogProps> = ({ onClose }) => {
   if (!selectedPatron) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
       <BeveledBox variant="raised" className="w-[400px] bg-[#D4D0C8] dark:bg-dark-surface shadow-2xl flex flex-col">
         {/* Header */}
         <div className="bg-[#000080] px-2 py-1 flex items-center justify-between select-none">

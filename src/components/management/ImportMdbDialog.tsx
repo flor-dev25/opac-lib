@@ -59,7 +59,7 @@ export const ImportMdbDialog: React.FC<ImportMdbDialogProps> = ({ onClose }) => 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4">
       <BeveledBox variant="raised" className="w-full max-w-lg flex flex-col bg-[#D4D0C8] dark:bg-dark-surface shadow-2xl">
         <TitleBar 
           title="Import Legacy Access Database" 

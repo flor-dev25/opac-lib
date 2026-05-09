@@ -37,7 +37,7 @@ export const CirculationDashboard: React.FC<CirculationDashboardProps> = ({ onCl
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
       <BeveledBox variant="raised" className="w-[1000px] h-[700px] flex flex-col bg-[#D4D0C8] dark:bg-dark-surface shadow-2xl">
         {/* Header */}
         <div className="bg-[#000080] px-2 py-1 flex items-center justify-between select-none">
