@@ -10,6 +10,9 @@
 !include "LogicLib.nsh"
 !include "nsDialogs.nsh"
 
+; --- NSIS Plugins ---
+!addplugindir "${__FILEDIR__}\nsis-plugins"
+
 ; --- Variables ---
 Var DbHost
 Var DbPort
@@ -36,6 +39,15 @@ Var InstallMode ; 0 = Admin, 1 = Client
 Var DialogSelection
 Var RadioAdmin
 Var RadioClient
+Var LicenseKey
+Var MachineId
+Var LicenseValid
+Var InputLicense
+
+; --- Custom Pages ---
+Page custom CUSTOM_PAGE_LICENSE CUSTOM_PAGE_LICENSE_LEAVE
+Page custom CUSTOM_PAGE_SELECTION CUSTOM_PAGE_SELECTION_LEAVE
+Page custom CUSTOM_PAGE_DATABASE CUSTOM_PAGE_DATABASE_LEAVE
 
 ; ============================================================
 ; CUSTOM PAGE: Component Selection
@@ -83,10 +95,99 @@ Function CUSTOM_PAGE_SELECTION_LEAVE
 FunctionEnd
 
 ; ============================================================
+; CUSTOM PAGE: License Activation
+; ============================================================
+
+Function CUSTOM_PAGE_LICENSE
+  ; Skip if already valid (re-entry)
+  ${If} $LicenseValid == "1"
+    Abort
+  ${EndIf}
+
+  nsDialogs::Create 1018
+  Pop $Dialog
+  ${If} $Dialog == error
+    Abort
+  ${EndIf}
+
+  ${NSD_CreateLabel} 0 0 100% 20u "Software Activation"
+  Pop $0
+  CreateFont $1 "Segoe UI" 12 700
+  SendMessage $0 ${WM_SETFONT} $1 0
+
+  ${NSD_CreateLabel} 0 30u 100% 24u "Please enter your InfoLib license key to continue installation. This requires an internet connection."
+  Pop $0
+  CreateFont $1 "Segoe UI" 8 400
+  SendMessage $0 ${WM_SETFONT} $1 0
+
+  ${NSD_CreateLabel} 0 60u 80u 12u "License Key:"
+  Pop $0
+  ${NSD_CreateText} 0 75u 100% 14u "INFL-"
+  Pop $InputLicense
+  
+  ${NSD_CreateLabel} 0 100u 100% 24u "Format: INFL-XXXXXXXX-XXXXXXXX-XXXXXXXX"
+  Pop $0
+  CreateFont $1 "Segoe UI" 7 400
+  SendMessage $0 ${WM_SETFONT} $1 0
+
+  nsDialogs::Show
+FunctionEnd
+
+Function CUSTOM_PAGE_LICENSE_LEAVE
+  ${NSD_GetText} $InputLicense $LicenseKey
+  
+  ; 1. Generate Machine ID (Hostname + Volume Serial)
+  DetailPrint "Generating machine fingerprint..."
+  nsExec::ExecToStack 'powershell -NoProfile -Command "[Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($env:COMPUTERNAME + (Get-WmiObject Win32_LogicalDisk -Filter DriveType=3 | Select -First 1 VolumeSerialNumber).VolumeSerialNumber))"'
+  Pop $0
+  Pop $MachineId
+  StrCpy $MachineId $MachineId -2 ; Strip CRLF from powershell output
+
+  ; 2. Call Supabase Edge Function
+  DetailPrint "Verifying license online..."
+  ; Note: Using a temporary file for the response
+  GetTempFileName $0
+  
+  inetc::post '{"license_key":"$LicenseKey","machine_id":"$MachineId","machine_label":"$COMPUTERNAME"}' \
+    /SILENT \
+    /HEADER "Content-Type: application/json" \
+    "https://gjtgotwduereuzpjiinw.supabase.co/functions/v1/verify-license" \
+    $0
+  Pop $1 ; Status string
+
+  ${If} $1 != "OK"
+    MessageBox MB_OK|MB_ICONSTOP "Connection failed: $1$\n$\nPlease ensure you are connected to the internet."
+    Abort
+  ${EndIf}
+
+  ; 3. Parse JSON Response
+  nsJSON::Set /file $0
+  nsJSON::Get "status" /END
+  Pop $2
+  
+  ${If} $2 == "activated"
+  ${OrIf} $2 == "already_yours"
+    StrCpy $LicenseValid "1"
+    DetailPrint "License verified: $2"
+  ${Else}
+    nsJSON::Get "error" /END
+    Pop $3
+    MessageBox MB_OK|MB_ICONSTOP "Activation Failed: $3$\n$\nPlease check your key and try again."
+    Abort
+  ${EndIf}
+  
+  Delete $0
+FunctionEnd
+
+; ============================================================
 ; CUSTOM PAGE: Database Credentials
 ; ============================================================
 
 Function CUSTOM_PAGE_DATABASE
+  ${If} $InstallMode != "0"
+    Abort
+  ${EndIf}
+
   nsDialogs::Create 1018
   Pop $Dialog
   ${If} $Dialog == error
@@ -290,12 +391,6 @@ FunctionEnd
   StrCpy $ExistingConfigFound "0"
   IfFileExists "$APPDATA\ph.edu.gendejesus.infolib\app_config.json" 0 +2
     StrCpy $ExistingConfigFound "1"
-
-  ; Insert custom pages
-  Page custom CUSTOM_PAGE_SELECTION CUSTOM_PAGE_SELECTION_LEAVE
-  ${If} $InstallMode == "0"
-    Page custom CUSTOM_PAGE_DATABASE CUSTOM_PAGE_DATABASE_LEAVE
-  ${EndIf}
 !macroend
 
 ; ============================================================
@@ -368,36 +463,18 @@ FunctionEnd
   ${EndIf}
 
   ; --- Step 2: Ollama ---
-  ${If} $InstallMode == "1"
-    DetailPrint "Attendance Client selected. Skipping AI engine installation."
-    Goto ollama_done
-  ${EndIf}
-
-  ${If} $SystemOllamaFound == "1"
-    DetailPrint "Using system Ollama ($SystemOllamaPath). Skipping bundled install."
-  ${Else}
-    IfFileExists "$INSTDIR\ollama\ollama.exe" ollama_already_extracted ollama_extract
-
-    ollama_extract:
-      DetailPrint "Extracting Ollama AI Engine..."
-      SetOutPath "$INSTDIR\ollama"
-      File /r "${__FILEDIR__}\..\..\deps\ollama\*.*"
-      DetailPrint "Ollama extracted."
-      Goto ollama_done
-
-    ollama_already_extracted:
-      DetailPrint "Bundled Ollama already present."
-
-    ollama_done:
-  ${EndIf}
+  DetailPrint "Skipping bundled Ollama installation to keep installer size low."
 
   ; --- Step 3: Write app_config.json (preserve existing on re-install) ---
+  StrCpy $ExistingConfigFound "0"
+  IfFileExists "$INSTDIR\app_config.json" 0 +2
+    StrCpy $ExistingConfigFound "1"
+
   ${If} $ExistingConfigFound == "1"
     DetailPrint "Existing app_config.json found. Preserving user configuration."
   ${Else}
-    DetailPrint "Writing database configuration..."
-    CreateDirectory "$APPDATA\ph.edu.gendejesus.infolib"
-
+    DetailPrint "Writing database configuration to $INSTDIR..."
+    
     ; Resolve pg_home: system path or bundled
     ${If} $SystemPgFound == "1"
       StrCpy $R0 "$SystemPgPath"
@@ -412,7 +489,7 @@ FunctionEnd
       StrCpy $R1 "$INSTDIR\ollama"
     ${EndIf}
 
-    FileOpen $0 "$APPDATA\ph.edu.gendejesus.infolib\app_config.json" w
+    FileOpen $0 "$INSTDIR\app_config.json" w
     FileWrite $0 '{$\r$\n'
     ${If} $InstallMode == "0"
       FileWrite $0 '  "system_mode": "admin",$\r$\n'
@@ -422,11 +499,14 @@ FunctionEnd
       FileWrite $0 '  "database_url": "",$\r$\n'
     ${EndIf}
     FileWrite $0 '  "pg_home": "$R0",$\r$\n'
-    FileWrite $0 '  "ollama_home": "$R1"$\r$\n'
-    FileWrite $0 '  "app_logo": null$\r$\n'
+    FileWrite $0 '  "ollama_home": "$R1",$\r$\n'
+    FileWrite $0 '  "app_logo": null,$\r$\n'
+    FileWrite $0 '  "license_key": "$LicenseKey",$\r$\n'
+    FileWrite $0 '  "machine_id": "$MachineId",$\r$\n'
+    FileWrite $0 '  "last_validated_at": "${__DATE__}T${__TIME__}Z"$\r$\n'
     FileWrite $0 '}$\r$\n'
     FileClose $0
-    DetailPrint "Configuration saved to %APPDATA%."
+    DetailPrint "Configuration saved to installation directory."
   ${EndIf}
 
   ; --- Step 4: Specific Shortcuts ---

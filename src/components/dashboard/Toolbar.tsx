@@ -1,5 +1,5 @@
 import React from 'react';
-import { FilePlus, Trash2, Download, BookOpen, Info, LogOut, Users, LayoutDashboard, Edit, ArrowUpRight, ArrowDownLeft, Activity, Wallet, ScanBarcode, TrendingUp, BookPlus, BookmarkPlus, Settings, ToggleLeft, DatabaseBackup, UserPlus, UserCheck } from 'lucide-react';
+import { FilePlus, Trash2, Download, BookOpen, Info, LogOut, Settings, ToggleLeft } from 'lucide-react';
 import { ToolbarItem } from './ToolbarItem';
 import { SyncComboButton } from './SyncComboButton';
 import { useAuthStore } from '../../stores/authStore';

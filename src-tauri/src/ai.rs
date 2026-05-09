@@ -162,6 +162,36 @@ struct OllamaPullResponse {
 }
 
 #[tauri::command]
+pub async fn check_ollama_presence(app: tauri::AppHandle) -> Result<bool, String> {
+    let config = crate::settings::load_config(&app);
+    
+    // 1. Check if Ollama API is already running
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_millis(500))
+        .build()
+        .map_err(|e| e.to_string())?;
+        
+    if client.get("http://localhost:11434/api/tags").send().await.is_ok() {
+        return Ok(true);
+    }
+
+    // 2. Check if ollama_home path is valid
+    if let Some(home) = config.ollama_home {
+        let exe_path = std::path::Path::new(&home).join("ollama.exe");
+        if exe_path.exists() {
+            // Check if it's not the 16-byte placeholder (just in case)
+            if let Ok(metadata) = std::fs::metadata(&exe_path) {
+                if metadata.len() > 1024 {
+                    return Ok(true);
+                }
+            }
+        }
+    }
+
+    Ok(false)
+}
+
+#[tauri::command]
 pub async fn check_ollama_model(
     model: String,
     ai_state: tauri::State<'_, AiState>,

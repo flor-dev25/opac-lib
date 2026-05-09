@@ -214,3 +214,29 @@
 - D095: Changed default DB name from `infolib` to `lib_mgmt` across settings.rs and NSIS hooks.
 - D096: NSIS sends `WM_WININICHANGE` broadcast after registry changes for immediate env propagation.
 - D097: Bundle targets narrowed from `"all"` to `["nsis"]` — only Windows NSIS needed.
+- D098: License key format `INFL-XXXXXXXX-XXXXXXXX-XXXXXXXX` (29 chars, custom Base32, strips 0/O/I/1 for typo-safety).
+- D099: Store SHA-256 hash of key in Supabase `licenses` table; never the raw key.
+- D100: Machine binding via `SHA256(hostname + C:\ volume serial number)` — computed by NSIS PowerShell.
+- D101: Supabase Edge Function (Deno) is the sole validation authority; client-side logic is defence-in-depth only.
+- D102: 30-day offline grace period; `last_validated_at` stored in `db_config.json` and updated on each successful heartbeat.
+- D103: Completed Licensing Infrastructure and verified activation via Supabase Edge Functions.
+- D104: Adopted "Low-Size Installer" model. Removed bundled Ollama binary (~400MB) from the main installer to ensure fast delivery.
+- D105: Moved `app_config.json` writing from `%APPDATA%` to the installation directory (`$INSTDIR`) to resolve "Configuration file not found" errors caused by admin/user permission mismatches.
+- D106: Updated Rust settings backend to support portable mode (checks executable directory for config before falling back to AppData).
+- D107: Implemented `check_ollama_presence` command and `OllamaPromptDialog` UI to detect missing AI engine on startup and offer a choice to install it, keeping the initial installer lightweight.
+
+## Milestones
+| Milestone | Title | Status | Scope |
+| :--- | :--- | :--- | :--- |
+| M013 | Offline Installer Infrastructure | DONE | Single-click bundles for PG/Ollama (Manual Ops) |
+| M014 | Library Circulation Engine | DONE | Robust loan/fine logic and reporting |
+| M015 | Software License Activation | DONE | Secure machine-bound licensing system |
+
+**Active Milestone:** M015 — Software License Activation
+**Active Slice:** S03 — Config Persistence & Runtime Heartbeat
+**Phase:** Execution
+
+### Files
+- `.gsd/milestones/M015/M015-PLAN.md`
+- `.gsd/milestones/M015/M015-CONTEXT.md`
+- `docs/LICENSE-FLOW.md`

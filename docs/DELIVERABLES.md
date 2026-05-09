@@ -8,8 +8,8 @@ This document defines the formal requirements and deliverables for the **infoLib
 
 | ID | Feature | Status | Notes |
 |:---|:---|:---|:---|
-| **LMS-01** | **Offline Installer** | ✅ Integrated | NSIS bundler with PG auto-detection, Ollama bundling, credential page, and db_config.json provisioning. |
-| **LMS-02** | **Offline AI Chat** | ✅ Integrated | Powered by Ollama (Phi-3) for local reasoning without internet. |
+| **LMS-01** | **Low-Size Installer** | ✅ Integrated | NSIS bundler with PG auto-detection, external Ollama support, credential page, and portable config provisioning. |
+| **LMS-02** | **AI Chat** | ✅ Integrated | Powered by Ollama (Phi-3). Requires external Ollama installation for AI chat availability. |
 | **LMS-03** | **Gmail Login** | ✅ Integrated | Includes smart internet detection to toggle between offline and online auth. |
 | **LMS-04** | **Legacy OPAC Parity** | ✅ Integrated | Full database architecture parity with legacy systems. |
 | **LMS-05** | **Legacy MDB Import** | ✅ Integrated | High-speed import tool for legacy `.mdb` (Microsoft Access) data files. |
@@ -19,6 +19,7 @@ This document defines the formal requirements and deliverables for the **infoLib
 | **LMS-09** | **Theme Engine** | ✅ Integrated | Global theme settings (Light, Dark, High-Contrast Win95 schemes). |
 | **LMS-10** | **Admin Management** | 🟡 In Progress | Basic auth active. Needs "Admin add Admins" UI for multi-user management. |
 | **LMS-11** | **Reporting & PDF** | ⬜ Pending | Generation of statistics and printable PDF reports. |
+| **LMS-12** | **License Activation** | ✅ Integrated | NSIS license key gate + Supabase Edge Function verification + machine binding + 30-day offline grace. |
 
 ---
 

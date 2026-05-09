@@ -25,8 +25,10 @@ const PatronEditWrapper = () => {
   return <PatronForm initialData={patron} />;
 };
 
+import { OllamaPromptDialog } from './components/layout/OllamaPromptDialog';
+
 function App() {
-  const { mode, initSystem, isLoading } = useSystemStore();
+  const { mode, initSystem, isLoading, licenseError } = useSystemStore();
 
   useEffect(() => {
     initSystem();
@@ -45,68 +47,101 @@ function App() {
     );
   }
 
-  if (mode === 'client') {
-    return <AttendancePage />;
+  if (licenseError) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-[#008080]">
+        <div className="w-[450px] bg-classic-grey border-2 border-t-white border-l-white border-b-black border-r-black p-1 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+          <div className="bg-[#000080] text-white px-2 py-1 flex justify-between items-center mb-4">
+            <span className="font-bold text-sm">System Activation Error</span>
+            <div className="bg-classic-grey border border-t-white border-l-white border-b-black border-r-black px-1.5 text-black text-xs font-bold">X</div>
+          </div>
+          <div className="px-6 py-4 flex flex-col items-center space-y-6">
+            <div className="flex items-center space-x-4">
+               <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white text-3xl font-bold border-2 border-t-white border-l-white border-b-black border-r-black">!</div>
+               <p className="text-black font-bold text-sm leading-tight">
+                 {licenseError}
+               </p>
+            </div>
+            <p className="text-gray-700 text-xs text-center">
+              Please contact your system administrator or infoLib support to activate this machine.
+            </p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-6 py-1 bg-classic-grey border-2 border-t-white border-l-white border-b-black border-r-black active:border-t-black active:border-l-black active:border-b-white active:border-r-white text-sm font-bold"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <DashboardPage />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/catalog/new"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <CatalogForm />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/patrons"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <PatronPage />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/patrons/new"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <PatronForm />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/patrons/edit/:idno"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <PatronEditWrapper />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <>
+      <OllamaPromptDialog />
+      {mode === 'client' ? (
+        <AttendancePage />
+      ) : (
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <DashboardPage />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/catalog/new"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <CatalogForm />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/patrons"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <PatronPage />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/patrons/new"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <PatronForm />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/patrons/edit/:idno"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <PatronEditWrapper />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </BrowserRouter>
+      )}
+    </>
   );
 }
 

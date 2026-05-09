@@ -124,21 +124,28 @@ export const EditCatalogDialog: React.FC<EditCatalogDialogProps> = ({ controlno,
         
         {/* Sub-Toolbar (Parity with Wireframe 010) */}
         <div className="flex gap-1 p-1 bg-[#D4D0C8] dark:bg-dark-panel border-b border-white dark:border-dark-highlight shadow-[0_1px_0_#808080] dark:shadow-[0_1px_0_#1A1A1A]">
-          <button className="flex flex-col items-center p-1 w-16 hover:bg-gray-200 border border-transparent hover:border-gray-400">
-            <PlusSquare size={24} />
-            <span className="text-[10px]">Add New</span>
+          <button className="flex flex-col items-center p-1 w-16 hover:bg-gray-200 dark:hover:bg-dark-surface-alt border border-transparent hover:border-gray-400 dark:hover:border-dark-highlight">
+            <PlusSquare size={24} className="dark:text-dark-text" />
+            <span className="text-[10px] dark:text-dark-text">Add New</span>
           </button>
-          <button onClick={handleSubmit(onSaveMetadata)} className="flex flex-col items-center p-1 w-16 hover:bg-gray-200 border border-transparent hover:border-gray-400">
-            <Save size={24} />
-            <span className="text-[10px]">Save</span>
+          <button onClick={handleSubmit(onSaveMetadata)} className="flex flex-col items-center p-1 w-16 hover:bg-gray-200 dark:hover:bg-dark-surface-alt border border-transparent hover:border-gray-400 dark:hover:border-dark-highlight">
+            <Save size={24} className="dark:text-dark-text" />
+            <span className="text-[10px] dark:text-dark-text">Save</span>
           </button>
-          <button onClick={() => setIsHoldingsMode(!isHoldingsMode)} className={`flex flex-col items-center p-1 w-16 hover:bg-gray-200 border border-transparent hover:border-gray-400 ${isHoldingsMode ? 'bg-blue-100 border-blue-400' : ''}`}>
-            <Book size={24} />
-            <span className="text-[10px]">Holdings</span>
+          <button 
+            onClick={() => setIsHoldingsMode(!isHoldingsMode)} 
+            className={`flex flex-col items-center p-1 w-16 hover:bg-gray-200 dark:hover:bg-dark-surface-alt border border-transparent hover:border-gray-400 dark:hover:border-dark-highlight ${
+              isHoldingsMode 
+                ? 'bg-blue-100 dark:bg-dark-selection border-blue-400 dark:border-dark-accent' 
+                : ''
+            }`}
+          >
+            <Book size={24} className="dark:text-dark-text" />
+            <span className="text-[10px] dark:text-dark-text">Holdings</span>
           </button>
-          <button onClick={onClose} className="flex flex-col items-center p-1 w-16 hover:bg-gray-200 border border-transparent hover:border-gray-400">
-            <LogOut size={24} />
-            <span className="text-[10px]">Exit</span>
+          <button onClick={onClose} className="flex flex-col items-center p-1 w-16 hover:bg-gray-200 dark:hover:bg-dark-surface-alt border border-transparent hover:border-gray-400 dark:hover:border-dark-highlight">
+            <LogOut size={24} className="dark:text-dark-text" />
+            <span className="text-[10px] dark:text-dark-text">Exit</span>
           </button>
           
           <div className="flex-1" />

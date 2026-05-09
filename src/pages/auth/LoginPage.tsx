@@ -41,7 +41,7 @@ export const LoginPage: React.FC = () => {
   const handleLogin = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (isLoading) return;
-    
+
     const success = await login(username, password);
     if (success) {
       navigate('/dashboard');
@@ -167,6 +167,19 @@ export const LoginPage: React.FC = () => {
                       </svg>
                       Sign in with Google
                     </button>
+                    {import.meta.env.DEV && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUsername('admin');
+                          setPassword('admin');
+                          handleLogin();
+                        }}
+                        className="text-[10px] text-gray-500 hover:underline mt-1"
+                      >
+                        [DEV] Fast Bypass Login
+                      </button>
+                    )}
                     {!isOnline && (
                       <span className="text-[10px] text-red-600 dark:text-red-400 font-bold text-center leading-tight">
                         Logging in via email or social is impossible if internet is down.

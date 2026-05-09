@@ -28,6 +28,9 @@ pub struct AppConfig {
     pub loan_period_days: i32,
     #[serde(default = "default_fine_per_day")]
     pub fine_per_day: f64,
+    pub license_key: Option<String>,
+    pub machine_id: Option<String>,
+    pub last_validated_at: Option<String>,
 }
 
 fn default_mode() -> String { "admin".to_string() }
@@ -44,11 +47,25 @@ impl Default for AppConfig {
             ollama_home: None,
             loan_period_days: 7,
             fine_per_day: 5.0,
+            license_key: None,
+            machine_id: None,
+            last_validated_at: None,
         }
     }
 }
 
 pub fn get_settings_path(app: &AppHandle) -> PathBuf {
+    // 1. Check if config exists in executable directory (Installation Dir)
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            let local_config = exe_dir.join("app_config.json");
+            if local_config.exists() {
+                return local_config;
+            }
+        }
+    }
+
+    // 2. Fallback to standard AppData
     let config_dir = app.path().app_config_dir().expect("failed to get config dir");
     if !config_dir.exists() {
         fs::create_dir_all(&config_dir).expect("failed to create config dir");

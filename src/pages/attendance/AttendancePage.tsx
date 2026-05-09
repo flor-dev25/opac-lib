@@ -48,7 +48,12 @@ export const AttendancePage: React.FC = () => {
     
     console.log(`Recording attendance: ${studentId} - ${selectedReason}`);
     try {
-        await invoke('record_attendance', { idno: studentId, reason: selectedReason });
+        if ((window as any).__TAURI__) {
+          await invoke('record_attendance', { idno: studentId, reason: selectedReason });
+        } else {
+          console.warn('Browser mode: Skipping attendance persistence (mock success)');
+          await new Promise(r => setTimeout(r, 1000));
+        }
         setStep('success');
     } catch (e) {
         console.error('Failed to record attendance:', e);

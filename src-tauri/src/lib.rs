@@ -4,6 +4,7 @@ mod ai;
 mod settings;
 mod import;
 mod sync;
+mod commands;
 use tauri::{
   menu::{Menu, MenuItem},
   tray::TrayIconBuilder,
@@ -1131,6 +1132,19 @@ pub fn run() {
 
       Ok(())
     })
+    .invoke_handler(tauri::generate_handler![
+      get_catalog_records, get_catalog_count, search_catalog, get_search_catalog_count, delete_catalog_record,
+      get_patrons, get_patron_count, search_patrons, get_search_patron_count, add_patron, update_patron, delete_patron,
+      check_out_item, return_item, get_active_loans, get_circulation_stats, get_overdue_items, audit_item, pay_fine, get_financial_reports, get_acquisitions_report,
+      record_attendance, get_attendance_stats, get_attendance_logs,
+      get_authors, update_author, delete_author,
+      get_subjects, update_subject, delete_subject,
+      get_reservations, add_reservation, serve_reservation, cancel_reservation,
+      settings::get_db_config, settings::save_db_config, settings::upload_logo, settings::process_logo, settings::get_logo_path, settings::export_settings, settings::import_settings,
+      sync::run_dual_sync,
+      commands::license::validate_license,
+      ai::check_ollama_presence
+    ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

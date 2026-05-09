@@ -92,6 +92,7 @@ Complete parity implementation of Library Management System based on wireframe s
 - [x] Semantic Infrastructure (pgvector)
 - [x] Offline LLM Integration (Phi-3)
 - [x] AI UI & Chat Badge
+- [x] AI Setup Dialog (Ollama detection & prompt)
 - [ ] Context-Aware RAG (Patron/Admin queries)
 
 ### Phase 9: Branding & Personalization (M009)
@@ -135,7 +136,7 @@ Complete parity implementation of Library Management System based on wireframe s
 ### Phase 13: Premium Services & Hardening (M013)
 - [ ] M013-S01: Twilio SMS Integration
 - [ ] M013-S02: Online AI API (Deepseek)
-- [x] M013-S03: LMS-01 Offline Installer (NSIS + PG Auto-Provisioning + Ollama Bundling)
+- [x] M013-S03: Low-Size Installer (NSIS + PG Auto-Provisioning + External Ollama Support)
 - [ ] M013-S04: Global Email Notification System
 
 ### Phase 14: Circulation Engine (M014)
@@ -143,3 +144,9 @@ Complete parity implementation of Library Management System based on wireframe s
 - [x] M014-S02: Automated Fine Calculation Logic
 - [x] M014-S03: Circulation Dashboard (Live Stats)
 - [x] M014-S04: Financial Reporting (Collections)
+
+### Phase 15: License Activation (M015) - 🟢 COMPLETE & VERIFIED
+- [x] M015-S01: Supabase Schema & Edge Function (licenses + activations tables, verify-license Deno fn)
+- [x] M015-S02: NSIS License Page (nsDialogs key input, machine fingerprint, InetLoad POST)
+- [x] M015-S03: Config Persistence & Runtime Heartbeat (app_config.json fields, Tauri validate_license, Portable Config Support)
+- [x] M015-S04: Admin Key Management (Optional v1.1 — provisioning dashboard)
