@@ -489,6 +489,18 @@ FunctionEnd
       StrCpy $R1 "$INSTDIR\ollama"
     ${EndIf}
 
+    ; --- REGISTRY FALLBACK ---
+    ; Write to HKLM so it's accessible to all users
+    SetShellVarContext all
+    WriteRegStr HKLM "Software\infoLib" "LicenseKey" "$LicenseKey"
+    WriteRegStr HKLM "Software\infoLib" "MachineId" "$MachineId"
+    WriteRegStr HKLM "Software\infoLib" "SystemMode" "$InstallMode" ; 0=admin, 1=client
+    WriteRegStr HKLM "Software\infoLib" "PgHome" "$R0"
+    WriteRegStr HKLM "Software\infoLib" "OllamaHome" "$R1"
+
+    ; Grant Users group read access to the registry key
+    nsExec::ExecToLog 'powershell -NoProfile -Command "$Acl = Get-Acl HKLM:\Software\infoLib; $Rule = New-Object System.Security.AccessControl.RegistryAccessRule(\"BUILTIN\Users\", \"ReadKey\", \"Allow\"); $Acl.SetAccessRule($Rule); Set-Acl HKLM:\Software\infoLib $Acl"'
+
     FileOpen $0 "$INSTDIR\app_config.json" w
     FileWrite $0 '{$\r$\n'
     ${If} $InstallMode == "0"
@@ -506,7 +518,7 @@ FunctionEnd
     FileWrite $0 '  "last_validated_at": "${__DATE__}T${__TIME__}Z"$\r$\n'
     FileWrite $0 '}$\r$\n'
     FileClose $0
-    DetailPrint "Configuration saved to installation directory."
+    DetailPrint "Configuration saved to installation directory and registry."
   ${EndIf}
 
   ; --- Step 4: Specific Shortcuts ---

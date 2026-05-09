@@ -94,7 +94,16 @@ pub fn load_config(app: &AppHandle) -> AppConfig {
             let data = fs::read_to_string(&path).unwrap_or_default();
             serde_json::from_str(&data).unwrap_or_default()
         } else {
-            AppConfig::default()
+            // REGISTRY FALLBACK: Try to recover from Registry if JSON is missing
+            match load_from_registry() {
+                Some(reg_config) => {
+                    println!("[Settings] Recovered configuration from Registry fallback.");
+                    // Auto-persist the recovered config to file
+                    let _ = save_config(app, &reg_config);
+                    reg_config
+                },
+                None => AppConfig::default()
+            }
         }
     };
 
@@ -104,6 +113,38 @@ pub fn load_config(app: &AppHandle) -> AppConfig {
     }
 
     config
+}
+
+fn load_from_registry() -> Option<AppConfig> {
+    use winreg::enums::*;
+    use winreg::RegKey;
+
+    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+    if let Ok(key) = hklm.open_subkey("Software\\infoLib") {
+        let mut config = AppConfig::default();
+        
+        if let Ok(license) = key.get_value::<String, _>("LicenseKey") {
+            config.license_key = Some(license);
+        }
+        if let Ok(machine) = key.get_value::<String, _>("MachineId") {
+            config.machine_id = Some(machine);
+        }
+        if let Ok(mode) = key.get_value::<String, _>("SystemMode") {
+            config.system_mode = if mode == "1" { "client".to_string() } else { "admin".to_string() };
+        }
+        if let Ok(pg) = key.get_value::<String, _>("PgHome") {
+            config.pg_home = Some(pg);
+        }
+        if let Ok(ollama) = key.get_value::<String, _>("OllamaHome") {
+            config.ollama_home = Some(ollama);
+        }
+
+        // If we found a license key, we consider the recovery successful
+        if config.license_key.is_some() {
+            return Some(config);
+        }
+    }
+    None
 }
 
 pub fn save_config(app: &AppHandle, config: &AppConfig) -> Result<(), String> {

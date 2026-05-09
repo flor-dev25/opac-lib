@@ -46,7 +46,7 @@ async function main() {
   console.log();
   console.log("  SQL INSERT:");
   console.log(`  INSERT INTO licenses (license_key_hash, customer_email, product_version, is_active, max_activations, notes)`);
-  console.log(`  VALUES ('${keyHash}', ${email ? `'${email}'` : "NULL"}, 'v1.0', true, 1, 'Generated ${new Date().toISOString()}');`);
+  console.log(`  VALUES ('${keyHash}', ${email ? `'${email}'` : "NULL"}, 'v1.0', true, 2, 'Generated ${new Date().toISOString()}');`);
   console.log();
   console.log("=".repeat(60));
 }

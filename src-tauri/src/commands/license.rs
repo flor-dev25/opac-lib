@@ -1,6 +1,6 @@
 // src-tauri/src/commands/license.rs
 use crate::settings::{AppConfig, save_config};
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
 use reqwest;
@@ -13,15 +13,7 @@ struct LicenseResponse {
 
 #[tauri::command]
 pub async fn validate_license(app: AppHandle) -> Result<bool, String> {
-    let config_dir = app.path().app_config_dir().expect("failed to get config dir");
-    let config_path = config_dir.join("app_config.json");
-    
-    if !config_path.exists() {
-        return Err("Configuration file not found. Please re-run the installer.".to_string());
-    }
-
-    let data = std::fs::read_to_string(&config_path).map_err(|e| e.to_string())?;
-    let mut config: AppConfig = serde_json::from_str(&data).map_err(|e| e.to_string())?;
+    let mut config = crate::settings::load_config(&app);
 
     let license_key = match &config.license_key {
         Some(k) if !k.is_empty() => k,

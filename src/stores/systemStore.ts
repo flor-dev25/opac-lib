@@ -10,6 +10,7 @@ interface SystemState {
   isOllamaMissing: boolean;
   initSystem: () => Promise<void>;
   setOllamaMissing: (missing: boolean) => void;
+  activateLicense: (key: string) => Promise<boolean>;
 }
 
 export const useSystemStore = create<SystemState>((set) => ({
@@ -18,6 +19,26 @@ export const useSystemStore = create<SystemState>((set) => ({
   licenseError: null,
   isOllamaMissing: false,
   setOllamaMissing: (missing: boolean) => set({ isOllamaMissing: missing }),
+  activateLicense: async (key: string) => {
+    try {
+      const config: any = await invoke('get_db_config');
+      config.license_key = key;
+      if (!config.machine_id) {
+        config.machine_id = "MANUAL-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+      }
+      await invoke('save_db_config', { config });
+      
+      const isValid = await invoke('validate_license');
+      if (isValid) {
+        set({ licenseError: null });
+        return true;
+      }
+      return false;
+    } catch (e: any) {
+      set({ licenseError: e.toString() });
+      throw e;
+    }
+  },
   initSystem: async () => {
     const envMode = import.meta.env.VITE_SYSTEM_MODE;
     try {

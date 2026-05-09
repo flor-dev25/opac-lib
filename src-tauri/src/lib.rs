@@ -1046,7 +1046,6 @@ pub fn run() {
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_shell::init())
     .setup(|app| {
-      use tauri_plugin_shell::ShellExt;
       
       let handle = app.handle().clone();
 
@@ -1066,20 +1065,9 @@ pub fn run() {
         }
       }
 
-      // Spawn Ollama Sidecar
-      if let Ok(command) = app.shell().sidecar("ollama") {
-        tauri::async_runtime::spawn(async move {
-          let _ = command.spawn();
-        });
-      }
-
-      // Start PostgreSQL Service
-      if let Ok(command) = app.shell().sidecar("pg_ctl") {
-        let command = command.args(["start", "-D", "pgsql/data"]);
-        tauri::async_runtime::spawn(async move {
-          let _ = command.spawn();
-        });
-      }
+      // NOTE: Ollama and PostgreSQL sidecar spawning has been removed.
+      // Ollama is now an external dependency (AI Setup Dialog handles missing installations).
+      // PostgreSQL is now extracted and managed directly by the NSIS installer.
 
       let pool_arc = std::sync::Arc::new(tokio::sync::Mutex::new(None));
       let remote_pool_arc = std::sync::Arc::new(tokio::sync::Mutex::new(None));

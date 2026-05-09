@@ -95,6 +95,17 @@ The system is architected for modular provider support:
 | `npm run tauri dev` | Launch the Tauri desktop environment |
 | `npm run health` | Verify connectivity to Firebase/Supabase |
 | `uv run ruff format` | Standardize code formatting |
+| `bun run scripts/new-license.ts` | Generate a new license key with seamless CLI activation |
+
+---
+
+## 🔑 License Management
+
+To provision a new license for a client or for development testing:
+
+1.  **Generate Key**: Run `bun run scripts/new-license.ts`. This will output a unique key and a `supabase db query` command.
+2.  **Activate**: Copy the `npx supabase db query --linked "..."` command from the output and run it in your terminal.
+3.  **Verify**: The key is now active and can be used in the InfoLib installer.
 
 ---
 
