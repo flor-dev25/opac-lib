@@ -1,5 +1,5 @@
 import React from 'react';
-import { FilePlus, Trash2, Download, BookOpen, Info, LogOut, Users, LayoutDashboard, Edit, ArrowUpRight, ArrowDownLeft, Activity, Wallet, ScanBarcode, TrendingUp, BookPlus, BookmarkPlus, Settings, ToggleLeft, DatabaseBackup, UserPlus } from 'lucide-react';
+import { FilePlus, Trash2, Download, BookOpen, Info, LogOut, Users, LayoutDashboard, Edit, ArrowUpRight, ArrowDownLeft, Activity, Wallet, ScanBarcode, TrendingUp, BookPlus, BookmarkPlus, Settings, ToggleLeft, DatabaseBackup, UserPlus, UserCheck } from 'lucide-react';
 import { ToolbarItem } from './ToolbarItem';
 import { SyncComboButton } from './SyncComboButton';
 import { useAuthStore } from '../../stores/authStore';
@@ -23,9 +23,10 @@ interface ToolbarProps {
   onShowLogs?: () => void;
   onImportMdb?: () => void;
   onImportAccounts?: () => void;
+  onAttendanceDashboard?: () => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete, onExport, onEdit, onCheckout, onReturn, onDashboard, onPayment, onAudit, onFinancialReports, onAcquisitions, onReservation, onSettings, onShowLogs, onImportMdb, onImportAccounts }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete, onExport, onEdit, onCheckout, onReturn, onDashboard, onPayment, onAudit, onFinancialReports, onAcquisitions, onReservation, onSettings, onShowLogs, onImportMdb, onImportAccounts, onAttendanceDashboard }) => {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
   const [isAdvanced, setIsAdvanced] = React.useState(false);
@@ -54,7 +55,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete
           />
           <ToolbarItem 
             icon={Users} 
-            label="Patrons" 
+            label="Manage Accounts" 
             onClick={() => navigate('/patrons')} 
           />
           <ToolbarItem 
@@ -104,8 +105,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete
           />
           <ToolbarItem 
             icon={UserPlus} 
-            label="Import Users" 
+            label="Import CSV" 
             onClick={onImportAccounts} 
+          />
+          <ToolbarItem 
+            icon={UserCheck} 
+            label="Attendance" 
+            onClick={onAttendanceDashboard} 
           />
           <div className="w-[1px] h-16 bg-gray-400 dark:bg-dark-border-light mx-1 shadow-[1px_0_0_white] dark:shadow-[1px_0_0_#404040]" />
         </>

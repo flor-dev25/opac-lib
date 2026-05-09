@@ -20,6 +20,7 @@ import { AboutDialog } from './AboutDialog';
 import { SyncLogsDialog } from '../dashboard/SyncLogsDialog';
 import { ImportMdbDialog } from '../management/ImportMdbDialog';
 import { ImportAccountsDialog } from '../management/ImportAccountsDialog';
+import { AttendanceDashboard } from '../attendance/AttendanceDashboard';
 import { useAuthStore } from '../../stores/authStore';
 import { useCatalogStore } from '../../stores/catalogStore';
 import { usePatronStore } from '../../stores/patronStore';
@@ -57,6 +58,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showSyncLogs, setShowSyncLogs] = React.useState(false);
   const [showImportMdb, setShowImportMdb] = React.useState(false);
   const [showImportAccounts, setShowImportAccounts] = React.useState(false);
+  const [showAttendanceDashboard, setShowAttendanceDashboard] = React.useState(false);
   const [importCsvPath, setImportCsvPath] = React.useState('');
   const [isImportMinimized, setIsImportMinimized] = React.useState(false);
   const [importBadgeStats, setImportBadgeStats] = React.useState({ current: 0, total: 0, isRunning: false });
@@ -228,6 +230,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               onShowLogs={() => setShowSyncLogs(true)}
               onImportMdb={() => setShowImportMdb(true)}
               onImportAccounts={handleImportAccounts}
+              onAttendanceDashboard={() => setShowAttendanceDashboard(true)}
             />
           </header>
 
@@ -275,6 +278,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {showSettings && <SettingsPage onClose={() => setShowSettings(false)} />}
       {showAbout && <AboutDialog onClose={() => setShowAbout(false)} />}
       {showSyncLogs && <SyncLogsDialog onClose={() => setShowSyncLogs(false)} />}
+      {showAttendanceDashboard && <AttendanceDashboard onClose={() => setShowAttendanceDashboard(false)} />}
       {showImportMdb && <ImportMdbDialog onClose={() => setShowImportMdb(false)} />}
       {showImportAccounts && !isImportMinimized && importCsvPath && (
         <ImportAccountsDialog 

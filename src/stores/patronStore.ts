@@ -14,11 +14,11 @@ export interface Patron {
 
 interface PatronState {
   patrons: Patron[];
-  selectedIdno: string | null;
-  isLoading: boolean;
-  error: string | null;
+  totalPatrons: number;
+  currentPage: number;
   setSelectedIdno: (idno: string | null) => void;
-  fetchPatrons: () => Promise<void>;
+  setCurrentPage: (page: number) => void;
+  fetchPatrons: (page?: number) => Promise<void>;
   addPatron: (patron: Patron) => Promise<void>;
   updatePatron: (idno: string, patron: Patron) => Promise<void>;
   deletePatron: (idno: string) => Promise<void>;
@@ -28,15 +28,20 @@ interface PatronState {
 
 export const usePatronStore = create<PatronState>((set, get) => ({
   patrons: [],
-  selectedIdno: null,
-  isLoading: false,
-  error: null,
+  totalPatrons: 0,
+  currentPage: 1,
   setSelectedIdno: (idno) => set({ selectedIdno: idno }),
-  fetchPatrons: async () => {
-    set({ isLoading: true });
+  setCurrentPage: (page) => set({ currentPage: page }),
+  fetchPatrons: async (page) => {
+    const p = page ?? get().currentPage;
+    set({ isLoading: true, currentPage: p });
     try {
-      const patrons = await invoke<Patron[]>('get_patrons');
-      set({ patrons, isLoading: false });
+      const offset = (p - 1) * 20;
+      const [patrons, total] = await Promise.all([
+        invoke<Patron[]>('get_patrons', { offset }),
+        invoke<number>('get_patron_count')
+      ]);
+      set({ patrons, totalPatrons: total, isLoading: false });
     } catch (e) {
       set({ error: String(e), isLoading: false });
     }

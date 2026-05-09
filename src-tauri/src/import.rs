@@ -562,10 +562,12 @@ impl Default for ImportTaskState {
 #[tauri::command]
 pub async fn import_school_accounts(
     csv_path: String,
+    group_name: Option<String>,
     app: AppHandle,
     state: tauri::State<'_, DbState>,
     import_state: tauri::State<'_, ImportTaskState>,
 ) -> Result<(), String> {
+    let group = group_name.unwrap_or_else(|| "STUDENT".to_string());
     // Prevent concurrent imports
     {
         let status = import_state.status.lock().await;
@@ -678,6 +680,7 @@ pub async fn import_school_accounts(
 
     tokio::spawn(async move {
         let import_task_state = import_app.state::<ImportTaskState>();
+        let group_name = group; // move into spawn
         let mut tx = match pool.begin().await {
             Ok(tx) => tx,
             Err(e) => {
@@ -755,13 +758,14 @@ pub async fn import_school_accounts(
                     match sqlx::query(
                         r#"
                         INSERT INTO "public"."tblUser" ("Name", "Idno", "GroupName", "Dept", "UnpaidFine")
-                        VALUES ($1, $2, 'STUDENT', $3, 0)
+                        VALUES ($1, $2, $3, $4, 0)
                         ON CONFLICT ("Idno") DO UPDATE
-                        SET "Name" = EXCLUDED."Name", "Dept" = EXCLUDED."Dept"
+                        SET "Name" = EXCLUDED."Name", "Dept" = EXCLUDED."Dept", "GroupName" = EXCLUDED."GroupName"
                         "#
                     )
                     .bind(&full_name)
                     .bind(&record.student_id)
+                    .bind(&group_name)
                     .bind(&dept)
                     .execute(&mut *tx)
                     .await {

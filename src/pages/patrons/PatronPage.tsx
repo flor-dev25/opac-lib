@@ -3,6 +3,7 @@ import { SearchBar } from '../../components/dashboard/SearchBar';
 import { DataGrid } from '../../components/common/DataGrid';
 import { usePatronStore } from '../../stores/patronStore';
 import { useNavigate } from 'react-router-dom';
+import { PatronNavigator } from '../../components/patrons/PatronNavigator';
 
 const COLUMNS = [
   { key: 'name', header: 'Name', width: '30%' },
@@ -14,7 +15,7 @@ const COLUMNS = [
 
 export const PatronPage: React.FC = () => {
   const navigate = useNavigate();
-  const { patrons, selectedIdno, setSelectedIdno, fetchPatrons } = usePatronStore();
+  const { patrons, selectedIdno, totalPatrons, setSelectedIdno, fetchPatrons } = usePatronStore();
 
   React.useEffect(() => {
     fetchPatrons();
@@ -38,11 +39,12 @@ export const PatronPage: React.FC = () => {
           idField="idno"
         />
       </div>
+      <PatronNavigator />
       
       {/* Footer status bar for classic feel */}
-      <div className="bg-[#D4D0C8] border-t border-white shadow-[0_-1px_0_#808080] px-2 py-0.5 text-[10px] text-gray-700 flex justify-between">
-        <span>Patron Management</span>
-        <span>Total Patrons: {patrons.length}</span>
+      <div className="bg-classic-grey dark:bg-dark-surface border-t border-white dark:border-dark-highlight shadow-[0_-1px_0_#808080] dark:shadow-[0_-1px_0_#1A1A1A] px-2 py-0.5 text-[10px] text-gray-700 dark:text-dark-text-muted flex justify-between">
+        <span>School Account Management</span>
+        <span>Total Accounts: {totalPatrons}</span>
       </div>
     </div>
   );

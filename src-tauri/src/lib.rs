@@ -11,7 +11,7 @@ use tauri::{
 };
 use db::DbState;
 use ai::AiState;
-use models::{CatalogRecord, CatalogEntry, Holdings, Patron, Circulation, CirculationStats, OverdueItem, AuditResult, FinancialSummary, AcquisitionRecord, Author, Subject, Reservation, PaymentRecord};
+use models::{CatalogRecord, CatalogEntry, Holdings, Patron, Circulation, CirculationStats, OverdueItem, AuditResult, FinancialSummary, AcquisitionRecord, Author, Subject, Reservation, PaymentRecord, AttendanceLog, AttendanceStats};
 use chrono::Utc;
 use sqlx::Row;
 
@@ -69,7 +69,7 @@ async fn delete_catalog_record(controlno: String, state: tauri::State<'_, DbStat
 }
 
 #[tauri::command]
-async fn get_patrons(state: tauri::State<'_, DbState>) -> Result<Vec<Patron>, String> {
+async fn get_patrons(offset: i32, state: tauri::State<'_, DbState>) -> Result<Vec<Patron>, String> {
   let rows = sqlx::query(
     r#"
     SELECT 
@@ -82,8 +82,11 @@ async fn get_patrons(state: tauri::State<'_, DbState>) -> Result<Vec<Patron>, St
       "Email" as email, 
       COALESCE("UnpaidFine", 0) as unpaid_fine
     FROM "public"."tblUser"
+    ORDER BY "Name" ASC
+    LIMIT 20 OFFSET $1
     "#
   )
+  .bind(offset)
   .fetch_all(&state.get_pool().await?)
   .await
   .map_err(|e| e.to_string())?;
@@ -92,7 +95,7 @@ async fn get_patrons(state: tauri::State<'_, DbState>) -> Result<Vec<Patron>, St
     name: row.try_get::<Option<String>, _>("name").unwrap_or_default().unwrap_or_default(),
     idno: row.try_get::<Option<String>, _>("idno").unwrap_or_default().unwrap_or_default(),
     group_name: row.try_get::<Option<String>, _>("group_name").unwrap_or_default().unwrap_or_default(),
-    expiry: None, // Simplified, date parsing can be tricky
+    expiry: None, 
     dept: row.try_get("dept").unwrap_or_default(),
     phone: row.try_get("phone").unwrap_or_default(),
     email: row.try_get("email").unwrap_or_default(),
@@ -100,6 +103,16 @@ async fn get_patrons(state: tauri::State<'_, DbState>) -> Result<Vec<Patron>, St
   }).collect();
 
   Ok(patrons)
+}
+
+#[tauri::command]
+async fn get_patron_count(state: tauri::State<'_, DbState>) -> Result<i64, String> {
+  let row = sqlx::query(r#"SELECT COUNT(*) as count FROM "public"."tblUser""#)
+    .fetch_one(&state.get_pool().await?)
+    .await
+    .map_err(|e| e.to_string())?;
+  
+  Ok(row.try_get("count").unwrap_or(0))
 }
 
 #[tauri::command]
@@ -450,6 +463,61 @@ async fn record_attendance(idno: String, reason: String, state: tauri::State<'_,
   Ok(())
 }
 
+#[tauri::command]
+async fn get_attendance_stats(state: tauri::State<'_, DbState>) -> Result<AttendanceStats, String> {
+  let pool = state.get_pool().await?;
+  let now = Utc::now().date_naive();
+  
+  let total = sqlx::query(r#"SELECT COUNT(*) FROM "public"."tblAttendance" WHERE "dteLog"::date = $1"#)
+    .bind(now)
+    .fetch_one(&pool).await.map_err(|e| e.to_string())?
+    .try_get::<i64, _>(0).unwrap_or(0);
+
+  let unique = sqlx::query(r#"SELECT COUNT(DISTINCT "Idno") FROM "public"."tblAttendance" WHERE "dteLog"::date = $1"#)
+    .bind(now)
+    .fetch_one(&pool).await.map_err(|e| e.to_string())?
+    .try_get::<i64, _>(0).unwrap_or(0);
+
+  let top = sqlx::query(r#"SELECT "Reason" FROM "public"."tblAttendance" WHERE "dteLog"::date = $1 GROUP BY "Reason" ORDER BY COUNT(*) DESC LIMIT 1"#)
+    .bind(now)
+    .fetch_optional(&pool).await.map_err(|e| e.to_string())?
+    .map(|r| r.try_get::<String, _>(0).unwrap_or_else(|_| "None".to_string()))
+    .unwrap_or_else(|| "None".to_string());
+
+  Ok(AttendanceStats {
+    total_today: total,
+    unique_today: unique,
+    top_reason: top,
+  })
+}
+
+#[tauri::command]
+async fn get_attendance_logs(limit: i32, state: tauri::State<'_, DbState>) -> Result<Vec<AttendanceLog>, String> {
+  let pool = state.get_pool().await?;
+  let rows = sqlx::query(
+    r#"
+    SELECT a."Idno", a."dteLog", a."Reason", a."TerminalID", u."Name"
+    FROM "public"."tblAttendance" a
+    LEFT JOIN "public"."tblUser" u ON a."Idno" = u."Idno"
+    ORDER BY a."dteLog" DESC
+    LIMIT $1
+    "#
+  )
+  .bind(limit)
+  .fetch_all(&pool)
+  .await
+  .map_err(|e| e.to_string())?;
+
+  let logs = rows.into_iter().map(|row| AttendanceLog {
+    idno: row.try_get("Idno").unwrap_or_default(),
+    name: row.try_get::<Option<String>, _>("Name").unwrap_or_default().unwrap_or_else(|| "Unknown".to_string()),
+    dte_log: row.try_get("dteLog").unwrap_or_else(|_| Utc::now()),
+    reason: row.try_get("Reason").unwrap_or_default(),
+    terminal_id: row.try_get("TerminalID").unwrap_or_default(),
+  }).collect();
+
+  Ok(logs)
+}
 
 #[tauri::command]
 async fn get_authors(state: tauri::State<'_, DbState>) -> Result<Vec<Author>, String> {
@@ -787,6 +855,7 @@ pub fn run() {
       get_catalog_count,
       delete_catalog_record,
       get_patrons,
+      get_patron_count,
       add_patron,
       update_patron,
       delete_patron,
@@ -836,7 +905,9 @@ pub fn run() {
       import::stop_import,
       import::get_import_status,
       sync::run_dual_sync,
-      record_attendance
+      record_attendance,
+      get_attendance_stats,
+      get_attendance_logs
     ])
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_shell::init())

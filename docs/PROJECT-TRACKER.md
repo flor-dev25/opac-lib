@@ -125,8 +125,8 @@ Complete parity implementation of Library Management System based on wireframe s
 
 ### Phase 12: Attendance System (M012)
 - [x] M012-S01: Door PC Client (Time-in Only)
-- [ ] M012-S02: Admin Dashboard (Real-time Stats)
-- [ ] M012-S03: CSV Data Import Pipeline (Students/Faculty)
+- [x] M012-S02: Admin Dashboard (Real-time Stats)
+- [x] M012-S03: Dedicated Account Management & Import CSV Buttons
 - [ ] M012-S04: Attendance PDF Reports (Daily/Weekly/Monthly)
 
 ### Phase 13: Premium Services & Hardening (M013)

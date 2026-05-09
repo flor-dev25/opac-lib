@@ -3,7 +3,7 @@ import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { BeveledBox } from '../common/BeveledBox';
 import { TitleBar } from '../layout/TitleBar';
-import { Loader2, Pause, Play, Square, Minimize2, AlertTriangle } from 'lucide-react';
+import { Loader2, Pause, Play, Square, Minimize2, AlertTriangle, FilePlus } from 'lucide-react';
 
 // ─── Types matching Rust backend ────────────────────────────────────────────
 
@@ -75,6 +75,8 @@ export const ImportAccountsDialog: React.FC<ImportAccountsDialogProps> = ({
   const [isDone, setIsDone] = useState(false);
   const [isStopped, setIsStopped] = useState(false);
   const [showStopConfirm, setShowStopConfirm] = useState(false);
+  const [groupName, setGroupName] = useState<'STUDENT' | 'FACULTY'>('STUDENT');
+  const [hasStarted, setHasStarted] = useState(false);
 
   // ── Refs ──
   const logContainerRef = useRef<HTMLDivElement>(null);
@@ -130,6 +132,7 @@ export const ImportAccountsDialog: React.FC<ImportAccountsDialogProps> = ({
     let unlisten: (() => void) | null = null;
 
     const startImport = async () => {
+      if (!hasStarted) return;
       setIsImporting(true);
       setIsDone(false);
       setIsStopped(false);
@@ -175,7 +178,10 @@ export const ImportAccountsDialog: React.FC<ImportAccountsDialogProps> = ({
 
       // Invoke the background import (returns immediately now)
       try {
-        await invoke('import_school_accounts', { csvPath });
+        await invoke('import_school_accounts', { 
+          csvPath,
+          groupName: groupName 
+        });
       } catch (e) {
         const ts = getTimestamp();
         pendingLogsRef.current.push({
@@ -199,7 +205,7 @@ export const ImportAccountsDialog: React.FC<ImportAccountsDialogProps> = ({
         rafIdRef.current = null;
       }
     };
-  }, [csvPath, getTimestamp, scheduleFlush]);
+  }, [csvPath, getTimestamp, scheduleFlush, hasStarted, groupName]);
 
   // ── Control handlers ──
   const handlePause = useCallback(async () => {
@@ -240,7 +246,61 @@ export const ImportAccountsDialog: React.FC<ImportAccountsDialogProps> = ({
         />
 
         <div className="p-4 flex flex-col flex-1 overflow-hidden space-y-3">
-          {/* ── Stats Bar ── */}
+          {!hasStarted ? (
+            <div className="flex-1 flex flex-col items-center justify-center space-y-6">
+              <div className="text-center space-y-2">
+                <BeveledBox variant="sunken" className="p-4 bg-blue-50 dark:bg-blue-900/10 max-w-md">
+                  <p className="text-sm font-bold text-blue-700 dark:text-blue-300">
+                    IMPORT CONFIGURATION
+                  </p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                    Please verify the CSV format and select the target group for this import.
+                  </p>
+                </BeveledBox>
+              </div>
+
+              <div className="w-64 space-y-2">
+                <label className="text-[10px] font-bold uppercase text-gray-500 ml-1">Target Account Group</label>
+                <select 
+                  value={groupName}
+                  onChange={(e) => setGroupName(e.target.value as any)}
+                  className="w-full h-10 px-3 bg-white dark:bg-black border-2 border-gray-400 dark:border-dark-border-light
+                    font-bold text-sm focus:outline-none focus:border-blue-500 shadow-inner"
+                >
+                  <option value="STUDENT">STUDENT (Default)</option>
+                  <option value="FACULTY">FACULTY</option>
+                  <option value="STAFF">STAFF</option>
+                  <option value="ADMIN">ADMINISTRATOR</option>
+                </select>
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setHasStarted(true)}
+                  className="px-10 py-3 bg-blue-700 text-white font-bold uppercase text-sm
+                    border-2 border-t-blue-400 border-l-blue-400 border-b-blue-900 border-r-blue-900
+                    hover:bg-blue-600 active:shadow-bevel-sunken transition-all shadow-lg"
+                >
+                  Start Import Now
+                </button>
+                <button
+                  onClick={onClose}
+                  className="px-10 py-3 bg-gray-300 text-gray-700 font-bold uppercase text-sm
+                    border-2 border-t-white border-l-white border-b-gray-600 border-r-gray-600
+                    hover:bg-gray-200 active:shadow-bevel-sunken transition-all shadow-lg"
+                >
+                  Cancel
+                </button>
+              </div>
+
+              <div className="text-[10px] text-gray-400 flex items-center gap-2">
+                <FilePlus size={10} />
+                <span>File: {csvPath.split(/[\\/]/).pop()}</span>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* ── Stats Bar ── */}
           <div className="grid grid-cols-3 gap-2">
             <BeveledBox variant="sunken" className="p-3 bg-white dark:bg-black/20 flex flex-col items-center">
               <span className="text-[10px] uppercase font-bold text-gray-500">Processed</span>
@@ -420,6 +480,8 @@ export const ImportAccountsDialog: React.FC<ImportAccountsDialogProps> = ({
               {isDone || isStopped ? 'Close' : isImporting ? 'Importing...' : 'Cancel'}
             </button>
           </div>
+            </>
+          )}
         </div>
       </BeveledBox>
     </div>
