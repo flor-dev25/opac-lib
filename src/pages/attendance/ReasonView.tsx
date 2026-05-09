@@ -32,47 +32,47 @@ const REASONS = [
 
 export const ReasonView: React.FC<ReasonViewProps> = ({ studentId, onComplete, onBack }) => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[600px] space-y-12 animate-in slide-in-from-right duration-500">
-      <div className="text-center space-y-2">
-        <h1 className="text-5xl font-black text-blue-900 dark:text-blue-100 tracking-tighter uppercase italic">
+    <div className="flex flex-col items-center justify-center min-h-[600px] space-y-8 animate-in slide-in-from-right duration-500">
+      <div className="text-center space-y-1">
+        <h1 className="text-5xl font-black text-blue-900 dark:text-blue-100 tracking-tight uppercase italic drop-shadow-sm">
           Purpose of Visit
         </h1>
-        <p className="text-blue-700 dark:text-blue-300 font-bold italic">
-          Welcome, <span className="underline decoration-2 underline-offset-4">{studentId}</span>. Please select one:
+        <p className="text-blue-700 dark:text-blue-300 font-bold uppercase tracking-widest text-sm">
+          Welcome, <span className="underline underline-offset-4">{studentId}</span>. Please select one:
         </p>
       </div>
 
-      <GroupBox label="Activity Selection" className="w-[800px] bg-classic-grey dark:bg-dark-surface shadow-2xl">
-        <div className="grid grid-cols-3 gap-6 p-2">
+      <GroupBox label="Activity Selection" className="w-[850px] bg-classic-grey dark:bg-dark-surface shadow-2xl">
+        <div className="grid grid-cols-3 gap-4 p-2">
           {REASONS.map((reason) => (
             <button
               key={reason.id}
               onClick={() => onComplete(reason.label)}
-              className="h-44 bg-classic-grey dark:bg-dark-surface border-2 border-white dark:border-dark-highlight shadow-bevel-raised active:shadow-bevel-sunken hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex flex-col items-center justify-center space-y-4 group active:scale-95"
+              className="h-40 bg-classic-grey dark:bg-dark-surface border-2 border-white dark:border-dark-highlight shadow-bevel-raised active:shadow-bevel-sunken hover:brightness-105 transition-all flex flex-col items-center justify-center space-y-3 group active:scale-95"
             >
-              <reason.icon className={`w-16 h-16 ${reason.color} group-hover:scale-110 transition-transform`} />
-              <span className="font-black text-2xl uppercase tracking-tighter text-gray-800 dark:text-gray-200">
+              <div className="p-3 bg-white/5 dark:bg-black/5 rounded-lg group-hover:bg-white/10 transition-colors">
+                <reason.icon className={`w-14 h-14 ${reason.color} group-hover:scale-110 transition-transform`} />
+              </div>
+              <span className="font-black text-xl uppercase tracking-tight text-gray-800 dark:text-gray-200">
                 {reason.label}
               </span>
             </button>
           ))}
         </div>
         
-        <div className="mt-8">
+        <div className="mt-6">
           <button
             onClick={onBack}
-            className="w-full py-4 bg-gray-300 dark:bg-gray-800 font-bold text-xl border-2 border-white dark:border-dark-highlight shadow-bevel-raised active:shadow-bevel-sunken text-gray-700 dark:text-gray-300 active:scale-[0.99]"
+            className="w-full py-4 bg-gray-300 dark:bg-gray-800 font-black text-xl border-2 border-white dark:border-dark-highlight shadow-bevel-raised active:shadow-bevel-sunken text-gray-700 dark:text-gray-300 active:scale-[0.99] uppercase tracking-widest"
           >
             ← GO BACK
           </button>
         </div>
+        <div className="mt-4 flex justify-between items-center opacity-30">
+          <span className="font-mono text-[10px] tracking-widest uppercase">Node: {Math.random().toString(36).substring(7).toUpperCase()}</span>
+          <span className="font-mono text-[10px] tracking-widest uppercase">TX_ID: {Math.random().toString(36).substring(7).toUpperCase()}</span>
+        </div>
       </GroupBox>
-      
-      <div className="flex items-center space-x-4 opacity-30">
-        <div className="w-12 h-[1px] bg-blue-900 dark:bg-blue-100" />
-        <span className="font-mono text-[10px] tracking-widest">TRANSACTION_ID: {Math.random().toString(36).substring(7).toUpperCase()}</span>
-        <div className="w-12 h-[1px] bg-blue-900 dark:bg-blue-100" />
-      </div>
     </div>
   );
 };

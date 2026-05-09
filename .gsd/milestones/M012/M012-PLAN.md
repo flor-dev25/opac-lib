@@ -37,6 +37,9 @@ Implement a dual-purpose installer and a dedicated Attendance System. The instal
   - Post-check-in random quote display.
 - [ ] **T08: Anti-Spam Logic**
   - Basic validation to prevent immediate re-entry.
+- [ ] **T09: UI/UX Polish (Retro Theme)**
+  - Execute geometry and spacing fixes defined in `docs/UI-UX-AUDIT.md`.
+  - Fix GroupBox labels, CheckInView overflow, and ReasonView bevels.
 
 ## Logical Decisions
 - **D040**: Use `mdns` crate for service discovery.

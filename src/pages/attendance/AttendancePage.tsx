@@ -3,6 +3,7 @@ import { CheckInView } from './CheckInView';
 import { ReasonView } from './ReasonView';
 import { SuccessView } from './SuccessView';
 import { invoke } from '@tauri-apps/api/core';
+import { BeveledBox } from '../../components/common/BeveledBox';
 
 type Step = 'input' | 'reason' | 'success';
 
@@ -70,8 +71,13 @@ export const AttendancePage: React.FC = () => {
 
       <div className="z-10 w-full max-w-4xl px-4">
         {errorMsg && step === 'input' && (
-          <div className="mb-8 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 font-bold shadow-lg text-center animate-in slide-in-from-top">
-            {errorMsg}
+          <div className="mb-6 animate-in slide-in-from-top duration-300">
+            <BeveledBox variant="raised" className="bg-red-100 border-l-4 border-red-600 p-4 shadow-lg">
+              <div className="flex items-center space-x-3">
+                <span className="text-red-700 font-black text-lg uppercase tracking-tight">System Error:</span>
+                <span className="text-red-800 font-bold">{errorMsg}</span>
+              </div>
+            </BeveledBox>
           </div>
         )}
         {step === 'input' && <CheckInView onNext={handleIdSubmit} />}

@@ -836,7 +836,24 @@ pub fn run() {
     .plugin(tauri_plugin_shell::init())
     .setup(|app| {
       use tauri_plugin_shell::ShellExt;
+      
       let handle = app.handle().clone();
+
+      // Enforce Window Mode strictly in backend
+      if let Some(window) = app.get_webview_window("main") {
+        let config = settings::load_config(&handle);
+        if config.system_mode == "client" {
+          let _ = window.set_fullscreen(true);
+          let _ = window.set_resizable(false);
+          let _ = window.set_maximizable(false);
+          let _ = window.set_closable(false);
+        } else {
+          let _ = window.set_fullscreen(false);
+          let _ = window.set_resizable(true);
+          let _ = window.set_maximizable(true);
+          let _ = window.set_closable(true);
+        }
+      }
 
       // Spawn Ollama Sidecar
       if let Ok(command) = app.shell().sidecar("ollama") {

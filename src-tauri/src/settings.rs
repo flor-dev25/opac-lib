@@ -81,8 +81,8 @@ pub fn load_config(app: &AppHandle) -> AppConfig {
         }
     };
 
-    // DEV MODE BYPASS: If DEV_SYSTEM_MODE is set, override the loaded mode
-    if let Ok(dev_mode) = std::env::var("DEV_SYSTEM_MODE") {
+    // DEV MODE BYPASS: If VITE_SYSTEM_MODE is set, override the loaded mode
+    if let Ok(dev_mode) = std::env::var("VITE_SYSTEM_MODE") {
         config.system_mode = dev_mode;
     }
 

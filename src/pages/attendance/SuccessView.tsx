@@ -49,10 +49,10 @@ export const SuccessView: React.FC<SuccessViewProps> = ({ studentId, reason, onR
         </p>
       </div>
 
-      <GroupBox label="Daily Inspiration" className="w-[700px] bg-white dark:bg-dark-surface shadow-2xl p-10">
-        <div className="relative flex flex-col items-center text-center space-y-6">
-          <Quote className="absolute -top-4 -left-4 w-12 h-12 text-gray-200 dark:text-gray-800" />
-          <p className="text-3xl font-serif italic text-gray-800 dark:text-gray-200 leading-relaxed">
+      <GroupBox label="Daily Inspiration" className="w-[700px] bg-white dark:bg-dark-surface shadow-2xl p-10 overflow-visible">
+        <div className="relative flex flex-col items-center text-center space-y-6 pt-4">
+          <Quote className="absolute -top-6 -left-6 w-14 h-14 text-gray-200 dark:text-gray-800 opacity-50" />
+          <p className="text-3xl font-serif italic text-gray-800 dark:text-gray-200 leading-relaxed z-10">
             "{quote.text}"
           </p>
           <div className="w-24 h-1 bg-blue-600" />
