@@ -778,6 +778,7 @@ fn quit_app(app: tauri::AppHandle) {
 pub fn run() {
   tauri::Builder::default()
     .manage(AiState::default())
+    .manage(import::ImportTaskState::default())
     .plugin(tauri_plugin_log::Builder::default().build())
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_shell::init())
@@ -829,6 +830,11 @@ pub fn run() {
       settings::export_settings,
       settings::import_settings,
       import::import_mdb_database,
+      import::import_school_accounts,
+      import::pause_import,
+      import::resume_import,
+      import::stop_import,
+      import::get_import_status,
       sync::run_dual_sync,
       record_attendance
     ])

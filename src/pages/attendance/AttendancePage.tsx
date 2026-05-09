@@ -13,6 +13,7 @@ export const AttendancePage: React.FC = () => {
   const [reason, setReason] = useState('');
   const [bgImage, setBgImage] = useState<string | null>(null);
 
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,6 +27,13 @@ export const AttendancePage: React.FC = () => {
       }
     };
     loadBg();
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
   }, []);
 
   const handleIdSubmit = (id: string) => {
@@ -103,7 +111,7 @@ export const AttendancePage: React.FC = () => {
         <div className="w-1 h-1 bg-white rounded-full" />
         <span className="font-bold text-sm uppercase italic">GJC Library Management System v2.0</span>
         <div className="w-1 h-1 bg-white rounded-full" />
-        <span className="font-mono text-sm">{new Date().toLocaleTimeString()}</span>
+        <span className="font-mono text-sm">{currentTime.toLocaleTimeString()}</span>
       </div>
     </div>
   );

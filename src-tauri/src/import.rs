@@ -9,7 +9,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use odbc_api::{Connection, ConnectionOptions, Cursor, Environment, buffers::TextRowSet, ResultSetMetadata};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, Emitter};
 
 use crate::db::DbState;
 use crate::settings;
@@ -485,4 +485,419 @@ pub async fn import_mdb_database(
         invalid: invalids,
         duration_ms: start.elapsed().as_millis() as u64,
     })
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(dead_code)]
+pub struct SchoolAccount {
+    pub student_id: String,
+    pub first_name: String,
+    pub middle_name: String,
+    pub last_name: String,
+    pub gender: String,
+    pub course: String,
+    pub year_level: String,
+}
+
+#[derive(Debug, Serialize, Clone)]
+pub struct ImportProgressEntry {
+    pub current: usize,
+    pub total: usize,
+    pub last_name: String,
+    pub status: String, // "success" | "error"
+    pub message: String,
+}
+
+/// Batched payload — the frontend receives an array of log entries at once,
+/// eliminating per-row re-render storms that caused the 1s-on/1s-off flicker.
+#[derive(Debug, Serialize, Clone)]
+pub struct ImportProgressBatch {
+    pub entries: Vec<ImportProgressEntry>,
+    pub current: usize,
+    pub total: usize,
+    pub success_count: usize,
+    pub error_count: usize,
+    pub is_paused: bool,
+    pub is_done: bool,
+    pub is_stopped: bool,
+}
+
+/// Lightweight status query — no event listener needed for restore/minimize.
+#[derive(Debug, Serialize, Clone)]
+pub struct ImportStatus {
+    pub is_running: bool,
+    pub is_paused: bool,
+    pub current: usize,
+    pub total: usize,
+    pub success_count: usize,
+    pub error_count: usize,
+}
+
+/// Shared state for background import task control.
+pub struct ImportTaskState {
+    pub cancel_token: tokio::sync::Mutex<Option<tokio_util::sync::CancellationToken>>,
+    pub paused: std::sync::atomic::AtomicBool,
+    pub resume_notify: tokio::sync::Notify,
+    pub status: tokio::sync::Mutex<ImportStatus>,
+}
+
+impl Default for ImportTaskState {
+    fn default() -> Self {
+        Self {
+            cancel_token: tokio::sync::Mutex::new(None),
+            paused: std::sync::atomic::AtomicBool::new(false),
+            resume_notify: tokio::sync::Notify::new(),
+            status: tokio::sync::Mutex::new(ImportStatus {
+                is_running: false,
+                is_paused: false,
+                current: 0,
+                total: 0,
+                success_count: 0,
+                error_count: 0,
+            }),
+        }
+    }
+}
+
+#[tauri::command]
+pub async fn import_school_accounts(
+    csv_path: String,
+    app: AppHandle,
+    state: tauri::State<'_, DbState>,
+    import_state: tauri::State<'_, ImportTaskState>,
+) -> Result<(), String> {
+    // Prevent concurrent imports
+    {
+        let status = import_state.status.lock().await;
+        if status.is_running {
+            return Err("An import is already in progress.".to_string());
+        }
+    }
+
+    // Pre-read CSV to get total count + collect all records into memory
+    // so the spawned task doesn't need to borrow `csv_path` across an await.
+    let file = std::fs::File::open(&csv_path).map_err(|e| e.to_string())?;
+    let mut count_reader = csv::Reader::from_reader(file);
+    let total = count_reader.deserialize::<SchoolAccount>().count();
+
+    let mut reader = csv::Reader::from_path(&csv_path).map_err(|e| e.to_string())?;
+    let records: Vec<(usize, Result<SchoolAccount, String>)> = reader
+        .deserialize()
+        .enumerate()
+        .map(|(i, r)| (i, r.map_err(|e| e.to_string())))
+        .collect();
+
+    // Set up cancellation token
+    let token = tokio_util::sync::CancellationToken::new();
+    let child_token = token.child_token();
+    {
+        let mut lock = import_state.cancel_token.lock().await;
+        *lock = Some(token);
+    }
+
+    // Reset state
+    import_state.paused.store(false, std::sync::atomic::Ordering::SeqCst);
+    {
+        let mut status = import_state.status.lock().await;
+        *status = ImportStatus {
+            is_running: true,
+            is_paused: false,
+            current: 0,
+            total,
+            success_count: 0,
+            error_count: 0,
+        };
+    }
+
+    // Clone what the spawned task needs
+    let pool = state.get_pool().await?;
+    let app_handle = app.clone();
+
+    // Shared buffer for batched emission
+    let buffer = std::sync::Arc::new(tokio::sync::Mutex::new(Vec::<ImportProgressEntry>::new()));
+    let counters = std::sync::Arc::new((
+        std::sync::atomic::AtomicUsize::new(0), // current
+        std::sync::atomic::AtomicUsize::new(0), // success
+        std::sync::atomic::AtomicUsize::new(0), // error
+    ));
+
+    // ── Flush task: emits batched events every 150ms ──
+    let flush_buffer = buffer.clone();
+    let flush_counters = counters.clone();
+    let flush_app = app_handle.clone();
+    let flush_token = child_token.clone();
+    let flush_paused = {
+        // We can't move the AtomicBool, but we can use a raw pointer pattern.
+        // Instead, since ImportTaskState is managed by Tauri (lives forever),
+        // we'll read the paused flag inside the flush via a separate Arc copy.
+        // Actually, let's just use Arc<AtomicBool> for the spawned tasks.
+        std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false))
+    };
+    // We need a separate paused Arc that the main loop and flush both share
+    let shared_paused = flush_paused.clone();
+
+    let flush_handle = tokio::spawn(async move {
+        loop {
+            tokio::select! {
+                _ = flush_token.cancelled() => break,
+                _ = tokio::time::sleep(Duration::from_millis(150)) => {}
+            }
+
+            let mut lock = flush_buffer.lock().await;
+            if lock.is_empty() {
+                continue;
+            }
+
+            let entries: Vec<ImportProgressEntry> = lock.drain(..).collect();
+            drop(lock);
+
+            let current = flush_counters.0.load(std::sync::atomic::Ordering::Relaxed);
+            let success = flush_counters.1.load(std::sync::atomic::Ordering::Relaxed);
+            let error = flush_counters.2.load(std::sync::atomic::Ordering::Relaxed);
+            let paused = flush_paused.load(std::sync::atomic::Ordering::Relaxed);
+
+            let batch = ImportProgressBatch {
+                entries,
+                current,
+                total,
+                success_count: success,
+                error_count: error,
+                is_paused: paused,
+                is_done: false,
+                is_stopped: false,
+            };
+            let _ = flush_app.emit("import-progress-batch", &batch);
+        }
+    });
+
+    // ── Main import task ──
+    // Capture the import_state status Arc for updates inside the spawned task.
+    // Since import_state is a Tauri managed state with 'static lifetime, we
+    // need to get a handle to the app and re-resolve it inside the spawn.
+    let import_app = app.clone();
+
+    tokio::spawn(async move {
+        let import_task_state = import_app.state::<ImportTaskState>();
+        let mut tx = match pool.begin().await {
+            Ok(tx) => tx,
+            Err(e) => {
+                let _ = app_handle.emit("import-progress-batch", &ImportProgressBatch {
+                    entries: vec![ImportProgressEntry {
+                        current: 0, total, last_name: "SYSTEM".into(),
+                        status: "error".into(), message: format!("Transaction start failed: {}", e),
+                    }],
+                    current: 0, total, success_count: 0, error_count: 0,
+                    is_paused: false, is_done: true, is_stopped: false,
+                });
+                let mut status = import_task_state.status.lock().await;
+                status.is_running = false;
+                return;
+            }
+        };
+
+        let mut was_stopped = false;
+
+        for (i, result) in records {
+            // ── Check STOP ──
+            if child_token.is_cancelled() {
+                was_stopped = true;
+                break;
+            }
+
+            // ── Check PAUSE ──
+            if shared_paused.load(std::sync::atomic::Ordering::SeqCst) {
+                {
+                    let mut status = import_task_state.status.lock().await;
+                    status.is_paused = true;
+                }
+                // Flush a paused-state batch so the UI knows immediately
+                {
+                    let mut lock = buffer.lock().await;
+                    let entries: Vec<ImportProgressEntry> = lock.drain(..).collect();
+                    let current = counters.0.load(std::sync::atomic::Ordering::Relaxed);
+                    let success = counters.1.load(std::sync::atomic::Ordering::Relaxed);
+                    let error = counters.2.load(std::sync::atomic::Ordering::Relaxed);
+                    let _ = app_handle.emit("import-progress-batch", &ImportProgressBatch {
+                        entries, current, total,
+                        success_count: success, error_count: error,
+                        is_paused: true, is_done: false, is_stopped: false,
+                    });
+                }
+                // Wait for resume signal (or cancellation)
+                tokio::select! {
+                    _ = child_token.cancelled() => {
+                        was_stopped = true;
+                        break;
+                    }
+                    _ = import_task_state.resume_notify.notified() => {}
+                }
+                {
+                    let mut status = import_task_state.status.lock().await;
+                    status.is_paused = false;
+                }
+            }
+
+            let entry = match result {
+                Err(e) => {
+                    counters.2.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                    ImportProgressEntry {
+                        current: i + 1, total,
+                        last_name: "Unknown".into(),
+                        status: "error".into(),
+                        message: e,
+                    }
+                }
+                Ok(record) => {
+                    let full_name = format!("{}, {} {}", record.last_name, record.first_name, record.middle_name)
+                        .trim().to_string();
+                    let dept = format!("{} - {}", record.course, record.year_level);
+
+                    match sqlx::query(
+                        r#"
+                        INSERT INTO "public"."tblUser" ("Name", "Idno", "GroupName", "Dept", "UnpaidFine")
+                        VALUES ($1, $2, 'STUDENT', $3, 0)
+                        ON CONFLICT ("Idno") DO UPDATE
+                        SET "Name" = EXCLUDED."Name", "Dept" = EXCLUDED."Dept"
+                        "#
+                    )
+                    .bind(&full_name)
+                    .bind(&record.student_id)
+                    .bind(&dept)
+                    .execute(&mut *tx)
+                    .await {
+                        Ok(_) => {
+                            counters.1.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                            ImportProgressEntry {
+                                current: i + 1, total,
+                                last_name: record.last_name.clone(),
+                                status: "success".into(),
+                                message: format!("Imported {}", record.student_id),
+                            }
+                        }
+                        Err(e) => {
+                            counters.2.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                            ImportProgressEntry {
+                                current: i + 1, total,
+                                last_name: record.last_name.clone(),
+                                status: "error".into(),
+                                message: e.to_string(),
+                            }
+                        }
+                    }
+                }
+            };
+
+            counters.0.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            {
+                let mut lock = buffer.lock().await;
+                lock.push(entry);
+            }
+
+            // Update shared status
+            {
+                let mut status = import_task_state.status.lock().await;
+                status.current = counters.0.load(std::sync::atomic::Ordering::Relaxed);
+                status.success_count = counters.1.load(std::sync::atomic::Ordering::Relaxed);
+                status.error_count = counters.2.load(std::sync::atomic::Ordering::Relaxed);
+            }
+
+            // Yield periodically to keep the runtime responsive
+            if i % 50 == 0 {
+                tokio::task::yield_now().await;
+            }
+        }
+
+        // Commit or rollback based on stop
+        if was_stopped {
+            let _ = tx.rollback().await;
+        } else {
+            let _ = tx.commit().await;
+        }
+
+        // Cancel the flush task and wait for it
+        child_token.cancel();
+        let _ = flush_handle.await;
+
+        // Final flush: emit remaining buffered entries + done/stopped flag
+        {
+            let mut lock = buffer.lock().await;
+            let entries: Vec<ImportProgressEntry> = lock.drain(..).collect();
+            let current = counters.0.load(std::sync::atomic::Ordering::Relaxed);
+            let success = counters.1.load(std::sync::atomic::Ordering::Relaxed);
+            let error = counters.2.load(std::sync::atomic::Ordering::Relaxed);
+
+            let _ = app_handle.emit("import-progress-batch", &ImportProgressBatch {
+                entries, current, total,
+                success_count: success, error_count: error,
+                is_paused: false,
+                is_done: !was_stopped,
+                is_stopped: was_stopped,
+            });
+        }
+
+        // Mark as no longer running
+        {
+            let mut status = import_task_state.status.lock().await;
+            status.is_running = false;
+            status.is_paused = false;
+        }
+        {
+            let mut lock = import_task_state.cancel_token.lock().await;
+            *lock = None;
+        }
+    });
+
+    // Return immediately — import runs in background
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn pause_import(
+    import_state: tauri::State<'_, ImportTaskState>,
+) -> Result<(), String> {
+    let status = import_state.status.lock().await;
+    if !status.is_running {
+        return Err("No import is currently running.".to_string());
+    }
+    drop(status);
+    import_state.paused.store(true, std::sync::atomic::Ordering::SeqCst);
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn resume_import(
+    import_state: tauri::State<'_, ImportTaskState>,
+) -> Result<(), String> {
+    let status = import_state.status.lock().await;
+    if !status.is_running {
+        return Err("No import is currently running.".to_string());
+    }
+    drop(status);
+    import_state.paused.store(false, std::sync::atomic::Ordering::SeqCst);
+    import_state.resume_notify.notify_one();
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn stop_import(
+    import_state: tauri::State<'_, ImportTaskState>,
+) -> Result<(), String> {
+    let lock = import_state.cancel_token.lock().await;
+    if let Some(token) = &*lock {
+        token.cancel();
+        // Also resume if paused, so the loop can see the cancel
+        import_state.paused.store(false, std::sync::atomic::Ordering::SeqCst);
+        import_state.resume_notify.notify_one();
+        Ok(())
+    } else {
+        Err("No import is currently running.".to_string())
+    }
+}
+
+#[tauri::command]
+pub async fn get_import_status(
+    import_state: tauri::State<'_, ImportTaskState>,
+) -> Result<ImportStatus, String> {
+    let status = import_state.status.lock().await;
+    Ok(status.clone())
 }

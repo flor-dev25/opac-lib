@@ -19,12 +19,14 @@ import { SettingsPage } from '../../pages/settings/SettingsPage';
 import { AboutDialog } from './AboutDialog';
 import { SyncLogsDialog } from '../dashboard/SyncLogsDialog';
 import { ImportMdbDialog } from '../management/ImportMdbDialog';
+import { ImportAccountsDialog } from '../management/ImportAccountsDialog';
 import { useAuthStore } from '../../stores/authStore';
 import { useCatalogStore } from '../../stores/catalogStore';
 import { usePatronStore } from '../../stores/patronStore';
 import { useSyncStore } from '../../stores/syncStore';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { invoke } from '@tauri-apps/api/core';
+import { open } from '@tauri-apps/plugin-dialog';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -54,6 +56,29 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showSettings, setShowSettings] = React.useState(false);
   const [showSyncLogs, setShowSyncLogs] = React.useState(false);
   const [showImportMdb, setShowImportMdb] = React.useState(false);
+  const [showImportAccounts, setShowImportAccounts] = React.useState(false);
+  const [importCsvPath, setImportCsvPath] = React.useState('');
+  const [isImportMinimized, setIsImportMinimized] = React.useState(false);
+  const [importBadgeStats, setImportBadgeStats] = React.useState({ current: 0, total: 0, isRunning: false });
+
+  // ── Poll import status when minimized (for the floating badge) ──
+  React.useEffect(() => {
+    if (!isImportMinimized) return;
+    const poll = async () => {
+      try {
+        const status = await invoke<{ is_running: boolean; current: number; total: number }>('get_import_status');
+        setImportBadgeStats({ current: status.current, total: status.total, isRunning: status.is_running });
+        if (!status.is_running) {
+          // Import finished in background — auto-restore dialog to show final state
+          setIsImportMinimized(false);
+          setShowImportAccounts(true);
+        }
+      } catch { /* ignore */ }
+    };
+    poll();
+    const interval = setInterval(poll, 2000);
+    return () => clearInterval(interval);
+  }, [isImportMinimized]);
 
   // Smart Scheduled Auto-Sync: checks every 60s if the admin-configured time window has been reached
   const lastScheduledFire = React.useRef<string | null>(null);
@@ -136,6 +161,22 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     }
   };
 
+  const handleImportAccounts = async () => {
+    try {
+      const selected = await open({
+        multiple: false,
+        filters: [{ name: 'CSV', extensions: ['csv'] }]
+      });
+      if (selected && typeof selected === 'string') {
+        setImportCsvPath(selected);
+        setShowImportAccounts(true);
+      }
+    } catch (e) {
+      console.error('Import failed:', e);
+      alert('Import failed: ' + e);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#808080] dark:bg-[#1A1A1A] p-0.5 sm:p-2 md:p-4 flex items-center justify-center">
       <BeveledBox variant="raised" className="w-full h-full max-w-7xl mx-auto flex flex-col bg-[#D4D0C8] dark:bg-dark-surface">
@@ -186,6 +227,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               onSettings={() => setShowSettings(true)}
               onShowLogs={() => setShowSyncLogs(true)}
               onImportMdb={() => setShowImportMdb(true)}
+              onImportAccounts={handleImportAccounts}
             />
           </header>
 
@@ -234,6 +276,40 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {showAbout && <AboutDialog onClose={() => setShowAbout(false)} />}
       {showSyncLogs && <SyncLogsDialog onClose={() => setShowSyncLogs(false)} />}
       {showImportMdb && <ImportMdbDialog onClose={() => setShowImportMdb(false)} />}
+      {showImportAccounts && !isImportMinimized && importCsvPath && (
+        <ImportAccountsDialog 
+          csvPath={importCsvPath} 
+          onClose={() => {
+            setShowImportAccounts(false);
+            setIsImportMinimized(false);
+            setImportCsvPath('');
+          }}
+          onMinimize={() => {
+            setShowImportAccounts(false);
+            setIsImportMinimized(true);
+          }}
+        />
+      )}
+
+      {/* Floating Import Badge — shown when import is minimized to background */}
+      {isImportMinimized && (
+        <button
+          onClick={() => {
+            setIsImportMinimized(false);
+            setShowImportAccounts(true);
+          }}
+          className="fixed bottom-4 right-20 z-[90] flex items-center gap-2 px-4 py-2
+            bg-blue-700 dark:bg-blue-800 text-white text-xs font-bold uppercase
+            border-2 border-t-blue-400 border-l-blue-400 border-b-blue-900 border-r-blue-900
+            shadow-lg hover:bg-blue-600 active:shadow-bevel-sunken
+            animate-pulse transition-all cursor-pointer"
+          title="Click to restore Import dialog"
+        >
+          <span className="w-2 h-2 rounded-full bg-green-400 animate-ping" />
+          <span>Importing: {importBadgeStats.current}/{importBadgeStats.total}</span>
+          <span className="text-blue-200">▲ Restore</span>
+        </button>
+      )}
     </div>
   );
 };
