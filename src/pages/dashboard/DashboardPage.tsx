@@ -3,6 +3,7 @@ import React from 'react';
 import { SearchBar } from '../../components/dashboard/SearchBar';
 import { DataGrid } from '../../components/common/DataGrid';
 import { RecordNavigator } from '../../components/dashboard/RecordNavigator';
+import { TableSkeleton } from '../../components/common/Skeleton';
 
 import { useCatalogStore } from '../../stores/catalogStore';
 
@@ -14,7 +15,7 @@ const COLUMNS = [
 ];
 
 export const DashboardPage: React.FC = () => {
-  const { records, selectedId, setSelectedId, fetchRecords, fetchCount, setEditDialogOpen, setEditingControlNo, setSearch } = useCatalogStore();
+  const { records, selectedId, isLoading, setSelectedId, fetchRecords, fetchCount, setEditDialogOpen, setEditingControlNo, setSearch } = useCatalogStore();
 
   React.useEffect(() => {
     fetchRecords();
@@ -32,19 +33,25 @@ export const DashboardPage: React.FC = () => {
       <SearchBar onSearch={handleSearch} />
       
       <div className="flex-1 p-4 overflow-hidden flex flex-col">
-        <DataGrid 
-          columns={COLUMNS} 
-          data={records} 
-          selectedId={selectedId}
-          onRowClick={(row) => setSelectedId(row.id)}
-          onRowDoubleClick={(row) => {
-            if (row.controlno) {
-              setEditingControlNo(row.controlno);
-              setEditDialogOpen(true);
-            }
-          }}
-          idField="id"
-        />
+        {isLoading ? (
+          <div className="bg-white dark:bg-dark-input shadow-bevel-sunken flex-1 overflow-auto">
+            <TableSkeleton rows={15} cols={4} />
+          </div>
+        ) : (
+          <DataGrid 
+            columns={COLUMNS} 
+            data={records} 
+            selectedId={selectedId}
+            onRowClick={(row) => setSelectedId(row.id)}
+            onRowDoubleClick={(row) => {
+              if (row.controlno) {
+                setEditingControlNo(row.controlno);
+                setEditDialogOpen(true);
+              }
+            }}
+            idField="id"
+          />
+        )}
       </div>
 
       <RecordNavigator />

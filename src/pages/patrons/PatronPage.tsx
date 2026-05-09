@@ -4,6 +4,7 @@ import { DataGrid } from '../../components/common/DataGrid';
 import { usePatronStore } from '../../stores/patronStore';
 import { useNavigate } from 'react-router-dom';
 import { PatronNavigator } from '../../components/patrons/PatronNavigator';
+import { TableSkeleton } from '../../components/common/Skeleton';
 
 const COLUMNS = [
   { key: 'name', header: 'Name', width: '30%' },
@@ -15,7 +16,7 @@ const COLUMNS = [
 
 export const PatronPage: React.FC = () => {
   const navigate = useNavigate();
-  const { patrons, selectedIdno, totalPatrons, setSelectedIdno, fetchPatrons, setSearchQuery } = usePatronStore();
+  const { patrons, selectedIdno, totalPatrons, isLoading, setSelectedIdno, fetchPatrons, setSearchQuery } = usePatronStore();
 
   React.useEffect(() => {
     fetchPatrons();
@@ -31,14 +32,20 @@ export const PatronPage: React.FC = () => {
       <SearchBar onSearch={handleSearch} />
       
       <div className="flex-1 p-4 overflow-hidden flex flex-col">
-        <DataGrid 
-          columns={COLUMNS} 
-          data={patrons} 
-          selectedId={selectedIdno ?? undefined}
-          onRowClick={(row) => setSelectedIdno(row.idno)}
-          onRowDoubleClick={(row) => navigate(`/patrons/edit/${row.idno}`)}
-          idField="idno"
-        />
+        {isLoading ? (
+          <div className="bg-white dark:bg-dark-input shadow-bevel-sunken flex-1 overflow-auto">
+            <TableSkeleton rows={15} cols={5} />
+          </div>
+        ) : (
+          <DataGrid 
+            columns={COLUMNS} 
+            data={patrons} 
+            selectedId={selectedIdno ?? undefined}
+            onRowClick={(row) => setSelectedIdno(row.idno)}
+            onRowDoubleClick={(row) => navigate(`/patrons/edit/${row.idno}`)}
+            idField="idno"
+          />
+        )}
       </div>
       <PatronNavigator />
       

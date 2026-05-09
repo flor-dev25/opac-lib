@@ -4,6 +4,8 @@ import { ToolbarItem } from './ToolbarItem';
 import { SyncComboButton } from './SyncComboButton';
 import { useAuthStore } from '../../stores/authStore';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { CommandBar } from '../toolbar/CommandBar';
+import { useSyncStore } from '../../stores/syncStore';
 
 interface ToolbarProps {
   onAuthority?: () => void;
@@ -28,6 +30,7 @@ interface ToolbarProps {
 
 export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete, onExport, onEdit, onCheckout, onReturn, onDashboard, onPayment, onAudit, onFinancialReports, onAcquisitions, onReservation, onSettings, onShowLogs, onImportMdb, onImportAccounts, onAttendanceDashboard }) => {
   const { logout } = useAuthStore();
+  const { syncNow } = useSyncStore();
   const navigate = useNavigate();
   const [isAdvanced, setIsAdvanced] = React.useState(false);
 
@@ -45,122 +48,72 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete
   };
 
   return (
-    <div className="flex items-center gap-1 p-1 bg-classic-grey dark:bg-dark-surface border-b border-white dark:border-dark-highlight shadow-[0_1px_0_#808080] dark:shadow-[0_1px_0_#1A1A1A] overflow-x-auto">
-      {isAdvanced && (
+    <div className="flex items-center gap-1 p-1 bg-classic-grey dark:bg-dark-surface border-b border-white dark:border-dark-highlight shadow-[0_1px_0_#808080] dark:shadow-[0_1px_0_#1A1A1A] relative z-[100]">
+      {isAdvanced ? (
+        <CommandBar 
+          onAuthority={onAuthority || (() => {})}
+          onAbout={onAbout || (() => {})}
+          onDelete={onDelete || (() => {})}
+          onExport={onExport || (() => {})}
+          onEdit={onEdit || (() => {})}
+          onCheckout={onCheckout || (() => {})}
+          onReturn={onReturn || (() => {})}
+          onDashboard={onDashboard || (() => {})}
+          onPayment={onPayment || (() => {})}
+          onAudit={onAudit || (() => {})}
+          onFinancialReports={onFinancialReports || (() => {})}
+          onAcquisitions={onAcquisitions || (() => {})}
+          onReservation={onReservation || (() => {})}
+          onSettings={onSettings || (() => {})}
+          onShowLogs={onShowLogs || (() => {})}
+          onImportMdb={onImportMdb || (() => {})}
+          onImportAccounts={onImportAccounts || (() => {})}
+          onAttendanceDashboard={onAttendanceDashboard || (() => {})}
+          onExit={handleLogout}
+          onSync={syncNow}
+          navigate={navigate}
+        />
+      ) : (
         <>
           <ToolbarItem 
-            icon={LayoutDashboard} 
-            label="Catalog" 
-            onClick={() => navigate('/dashboard')} 
+            icon={FilePlus} 
+            label="New" 
+            onClick={handleNew} 
           />
           <ToolbarItem 
-            icon={Users} 
-            label="Manage Accounts" 
-            onClick={() => navigate('/patrons')} 
+            icon={Trash2} 
+            label="Delete" 
+            onClick={onDelete} 
           />
           <ToolbarItem 
-            icon={ArrowUpRight} 
-            label="Borrow" 
-            onClick={onCheckout} 
+            icon={Download} 
+            label="Export" 
+            onClick={onExport} 
           />
-          <ToolbarItem 
-            icon={ArrowDownLeft} 
-            label="Return" 
-            onClick={onReturn} 
-          />
-          <ToolbarItem 
-            icon={Activity} 
-            label="Overview" 
-            onClick={onDashboard} 
-          />
-          <ToolbarItem 
-            icon={Wallet} 
-            label="Pay Fine" 
-            onClick={onPayment} 
-          />
-          <ToolbarItem 
-            icon={ScanBarcode} 
-            label="Audit" 
-            onClick={onAudit} 
-          />
-          <ToolbarItem 
-            icon={TrendingUp} 
-            label="Reports" 
-            onClick={onFinancialReports} 
-          />
-          <ToolbarItem 
-            icon={BookPlus} 
-            label="New Items" 
-            onClick={onAcquisitions} 
-          />
-          <ToolbarItem 
-            icon={BookmarkPlus} 
-            label="Reserve" 
-            onClick={onReservation} 
-          />
-          <ToolbarItem 
-            icon={DatabaseBackup} 
-            label="Import" 
-            onClick={onImportMdb} 
-          />
-          <ToolbarItem 
-            icon={UserPlus} 
-            label="Import CSV" 
-            onClick={onImportAccounts} 
-          />
-          <ToolbarItem 
-            icon={UserCheck} 
-            label="Attendance" 
-            onClick={onAttendanceDashboard} 
-          />
+          
           <div className="w-[1px] h-16 bg-gray-400 dark:bg-dark-border-light mx-1 shadow-[1px_0_0_white] dark:shadow-[1px_0_0_#404040]" />
+          
+          <ToolbarItem 
+            icon={BookOpen} 
+            label="Authority" 
+            onClick={onAuthority} 
+          />
+          <ToolbarItem 
+            icon={Info} 
+            label="About" 
+            onClick={onAbout} 
+          />
+          <ToolbarItem 
+            icon={LogOut} 
+            label="Exit" 
+            onClick={handleLogout} 
+          />
+          
+          <div className="w-[1px] h-16 bg-gray-400 dark:bg-dark-border-light mx-1 shadow-[1px_0_0_white] dark:shadow-[1px_0_0_#404040]" />
+          
+          <SyncComboButton onShowLogs={onShowLogs || (() => {})} />
         </>
       )}
-
-      <ToolbarItem 
-        icon={FilePlus} 
-        label="New" 
-        onClick={handleNew} 
-      />
-      {isAdvanced && (
-        <ToolbarItem 
-          icon={Edit} 
-          label="Edit" 
-          onClick={onEdit} 
-        />
-      )}
-      <ToolbarItem 
-        icon={Trash2} 
-        label="Delete" 
-        onClick={onDelete} 
-      />
-      <ToolbarItem 
-        icon={Download} 
-        label="Export" 
-        onClick={onExport} 
-      />
-      
-      <div className="w-[1px] h-16 bg-gray-400 dark:bg-dark-border-light mx-1 shadow-[1px_0_0_white] dark:shadow-[1px_0_0_#404040]" />
-      
-      <ToolbarItem 
-        icon={BookOpen} 
-        label="Authority" 
-        onClick={onAuthority} 
-      />
-      <ToolbarItem 
-        icon={Info} 
-        label="About" 
-        onClick={onAbout} 
-      />
-      <ToolbarItem 
-        icon={LogOut} 
-        label="Exit" 
-        onClick={handleLogout} 
-      />
-      
-      <div className="w-[1px] h-16 bg-gray-400 dark:bg-dark-border-light mx-1 shadow-[1px_0_0_white] dark:shadow-[1px_0_0_#404040]" />
-      
-      <SyncComboButton onShowLogs={onShowLogs || (() => {})} />
       
       {/* Spacer */}
       <div className="flex-1 min-w-[20px]" />
