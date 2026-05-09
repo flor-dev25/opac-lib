@@ -15,14 +15,15 @@ const COLUMNS = [
 
 export const PatronPage: React.FC = () => {
   const navigate = useNavigate();
-  const { patrons, selectedIdno, totalPatrons, setSelectedIdno, fetchPatrons } = usePatronStore();
+  const { patrons, selectedIdno, totalPatrons, setSelectedIdno, fetchPatrons, setSearchQuery } = usePatronStore();
 
   React.useEffect(() => {
     fetchPatrons();
   }, [fetchPatrons]);
 
-  const handleSearch = (query: string, scope: string) => {
-    console.log(`Searching for "${query}" in ${scope}`);
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    fetchPatrons(1);
   };
 
   return (

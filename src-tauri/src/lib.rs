@@ -59,6 +59,79 @@ async fn get_catalog_count(state: tauri::State<'_, DbState>) -> Result<i64, Stri
 }
 
 #[tauri::command]
+async fn search_catalog(query: String, scope: String, offset: i32, state: tauri::State<'_, DbState>) -> Result<Vec<CatalogRecord>, String> {
+  let pool = state.get_pool().await?;
+  let search_pattern = format!("%{}%", query);
+  
+  let rows = sqlx::query(
+    r#"
+    SELECT 
+      c."controlno", 
+      c."Title" as title, 
+      a."Author" as author, 
+      c."Callno" as callno, 
+      c."Copyright" as year
+    FROM "public"."tblCat" c
+    LEFT JOIN "public"."tblAuthor" a ON c."AuthorCode" = a."AuthorCode"
+    WHERE 
+      CASE $1
+        WHEN 'Title' THEN c."Title" ILIKE $2
+        WHEN 'Author' THEN a."Author" ILIKE $2
+        WHEN 'Call Number' THEN c."Callno" ILIKE $2
+        ELSE (c."Title" ILIKE $2 OR a."Author" ILIKE $2 OR c."Callno" ILIKE $2)
+      END
+    ORDER BY c."Title" ASC
+    LIMIT 20 OFFSET $3
+    "#
+  )
+  .bind(&scope)
+  .bind(&search_pattern)
+  .bind(offset)
+  .fetch_all(&pool)
+  .await
+  .map_err(|e| e.to_string())?;
+
+  let records = rows.into_iter().enumerate().map(|(i, row)| CatalogRecord {
+    id: i as i32 + 1,
+    controlno: row.try_get("controlno").unwrap_or_default(),
+    title: row.try_get("title").unwrap_or_default(),
+    author: row.try_get::<Option<String>, _>("author").unwrap_or_default().unwrap_or_else(|| "Unknown".to_string()),
+    callno: row.try_get("callno").unwrap_or_default(),
+    year: row.try_get("year").unwrap_or_default(),
+  }).collect();
+
+  Ok(records)
+}
+
+#[tauri::command]
+async fn get_search_catalog_count(query: String, scope: String, state: tauri::State<'_, DbState>) -> Result<i64, String> {
+  let pool = state.get_pool().await?;
+  let search_pattern = format!("%{}%", query);
+  
+  let row = sqlx::query(
+    r#"
+    SELECT COUNT(*) as count 
+    FROM "public"."tblCat" c
+    LEFT JOIN "public"."tblAuthor" a ON c."AuthorCode" = a."AuthorCode"
+    WHERE 
+      CASE $1
+        WHEN 'Title' THEN c."Title" ILIKE $2
+        WHEN 'Author' THEN a."Author" ILIKE $2
+        WHEN 'Call Number' THEN c."Callno" ILIKE $2
+        ELSE (c."Title" ILIKE $2 OR a."Author" ILIKE $2 OR c."Callno" ILIKE $2)
+      END
+    "#
+  )
+  .bind(&scope)
+  .bind(&search_pattern)
+  .fetch_one(&pool)
+  .await
+  .map_err(|e| e.to_string())?;
+  
+  Ok(row.try_get("count").unwrap_or(0))
+}
+
+#[tauri::command]
 async fn delete_catalog_record(controlno: String, state: tauri::State<'_, DbState>) -> Result<(), String> {
   sqlx::query(r#"DELETE FROM "public"."tblCat" WHERE "controlno" = $1"#)
     .bind(controlno)
@@ -109,6 +182,62 @@ async fn get_patrons(offset: i32, state: tauri::State<'_, DbState>) -> Result<Ve
 async fn get_patron_count(state: tauri::State<'_, DbState>) -> Result<i64, String> {
   let row = sqlx::query(r#"SELECT COUNT(*) as count FROM "public"."tblUser""#)
     .fetch_one(&state.get_pool().await?)
+    .await
+    .map_err(|e| e.to_string())?;
+  
+  Ok(row.try_get("count").unwrap_or(0))
+}
+
+#[tauri::command]
+async fn search_patrons(query: String, offset: i32, state: tauri::State<'_, DbState>) -> Result<Vec<Patron>, String> {
+  let pool = state.get_pool().await?;
+  let search_pattern = format!("%{}%", query);
+  
+  let rows = sqlx::query(
+    r#"
+    SELECT 
+      "Name" as name, 
+      "Idno" as idno, 
+      "GroupName" as group_name, 
+      "Expiry" as expiry, 
+      "Dept" as dept, 
+      "Phone" as phone, 
+      "Email" as email, 
+      COALESCE("UnpaidFine", 0) as unpaid_fine
+    FROM "public"."tblUser"
+    WHERE "Name" ILIKE $1 OR "Idno" ILIKE $1
+    ORDER BY "Name" ASC
+    LIMIT 20 OFFSET $2
+    "#
+  )
+  .bind(&search_pattern)
+  .bind(offset)
+  .fetch_all(&pool)
+  .await
+  .map_err(|e| e.to_string())?;
+
+  let patrons = rows.into_iter().map(|row| Patron {
+    name: row.try_get::<Option<String>, _>("name").unwrap_or_default().unwrap_or_default(),
+    idno: row.try_get::<Option<String>, _>("idno").unwrap_or_default().unwrap_or_default(),
+    group_name: row.try_get::<Option<String>, _>("group_name").unwrap_or_default().unwrap_or_default(),
+    expiry: None, 
+    dept: row.try_get("dept").unwrap_or_default(),
+    phone: row.try_get("phone").unwrap_or_default(),
+    email: row.try_get("email").unwrap_or_default(),
+    unpaid_fine: row.try_get("unpaid_fine").unwrap_or(0),
+  }).collect();
+
+  Ok(patrons)
+}
+
+#[tauri::command]
+async fn get_search_patron_count(query: String, state: tauri::State<'_, DbState>) -> Result<i64, String> {
+  let pool = state.get_pool().await?;
+  let search_pattern = format!("%{}%", query);
+  
+  let row = sqlx::query(r#"SELECT COUNT(*) as count FROM "public"."tblUser" WHERE "Name" ILIKE $1 OR "Idno" ILIKE $1"#)
+    .bind(&search_pattern)
+    .fetch_one(&pool)
     .await
     .map_err(|e| e.to_string())?;
   
@@ -853,9 +982,13 @@ pub fn run() {
     .invoke_handler(tauri::generate_handler![
       get_catalog_records,
       get_catalog_count,
+      search_catalog,
+      get_search_catalog_count,
       delete_catalog_record,
       get_patrons,
       get_patron_count,
+      search_patrons,
+      get_search_patron_count,
       add_patron,
       update_patron,
       delete_patron,

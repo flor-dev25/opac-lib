@@ -14,7 +14,7 @@ const COLUMNS = [
 ];
 
 export const DashboardPage: React.FC = () => {
-  const { records, selectedId, setSelectedId, fetchRecords, fetchCount, setEditDialogOpen, setEditingControlNo } = useCatalogStore();
+  const { records, selectedId, setSelectedId, fetchRecords, fetchCount, setEditDialogOpen, setEditingControlNo, setSearch } = useCatalogStore();
 
   React.useEffect(() => {
     fetchRecords();
@@ -22,7 +22,9 @@ export const DashboardPage: React.FC = () => {
   }, [fetchRecords, fetchCount]);
 
   const handleSearch = (query: string, scope: string) => {
-    console.log(`Searching for "${query}" in ${scope}`);
+    setSearch(query, scope);
+    fetchRecords(1);
+    fetchCount();
   };
 
   return (

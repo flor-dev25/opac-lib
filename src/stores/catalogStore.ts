@@ -50,12 +50,15 @@ interface CatalogState {
   error: string | null;
   currentPage: number;
   totalRecords: number;
+  searchQuery: string;
+  searchScope: string;
   isEditDialogOpen: boolean;
   editingControlNo: string | null;
   setSelectedId: (id: number | undefined) => void;
   setPage: (page: number) => Promise<void>;
   setEditDialogOpen: (open: boolean) => void;
   setEditingControlNo: (controlno: string | null) => void;
+  setSearch: (query: string, scope: string) => void;
   fetchRecords: (page?: number) => Promise<void>;
   fetchCount: () => Promise<void>;
   deleteRecord: (id: number) => Promise<void>;
@@ -76,6 +79,8 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
   editingControlNo: null,
   currentPage: 1,
   totalRecords: 0,
+  searchQuery: '',
+  searchScope: 'Keyword',
   setSelectedId: (id) => set({ selectedId: id }),
   setPage: async (page) => {
     set({ currentPage: page });
@@ -83,18 +88,37 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
   },
   setEditDialogOpen: (open) => set({ isEditDialogOpen: open }),
   setEditingControlNo: (controlno) => set({ editingControlNo: controlno }),
+  setSearch: (query, scope) => {
+    set({ searchQuery: query, searchScope: scope, currentPage: 1 });
+  },
   fetchRecords: async (page = 1) => {
-    set({ isLoading: true });
+    const p = page ?? get().currentPage;
+    const query = get().searchQuery;
+    const scope = get().searchScope;
+    set({ isLoading: true, currentPage: p });
     try {
-      const records = await invoke<CatalogRecord[]>('get_catalog_records', { page });
+      const offset = (p - 1) * 20;
+      let records;
+      if (query.trim()) {
+        records = await invoke<CatalogRecord[]>('search_catalog', { query, scope, offset });
+      } else {
+        records = await invoke<CatalogRecord[]>('get_catalog_records', { page: p });
+      }
       set({ records, isLoading: false });
     } catch (e) {
       set({ error: (e as Error).message, isLoading: false });
     }
   },
   fetchCount: async () => {
+    const query = get().searchQuery;
+    const scope = get().searchScope;
     try {
-      const count = await invoke<number>('get_catalog_count');
+      let count;
+      if (query.trim()) {
+        count = await invoke<number>('get_search_catalog_count', { query, scope });
+      } else {
+        count = await invoke<number>('get_catalog_count');
+      }
       set({ totalRecords: count });
     } catch (e) {
       console.error('Failed to fetch count:', e);

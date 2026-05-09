@@ -127,6 +127,7 @@ Complete parity implementation of Library Management System based on wireframe s
 - [x] M012-S01: Door PC Client (Time-in Only)
 - [x] M012-S02: Admin Dashboard (Real-time Stats)
 - [x] M012-S03: Dedicated Account Management & Import CSV Buttons
+- [x] M012-S03.1: High-Performance Search System (Accounts & Catalog)
 - [ ] M012-S04: Attendance PDF Reports (Daily/Weekly/Monthly)
 
 ### Phase 13: Premium Services & Hardening (M013)
