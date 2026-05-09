@@ -389,7 +389,7 @@ FunctionEnd
 
   ; --- Detect existing app_config.json ---
   StrCpy $ExistingConfigFound "0"
-  IfFileExists "$APPDATA\ph.edu.gendejesus.infolib\app_config.json" 0 +2
+  IfFileExists "$APPDATA\solutions.jansoft.infolib\app_config.json" 0 +2
     StrCpy $ExistingConfigFound "1"
 !macroend
 
