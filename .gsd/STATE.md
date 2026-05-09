@@ -89,10 +89,9 @@
 - D073: Repositioned both `UserProfile` and `Close` buttons to the top-right group per user request.
 # GSD State
 
-**Active Milestone:** M008 — Legacy Data Migration (PAUSED)
-**Active Milestone:** M009 — Branding & Personalization
-**Active Slice:** S02 — Theme Engine
-**Active Task:** T03 — Implement Dark Mode & Theme Scalability
+**Active Milestone:** M012 — Attendance System
+**Active Slice:** S01 — Attendance Client UI
+**Active Task:** T06 — Background Customization (Refinement)
 **Phase:** Review
 
 ## Recent Decisions
@@ -176,7 +175,12 @@
 - D071: Implemented Win95-styled `UserProfile` component in the main window TitleBar.
 - D072: Integrated role-based metadata (Administrator, Librarian, etc.) into the authentication state and UI.
 - D073: Repositioned both `UserProfile` and `Close` buttons to the top-right group per user request.
-- D074: Implemented `DEV_DATABASE_URL` env var bypass in `settings.rs` to skip NSIS-installed `db_config.json` during development. Activated `dotenvy` in `main.rs` (was a dead dependency).
+- D074: Implemented `DEV_DATABASE_URL` env var bypass in `settings.rs` to skip NSIS-installed `db_config.json` during development. Activated `dotenvy` in `main.rs`.
+- D075: Planned M012-S01 — Attendance Client UI. Dedicated touch-friendly terminal for library entry check-ins.
+- D076: Implemented `systemStore.ts` to detect `system_mode` (admin/client) from `app_config.json`.
+- D077: Created `AttendancePage.tsx` with a multi-step workflow: ID Input → Reason Selection → Success/Quote.
+- D078: Implemented `record_attendance` Rust command to persist check-ins to `tblAttendance`.
+- D079: Wired `App.tsx` to automatically route to the Attendance Client if the system mode is set to 'client'.
 - D075: Planned M010 — Legacy Access Database Import. Pure Rust implementation via `odbc-api` crate. No Python runtime dependency.
 - D076: S01 (backend) defines 6-task pipeline: auto-backup → ODBC check → MDB read → validate → transact → wire. S02 (frontend) defines 4-step import dialog (Advanced Mode only).
 - D077: Implemented M010-S02 (Frontend). Added `ImportMdbDialog` and `ImportSummaryView`. Added `DatabaseBackup` icon to `Toolbar` (visible in Advanced Mode). Wired to `MainLayout`.
@@ -198,9 +202,8 @@
 **Status:** Active. Fast, terse agentic execution protocol enabled.
 
 ## Next Action
-- LMS-01 Installer: ✅ COMPLETE. NSIS offline installer with PG auto-provisioning and Ollama bundling.
-- Attendance System: Initiate M012-S01 (Door PC Client) development.
-- Attendance System: Design CSV student/faculty import schema.
+- Attendance System: ✅ M012-S01 COMPLETE. Door PC Client UI and backend integration.
+- Attendance System: Initiate M012-S03 (CSV student/faculty import) development.
 - Premium: Research Twilio SMS implementation for Overdue alerts.
 
 ## M013 Decisions

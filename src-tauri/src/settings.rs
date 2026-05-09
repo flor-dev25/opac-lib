@@ -14,6 +14,8 @@ pub struct ProcessOptions {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AppConfig {
+    #[serde(default = "default_mode")]
+    pub system_mode: String,
     pub database_url: String,
     pub app_logo: Option<String>,
     /// Path to PostgreSQL installation (bundled or system). Written by NSIS installer.
@@ -28,12 +30,14 @@ pub struct AppConfig {
     pub fine_per_day: f64,
 }
 
+fn default_mode() -> String { "admin".to_string() }
 fn default_loan_period() -> i32 { 7 }
 fn default_fine_per_day() -> f64 { 5.0 }
 
 impl Default for AppConfig {
     fn default() -> Self {
         Self {
+            system_mode: "admin".to_string(),
             database_url: "postgres://postgres:password@localhost:5432/lib_mgmt".to_string(),
             app_logo: None,
             pg_home: None,
@@ -49,36 +53,40 @@ pub fn get_settings_path(app: &AppHandle) -> PathBuf {
     if !config_dir.exists() {
         fs::create_dir_all(&config_dir).expect("failed to create config dir");
     }
-    config_dir.join("db_config.json")
+    config_dir.join("app_config.json")
 }
 
 pub fn load_config(app: &AppHandle) -> AppConfig {
-    // DEV MODE BYPASS: If DEV_DATABASE_URL is set, use it directly
-    // This allows `bunx tauri dev` to work without NSIS installer setup
-    if let Ok(dev_url) = std::env::var("DEV_DATABASE_URL") {
-        println!("[Settings] DEV MODE: Using DEV_DATABASE_URL bypass");
-        let mut config = AppConfig::default();
-        config.database_url = dev_url;
+    let path = get_settings_path(app);
 
-        // Still load logo from config file if it exists
-        let path = get_settings_path(app);
+    let mut config = if let Ok(dev_url) = std::env::var("DEV_DATABASE_URL") {
+        println!("[Settings] DEV MODE: Using DEV_DATABASE_URL bypass");
+        let mut dev_config = AppConfig::default();
+        dev_config.database_url = dev_url;
+
         if path.exists() {
             if let Ok(data) = fs::read_to_string(&path) {
                 if let Ok(file_config) = serde_json::from_str::<AppConfig>(&data) {
-                    config.app_logo = file_config.app_logo;
+                    dev_config.app_logo = file_config.app_logo;
                 }
             }
         }
-        return config;
+        dev_config
+    } else {
+        if path.exists() {
+            let data = fs::read_to_string(&path).unwrap_or_default();
+            serde_json::from_str(&data).unwrap_or_default()
+        } else {
+            AppConfig::default()
+        }
+    };
+
+    // DEV MODE BYPASS: If DEV_SYSTEM_MODE is set, override the loaded mode
+    if let Ok(dev_mode) = std::env::var("DEV_SYSTEM_MODE") {
+        config.system_mode = dev_mode;
     }
 
-    let path = get_settings_path(app);
-    if path.exists() {
-        let data = fs::read_to_string(&path).unwrap_or_default();
-        serde_json::from_str(&data).unwrap_or_default()
-    } else {
-        AppConfig::default()
-    }
+    config
 }
 
 pub fn save_config(app: &AppHandle, config: &AppConfig) -> Result<(), String> {

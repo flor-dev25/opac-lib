@@ -1,0 +1,7 @@
+INSERT INTO "public"."tblUser" ("Idno", "Name", "GroupName", "Dept") VALUES
+('2598884', 'JOHNSON, TERESA THOMAS', 'Student', 'BSCS'),
+('2334393', 'ELLIOTT, TIFFANY RICHARDSON', 'Student', 'BSA'),
+('2405657', 'BRADSHAW, MICHELLE ORTEGA', 'Student', 'BSIT'),
+('2707718', 'MOORE, JONATHAN LOGAN', 'Student', 'BSBA'),
+('2565888', 'BEAN, MICHELLE NORTON', 'Student', 'BSIT')
+ON CONFLICT ("Idno") DO NOTHING;

@@ -23,6 +23,7 @@ interface PatronState {
   updatePatron: (idno: string, patron: Patron) => Promise<void>;
   deletePatron: (idno: string) => Promise<void>;
   payFine: (idno: string, amount: number) => Promise<void>;
+  addPatrons: (patrons: Patron[]) => Promise<void>;
 }
 
 export const usePatronStore = create<PatronState>((set, get) => ({
@@ -79,4 +80,17 @@ export const usePatronStore = create<PatronState>((set, get) => ({
       alert(`Payment failed: ${e}`);
     }
   },
+  addPatrons: async (patrons) => {
+    set({ isLoading: true, error: null });
+    try {
+      // Add each patron individually (since we don't have a batch command yet)
+      for (const patron of patrons) {
+        await invoke('add_patron', { patron });
+      }
+      // After all are added, refresh the patron list
+      await get().fetchPatrons();
+    } catch (e) {
+      set({ error: String(e), isLoading: false });
+    }
+  }
 }));

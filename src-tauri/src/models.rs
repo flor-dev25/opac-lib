@@ -142,3 +142,12 @@ pub struct Reservation {
     pub patron_name: Option<String>,
     pub item_title: Option<String>,
 }
+
+#[allow(dead_code)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AttendanceRecord {
+    pub idno: String,
+    pub dte_log: chrono::DateTime<chrono::Utc>,
+    pub reason: String,
+    pub terminal_id: String,
+}

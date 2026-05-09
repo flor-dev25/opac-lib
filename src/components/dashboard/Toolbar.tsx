@@ -1,5 +1,5 @@
 import React from 'react';
-import { FilePlus, Trash2, Download, BookOpen, Info, LogOut, Users, LayoutDashboard, Edit, ArrowUpRight, ArrowDownLeft, Activity, Wallet, ScanBarcode, TrendingUp, BookPlus, BookmarkPlus, Settings, ToggleLeft, DatabaseBackup } from 'lucide-react';
+import { FilePlus, Trash2, Download, BookOpen, Info, LogOut, Users, LayoutDashboard, Edit, ArrowUpRight, ArrowDownLeft, Activity, Wallet, ScanBarcode, TrendingUp, BookPlus, BookmarkPlus, Settings, ToggleLeft, DatabaseBackup, UserPlus } from 'lucide-react';
 import { ToolbarItem } from './ToolbarItem';
 import { SyncComboButton } from './SyncComboButton';
 import { useAuthStore } from '../../stores/authStore';
@@ -22,9 +22,10 @@ interface ToolbarProps {
   onSettings?: () => void;
   onShowLogs?: () => void;
   onImportMdb?: () => void;
+  onImportAccounts?: () => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete, onExport, onEdit, onCheckout, onReturn, onDashboard, onPayment, onAudit, onFinancialReports, onAcquisitions, onReservation, onSettings, onShowLogs, onImportMdb }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete, onExport, onEdit, onCheckout, onReturn, onDashboard, onPayment, onAudit, onFinancialReports, onAcquisitions, onReservation, onSettings, onShowLogs, onImportMdb, onImportAccounts }) => {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
   const [isAdvanced, setIsAdvanced] = React.useState(false);
@@ -100,6 +101,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAuthority, onAbout, onDelete
             icon={DatabaseBackup} 
             label="Import" 
             onClick={onImportMdb} 
+          />
+          <ToolbarItem 
+            icon={UserPlus} 
+            label="Import Users" 
+            onClick={onImportAccounts} 
           />
           <div className="w-[1px] h-16 bg-gray-400 dark:bg-dark-border-light mx-1 shadow-[1px_0_0_white] dark:shadow-[1px_0_0_#404040]" />
         </>

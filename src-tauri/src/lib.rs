@@ -407,6 +407,51 @@ async fn get_acquisitions_report(_start_date: Option<String>, _end_date: Option<
 }
 
 #[tauri::command]
+async fn record_attendance(idno: String, reason: String, state: tauri::State<'_, DbState>) -> Result<(), String> {
+  let now = Utc::now();
+  let terminal_id = "DOOR-01".to_string(); 
+  let pool = state.get_pool().await?;
+
+  // Validate student exists
+  let exists: (i64,) = sqlx::query_as(
+      r#"SELECT count(*) FROM "public"."tblUser" WHERE "Idno" = $1"#
+  )
+  .bind(&idno)
+  .fetch_one(&pool)
+  .await
+  .map_err(|e| e.to_string())?;
+
+  if exists.0 == 0 {
+      return Err(format!("Student ID {} not found in database. Please register first.", idno));
+  }
+
+  sqlx::query(
+      r#"
+      CREATE TABLE IF NOT EXISTS "public"."tblAttendance" (
+          "Idno" TEXT,
+          "dteLog" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+          "Reason" TEXT,
+          "TerminalID" TEXT
+      )
+      "#
+  ).execute(&pool).await.map_err(|e| e.to_string())?;
+
+  sqlx::query(
+      r#"INSERT INTO "public"."tblAttendance" ("Idno", "dteLog", "Reason", "TerminalID") VALUES ($1, $2, $3, $4)"#
+  )
+  .bind(idno)
+  .bind(now)
+  .bind(reason)
+  .bind(terminal_id)
+  .execute(&pool)
+  .await
+  .map_err(|e| e.to_string())?;
+
+  Ok(())
+}
+
+
+#[tauri::command]
 async fn get_authors(state: tauri::State<'_, DbState>) -> Result<Vec<Author>, String> {
   let rows = sqlx::query(r#"SELECT "Author", "AuthorCode" FROM "public"."tblAuthor" ORDER BY "Author" ASC"#)
     .fetch_all(&state.get_pool().await?)
@@ -784,7 +829,8 @@ pub fn run() {
       settings::export_settings,
       settings::import_settings,
       import::import_mdb_database,
-      sync::run_dual_sync
+      sync::run_dual_sync,
+      record_attendance
     ])
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_shell::init())

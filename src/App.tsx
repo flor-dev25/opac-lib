@@ -8,6 +8,9 @@ import { useAuthStore } from './stores/authStore';
 import { MainLayout } from './components/layout/MainLayout';
 import { useParams } from 'react-router-dom';
 import { usePatronStore } from './stores/patronStore';
+import { useSystemStore } from './stores/systemStore';
+import { AttendancePage } from './pages/attendance/AttendancePage';
+import { useEffect } from 'react';
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuthStore();
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
@@ -23,6 +26,29 @@ const PatronEditWrapper = () => {
 };
 
 function App() {
+  const { mode, initSystem, isLoading } = useSystemStore();
+
+  useEffect(() => {
+    initSystem();
+  }, [initSystem]);
+
+  if (isLoading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-classic-grey dark:bg-dark-surface">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <span className="font-black text-2xl uppercase tracking-widest text-blue-900 dark:text-blue-100 italic">
+            Initialising infoLib...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (mode === 'client') {
+    return <AttendancePage />;
+  }
+
   return (
     <BrowserRouter>
       <Routes>

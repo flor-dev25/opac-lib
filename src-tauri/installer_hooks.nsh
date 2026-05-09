@@ -32,6 +32,55 @@ Var SystemPgPath
 Var SystemOllamaFound
 Var SystemOllamaPath
 Var ExistingConfigFound
+Var InstallMode ; 0 = Admin, 1 = Client
+Var DialogSelection
+Var RadioAdmin
+Var RadioClient
+
+; ============================================================
+; CUSTOM PAGE: Component Selection
+; ============================================================
+
+Function CUSTOM_PAGE_SELECTION
+  nsDialogs::Create 1018
+  Pop $DialogSelection
+  ${If} $DialogSelection == error
+    Abort
+  ${EndIf}
+
+  ${NSD_CreateLabel} 0 0 100% 20u "Select Installation Type"
+  Pop $0
+  CreateFont $1 "Segoe UI" 12 700
+  SendMessage $0 ${WM_SETFONT} $1 0
+
+  ${NSD_CreateRadioButton} 0 30u 100% 12u "Admin System (Cataloging, Server, AI)"
+  Pop $RadioAdmin
+  ${NSD_Check} $RadioAdmin
+
+  ${NSD_CreateLabel} 15u 45u 90% 24u "Installs the full library management system, database, and AI engine. Acts as the central server."
+  Pop $0
+  CreateFont $1 "Segoe UI" 8 400
+  SendMessage $0 ${WM_SETFONT} $1 0
+
+  ${NSD_CreateRadioButton} 0 75u 100% 12u "Attendance Client (Door PC)"
+  Pop $RadioClient
+
+  ${NSD_CreateLabel} 15u 90u 90% 24u "Installs a lightweight kiosk for student check-ins. Connects to an existing Admin Server on the network."
+  Pop $0
+  CreateFont $1 "Segoe UI" 8 400
+  SendMessage $0 ${WM_SETFONT} $1 0
+
+  nsDialogs::Show
+FunctionEnd
+
+Function CUSTOM_PAGE_SELECTION_LEAVE
+  ${NSD_GetState} $RadioAdmin $0
+  ${If} $0 == ${BST_CHECKED}
+    StrCpy $InstallMode "0"
+  ${Else}
+    StrCpy $InstallMode "1"
+  ${EndIf}
+FunctionEnd
 
 ; ============================================================
 ; CUSTOM PAGE: Database Credentials
@@ -237,13 +286,16 @@ FunctionEnd
 
   ollama_detect_done:
 
-  ; --- Detect existing db_config.json ---
+  ; --- Detect existing app_config.json ---
   StrCpy $ExistingConfigFound "0"
-  IfFileExists "$APPDATA\ph.edu.gendejesus.infolib\db_config.json" 0 +2
+  IfFileExists "$APPDATA\ph.edu.gendejesus.infolib\app_config.json" 0 +2
     StrCpy $ExistingConfigFound "1"
 
-  ; Insert custom database credentials page
-  Page custom CUSTOM_PAGE_DATABASE CUSTOM_PAGE_DATABASE_LEAVE
+  ; Insert custom pages
+  Page custom CUSTOM_PAGE_SELECTION CUSTOM_PAGE_SELECTION_LEAVE
+  ${If} $InstallMode == "0"
+    Page custom CUSTOM_PAGE_DATABASE CUSTOM_PAGE_DATABASE_LEAVE
+  ${EndIf}
 !macroend
 
 ; ============================================================
@@ -254,6 +306,11 @@ FunctionEnd
   SetDetailsPrint textonly
 
   ; --- Step 1: PostgreSQL ---
+  ${If} $InstallMode == "1"
+    DetailPrint "Attendance Client selected. Skipping local database installation."
+    Goto pg_done
+  ${EndIf}
+
   ${If} $SystemPgFound == "1"
     DetailPrint "Using system PostgreSQL ($SystemPgPath). Skipping bundled install."
   ${Else}
@@ -311,6 +368,11 @@ FunctionEnd
   ${EndIf}
 
   ; --- Step 2: Ollama ---
+  ${If} $InstallMode == "1"
+    DetailPrint "Attendance Client selected. Skipping AI engine installation."
+    Goto ollama_done
+  ${EndIf}
+
   ${If} $SystemOllamaFound == "1"
     DetailPrint "Using system Ollama ($SystemOllamaPath). Skipping bundled install."
   ${Else}
@@ -329,9 +391,9 @@ FunctionEnd
     ollama_done:
   ${EndIf}
 
-  ; --- Step 3: Write db_config.json (preserve existing on re-install) ---
+  ; --- Step 3: Write app_config.json (preserve existing on re-install) ---
   ${If} $ExistingConfigFound == "1"
-    DetailPrint "Existing db_config.json found. Preserving user configuration."
+    DetailPrint "Existing app_config.json found. Preserving user configuration."
   ${Else}
     DetailPrint "Writing database configuration..."
     CreateDirectory "$APPDATA\ph.edu.gendejesus.infolib"
@@ -350,14 +412,30 @@ FunctionEnd
       StrCpy $R1 "$INSTDIR\ollama"
     ${EndIf}
 
-    FileOpen $0 "$APPDATA\ph.edu.gendejesus.infolib\db_config.json" w
+    FileOpen $0 "$APPDATA\ph.edu.gendejesus.infolib\app_config.json" w
     FileWrite $0 '{$\r$\n'
-    FileWrite $0 '  "database_url": "postgres://$DbUser:$DbPass@$DbHost:$DbPort/$DbName",$\r$\n'
+    ${If} $InstallMode == "0"
+      FileWrite $0 '  "system_mode": "admin",$\r$\n'
+      FileWrite $0 '  "database_url": "postgres://$DbUser:$DbPass@$DbHost:$DbPort/$DbName",$\r$\n'
+    ${Else}
+      FileWrite $0 '  "system_mode": "client",$\r$\n'
+      FileWrite $0 '  "database_url": "",$\r$\n'
+    ${EndIf}
     FileWrite $0 '  "pg_home": "$R0",$\r$\n'
     FileWrite $0 '  "ollama_home": "$R1"$\r$\n'
+    FileWrite $0 '  "app_logo": null$\r$\n'
     FileWrite $0 '}$\r$\n'
     FileClose $0
     DetailPrint "Configuration saved to %APPDATA%."
+  ${EndIf}
+
+  ; --- Step 4: Specific Shortcuts ---
+  ; We use the product name for the EXE, usually the name from tauri.conf.json
+  ; For this project, it's infoLib.
+  ${If} $InstallMode == "0"
+    CreateShortcut "$DESKTOP\infoLib Admin.lnk" "$INSTDIR\infoLib.exe" "" "$INSTDIR\infoLib.exe" 0
+  ${Else}
+    CreateShortcut "$DESKTOP\infoLib Attendance.lnk" "$INSTDIR\infoLib.exe" "" "$INSTDIR\infoLib.exe" 0
   ${EndIf}
 
   ; --- Step 4: Register environment ---
@@ -387,7 +465,7 @@ FunctionEnd
   ; Notify system of environment change
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=500
 
-  ; NOTE: db_config.json is NOT deleted — it contains user data
+  ; NOTE: app_config.json is NOT deleted — it contains user data
   DetailPrint "Services stopped. User configuration preserved at %APPDATA%."
   DetailPrint "Proceeding with uninstall."
 !macroend
