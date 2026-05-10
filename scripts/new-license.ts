@@ -1,5 +1,3 @@
-import { crypto } from "bun";
-
 function generateKey(): string {
   const segment = () =>
     Array.from({ length: 8 }, () =>
