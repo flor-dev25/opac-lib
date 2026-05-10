@@ -11,6 +11,7 @@ const patronSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   idno: z.string().min(4, 'ID Number must be at least 4 characters').regex(/^[A-Z0-9-]+$/, 'ID Number can only contain letters, numbers, and dashes'),
   group_name: z.string().min(1, 'Group is required'),
+  course: z.string().optional().nullable(),
   expiry: z.string().optional().nullable(),
   dept: z.string().optional().nullable(),
   phone: z.string().regex(/^[\d\s-()]*$/, 'Invalid phone format').optional().nullable(),
@@ -40,6 +41,7 @@ export const PatronForm: React.FC<PatronFormProps> = ({ initialData, onClose }) 
       ...initialData,
       expiry: initialData.expiry ? initialData.expiry.split('T')[0] : '',
       dept: initialData.dept ?? '',
+      course: initialData.course ?? '',
       phone: initialData.phone ?? '',
       email: initialData.email ?? '',
     } : {
@@ -47,6 +49,7 @@ export const PatronForm: React.FC<PatronFormProps> = ({ initialData, onClose }) 
       unpaid_fine: 0,
       expiry: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
       dept: '',
+      course: '',
       phone: '',
       email: '',
     },
@@ -58,6 +61,7 @@ export const PatronForm: React.FC<PatronFormProps> = ({ initialData, onClose }) 
       email: data.email || null,
       expiry: data.expiry ? new Date(data.expiry).toISOString() : null,
       dept: data.dept || null,
+      course: data.course || null,
       phone: data.phone || null,
     };
 
@@ -93,7 +97,7 @@ export const PatronForm: React.FC<PatronFormProps> = ({ initialData, onClose }) 
               {errors.name && <span className="text-[10px] text-red-600 block">{errors.name.message}</span>}
             </FieldGroup>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <FieldGroup label="ID Number" id="idno">
                 <input 
                   id="idno" 
@@ -116,6 +120,9 @@ export const PatronForm: React.FC<PatronFormProps> = ({ initialData, onClose }) 
                     <option value="GUEST">GUEST</option>
                   </select>
                 </div>
+              </FieldGroup>
+              <FieldGroup label="Course" id="course">
+                <input id="course" {...register('course')} className="input-classic w-full" type="text" />
               </FieldGroup>
             </div>
 

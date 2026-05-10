@@ -154,6 +154,7 @@ async fn get_patrons(offset: i32, state: tauri::State<'_, DbState>) -> Result<Ve
       "Dept" as dept, 
       "Phone" as phone, 
       "Email" as email, 
+      "Course" as course,
       COALESCE("UnpaidFine", 0) as unpaid_fine
     FROM "public"."tblUser"
     ORDER BY "Name" ASC
@@ -169,6 +170,7 @@ async fn get_patrons(offset: i32, state: tauri::State<'_, DbState>) -> Result<Ve
     name: row.try_get::<Option<String>, _>("name").unwrap_or_default().unwrap_or_default(),
     idno: row.try_get::<Option<String>, _>("idno").unwrap_or_default().unwrap_or_default(),
     group_name: row.try_get::<Option<String>, _>("group_name").unwrap_or_default().unwrap_or_default(),
+    course: row.try_get("course").unwrap_or_default(),
     expiry: None, 
     dept: row.try_get("dept").unwrap_or_default(),
     phone: row.try_get("phone").unwrap_or_default(),
@@ -204,6 +206,7 @@ async fn search_patrons(query: String, offset: i32, state: tauri::State<'_, DbSt
       "Dept" as dept, 
       "Phone" as phone, 
       "Email" as email, 
+      "Course" as course,
       COALESCE("UnpaidFine", 0) as unpaid_fine
     FROM "public"."tblUser"
     WHERE "Name" ILIKE $1 OR "Idno" ILIKE $1
@@ -221,6 +224,7 @@ async fn search_patrons(query: String, offset: i32, state: tauri::State<'_, DbSt
     name: row.try_get::<Option<String>, _>("name").unwrap_or_default().unwrap_or_default(),
     idno: row.try_get::<Option<String>, _>("idno").unwrap_or_default().unwrap_or_default(),
     group_name: row.try_get::<Option<String>, _>("group_name").unwrap_or_default().unwrap_or_default(),
+    course: row.try_get("course").unwrap_or_default(),
     expiry: None, 
     dept: row.try_get("dept").unwrap_or_default(),
     phone: row.try_get("phone").unwrap_or_default(),
@@ -249,8 +253,8 @@ async fn get_search_patron_count(query: String, state: tauri::State<'_, DbState>
 async fn add_patron(patron: Patron, state: tauri::State<'_, DbState>) -> Result<(), String> {
   sqlx::query(
     r#"
-    INSERT INTO "public"."tblUser" ("Name", "Idno", "GroupName", "Dept", "Phone", "Email", "UnpaidFine")
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    INSERT INTO "public"."tblUser" ("Name", "Idno", "GroupName", "Dept", "Phone", "Email", "Course", "UnpaidFine")
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     "#
   )
   .bind(patron.name)
@@ -259,6 +263,7 @@ async fn add_patron(patron: Patron, state: tauri::State<'_, DbState>) -> Result<
   .bind(patron.dept)
   .bind(patron.phone)
   .bind(patron.email)
+  .bind(patron.course)
   .bind(patron.unpaid_fine)
   .execute(&state.get_pool().await?)
   .await
@@ -271,8 +276,8 @@ async fn update_patron(patron: Patron, state: tauri::State<'_, DbState>) -> Resu
   sqlx::query(
     r#"
     UPDATE "public"."tblUser" 
-    SET "Name" = $1, "GroupName" = $2, "Dept" = $3, "Phone" = $4, "Email" = $5, "UnpaidFine" = $6
-    WHERE "Idno" = $7
+    SET "Name" = $1, "GroupName" = $2, "Dept" = $3, "Phone" = $4, "Email" = $5, "Course" = $6, "UnpaidFine" = $7
+    WHERE "Idno" = $8
     "#
   )
   .bind(patron.name)
@@ -280,6 +285,7 @@ async fn update_patron(patron: Patron, state: tauri::State<'_, DbState>) -> Resu
   .bind(patron.dept)
   .bind(patron.phone)
   .bind(patron.email)
+  .bind(patron.course)
   .bind(patron.unpaid_fine)
   .bind(patron.idno)
   .execute(&state.get_pool().await?)

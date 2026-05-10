@@ -7,10 +7,11 @@ import { PatronNavigator } from '../../components/patrons/PatronNavigator';
 import { TableSkeleton } from '../../components/common/Skeleton';
 
 const COLUMNS = [
-  { key: 'name', header: 'Name', width: '30%' },
-  { key: 'idno', header: 'ID Number', width: '15%' },
-  { key: 'group_name', header: 'Group', width: '15%' },
-  { key: 'email', header: 'Email', width: '25%' },
+  { key: 'name', header: 'Name', width: '25%' },
+  { key: 'idno', header: 'ID Number', width: '12%' },
+  { key: 'group_name', header: 'Group', width: '12%' },
+  { key: 'course', header: 'Course', width: '15%' },
+  { key: 'email', header: 'Email', width: '21%' },
   { key: 'unpaid_fine', header: 'Fines', width: '15%' },
 ];
 

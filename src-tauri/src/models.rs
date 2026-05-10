@@ -68,6 +68,7 @@ pub struct Patron {
     pub dept: Option<String>,
     pub phone: Option<String>,
     pub email: Option<String>,
+    pub course: Option<String>,
     pub unpaid_fine: i32,
 }
 

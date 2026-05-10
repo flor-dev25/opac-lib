@@ -5,6 +5,7 @@ export interface Patron {
   name: string;
   idno: string;
   group_name: string;
+  course: string | null;
   expiry: string | null;
   dept: string | null;
   phone: string | null;
