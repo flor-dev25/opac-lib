@@ -13,6 +13,12 @@ struct LicenseResponse {
 
 #[tauri::command]
 pub async fn validate_license(app: AppHandle) -> Result<bool, String> {
+    // Development Bypass
+    if std::env::var("VITE_BYPASS_LICENSE").unwrap_or_default() == "true" {
+        println!("[License] Bypass enabled via VITE_BYPASS_LICENSE=true");
+        return Ok(true);
+    }
+
     let mut config = crate::settings::load_config(&app);
 
     let license_key = match &config.license_key {

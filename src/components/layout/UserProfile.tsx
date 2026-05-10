@@ -52,7 +52,7 @@ export const UserProfile: React.FC = () => {
 
       {/* Win 95 Style Dropdown Menu */}
       {isOpen && (
-        <div className="absolute left-0 top-full mt-0.5 w-48 bg-[#D4D0C8] dark:bg-dark-panel border-2 border-[#808080] dark:border-dark-border-dark shadow-bevel-raised z-50 animate-in fade-in slide-in-from-top-1">
+        <div className="absolute left-0 top-full mt-0.5 w-48 bg-[#D4D0C8] dark:bg-dark-panel border-2 border-[#808080] dark:border-dark-border-dark shadow-bevel-raised z-[200] animate-in fade-in slide-in-from-top-1">
           <div className="p-3 border-b border-[#808080] dark:border-dark-border-dark bg-[#A6CAF0]/20 dark:bg-dark-accent/10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white dark:bg-dark-surface border-2 border-[#808080] dark:border-dark-border-dark shadow-bevel-sunken overflow-hidden flex items-center justify-center">

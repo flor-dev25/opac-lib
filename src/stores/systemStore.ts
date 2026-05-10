@@ -41,12 +41,18 @@ export const useSystemStore = create<SystemState>((set) => ({
   },
   initSystem: async () => {
     const envMode = import.meta.env.VITE_SYSTEM_MODE;
+    const isBypass = import.meta.env.VITE_BYPASS_LICENSE === 'true';
+    
     try {
-      // 1. Verify License (skip in dev mode if DEV_DATABASE_URL exists)
+      // 1. Verify License (skip in dev mode if BYPASS or DEV_DATABASE_URL exists)
       try {
-        const isValid = await invoke('validate_license');
-        if (!isValid) {
-          set({ licenseError: 'Software activation is required to use infoLib.' });
+        if (isBypass) {
+          console.log('[System] License check bypassed via VITE_BYPASS_LICENSE');
+        } else {
+          const isValid = await invoke('validate_license');
+          if (!isValid) {
+            set({ licenseError: 'Software activation is required to use infoLib.' });
+          }
         }
       } catch (e: any) {
         console.error('License validation failed:', e);
