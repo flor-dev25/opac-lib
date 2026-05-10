@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { BeveledBox } from '../common/BeveledBox';
 import { TitleBar } from '../layout/TitleBar';
-import { Users, History, Activity, TrendingUp, RefreshCw } from 'lucide-react';
+import { Users, History, Activity, TrendingUp, RefreshCw, FileText } from 'lucide-react';
+import { AttendanceReportModal } from './AttendanceReportModal';
 
 interface AttendanceLog {
   idno: string;
   name: string;
+  course: string;
   dte_log: string;
   reason: string;
   terminal_id: string;
@@ -30,6 +32,7 @@ export const AttendanceDashboard: React.FC<AttendanceDashboardProps> = ({ onClos
     top_reason: 'Loading...',
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -119,6 +122,7 @@ export const AttendanceDashboard: React.FC<AttendanceDashboardProps> = ({ onClos
                       <th className="px-4 py-2">Timestamp</th>
                       <th className="px-4 py-2">Student ID</th>
                       <th className="px-4 py-2">Name</th>
+                      <th className="px-4 py-2">Course</th>
                       <th className="px-4 py-2">Reason</th>
                       <th className="px-4 py-2">Terminal</th>
                     </tr>
@@ -126,7 +130,7 @@ export const AttendanceDashboard: React.FC<AttendanceDashboardProps> = ({ onClos
                   <tbody className="text-xs font-medium divide-y divide-gray-100 dark:divide-white/5">
                     {logs.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-4 py-8 text-center text-gray-400 italic">
+                        <td colSpan={6} className="px-4 py-8 text-center text-gray-400 italic">
                           No activity recorded for today yet.
                         </td>
                       </tr>
@@ -138,6 +142,7 @@ export const AttendanceDashboard: React.FC<AttendanceDashboardProps> = ({ onClos
                           </td>
                           <td className="px-4 py-2 font-bold">{log.idno}</td>
                           <td className="px-4 py-2 truncate max-w-[150px]" title={log.name}>{log.name}</td>
+                          <td className="px-4 py-2 text-gray-500 font-bold">{log.course}</td>
                           <td className="px-4 py-2">
                             <span className="px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700 text-[10px] font-bold uppercase tracking-tighter">
                               {log.reason}
@@ -161,17 +166,32 @@ export const AttendanceDashboard: React.FC<AttendanceDashboardProps> = ({ onClos
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               Real-time monitoring active
             </div>
-            <button
-              onClick={onClose}
-              className="px-8 py-2 bg-classic-grey dark:bg-dark-surface border-2 border-white dark:border-dark-highlight
-                shadow-bevel-raised active:shadow-bevel-sunken font-bold uppercase text-sm
-                hover:bg-gray-200 dark:hover:bg-dark-highlight transition-all"
-            >
-              Close
-            </button>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowReportModal(true)}
+                className="px-6 py-2 bg-blue-600 text-white border-2 border-blue-400
+                  shadow-bevel-raised active:shadow-bevel-sunken font-bold uppercase text-sm
+                  hover:bg-blue-700 transition-all flex items-center gap-2"
+              >
+                <FileText size={16} />
+                Generate Report
+              </button>
+              <button
+                onClick={onClose}
+                className="px-8 py-2 bg-classic-grey dark:bg-dark-surface border-2 border-white dark:border-dark-highlight
+                  shadow-bevel-raised active:shadow-bevel-sunken font-bold uppercase text-sm
+                  hover:bg-gray-200 dark:hover:bg-dark-highlight transition-all"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       </BeveledBox>
+
+      {showReportModal && (
+        <AttendanceReportModal onClose={() => setShowReportModal(false)} />
+      )}
     </div>
   );
 };

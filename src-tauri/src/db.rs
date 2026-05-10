@@ -51,6 +51,11 @@ pub async fn init_db(app: &AppHandle) -> Result<PgPool, sqlx::Error> {
         .execute(&pool)
         .await?;
 
+    // Migration: Add Course column to tblUser if it doesn't exist
+    sqlx::query(r#"ALTER TABLE "public"."tblUser" ADD COLUMN IF NOT EXISTS "Course" TEXT"#)
+        .execute(&pool)
+        .await?;
+
     Ok(pool)
 }
 

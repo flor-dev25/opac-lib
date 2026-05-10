@@ -1,5 +1,5 @@
 // src-tauri/src/commands/license.rs
-use crate::settings::{AppConfig, save_config};
+use crate::settings::save_config;
 use tauri::AppHandle;
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};

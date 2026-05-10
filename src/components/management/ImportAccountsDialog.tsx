@@ -20,6 +20,7 @@ interface ImportProgressBatch {
   current: number;
   total: number;
   success_count: number;
+  updated_count: number;
   error_count: number;
   is_paused: boolean;
   is_done: boolean;
@@ -68,7 +69,7 @@ export const ImportAccountsDialog: React.FC<ImportAccountsDialogProps> = ({
   // ── State ──
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [stats, setStats] = useState({
-    success: 0, error: 0, total: 0, current: 0,
+    success: 0, updated: 0, error: 0, total: 0, current: 0,
   });
   const [isImporting, setIsImporting] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -146,6 +147,7 @@ export const ImportAccountsDialog: React.FC<ImportAccountsDialogProps> = ({
           total: batch.total,
           current: batch.current,
           success: batch.success_count,
+          updated: batch.updated_count,
           error: batch.error_count,
         });
 
@@ -301,14 +303,18 @@ export const ImportAccountsDialog: React.FC<ImportAccountsDialogProps> = ({
           ) : (
             <>
               {/* ── Stats Bar ── */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             <BeveledBox variant="sunken" className="p-3 bg-white dark:bg-black/20 flex flex-col items-center">
               <span className="text-[10px] uppercase font-bold text-gray-500">Processed</span>
               <span className="text-xl font-black font-mono">{stats.current} / {stats.total}</span>
             </BeveledBox>
             <BeveledBox variant="sunken" className="p-3 bg-green-50 dark:bg-green-900/20 flex flex-col items-center">
-              <span className="text-[10px] uppercase font-bold text-green-600">Success</span>
+              <span className="text-[10px] uppercase font-bold text-green-600">New</span>
               <span className="text-xl font-black font-mono text-green-700 dark:text-green-400">{stats.success}</span>
+            </BeveledBox>
+            <BeveledBox variant="sunken" className="p-3 bg-blue-50 dark:bg-blue-900/20 flex flex-col items-center">
+              <span className="text-[10px] uppercase font-bold text-blue-600">Updated</span>
+              <span className="text-xl font-black font-mono text-blue-700 dark:text-blue-400">{stats.updated}</span>
             </BeveledBox>
             <BeveledBox variant="sunken" className="p-3 bg-red-50 dark:bg-red-900/20 flex flex-col items-center">
               <span className="text-[10px] uppercase font-bold text-red-600">Errors</span>

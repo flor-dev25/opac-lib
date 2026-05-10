@@ -13,7 +13,7 @@ use tauri::{
 use db::DbState;
 use ai::AiState;
 use models::{CatalogRecord, CatalogEntry, Holdings, Patron, Circulation, CirculationStats, OverdueItem, AuditResult, FinancialSummary, AcquisitionRecord, Author, Subject, Reservation, PaymentRecord, AttendanceLog, AttendanceStats};
-use chrono::Utc;
+use chrono::{Utc, NaiveDate};
 use sqlx::Row;
 
 #[tauri::command]
@@ -626,7 +626,13 @@ async fn get_attendance_logs(limit: i32, state: tauri::State<'_, DbState>) -> Re
   let pool = state.get_pool().await?;
   let rows = sqlx::query(
     r#"
-    SELECT a."Idno", a."dteLog", a."Reason", a."TerminalID", u."Name"
+    SELECT 
+        a."Idno" as idno, 
+        u."Name" as name, 
+        u."Course" as course,
+        a."dteLog" as dte_log, 
+        a."Reason" as reason, 
+        a."TerminalID" as terminal_id
     FROM "public"."tblAttendance" a
     LEFT JOIN "public"."tblUser" u ON a."Idno" = u."Idno"
     ORDER BY a."dteLog" DESC
@@ -639,11 +645,73 @@ async fn get_attendance_logs(limit: i32, state: tauri::State<'_, DbState>) -> Re
   .map_err(|e| e.to_string())?;
 
   let logs = rows.into_iter().map(|row| AttendanceLog {
-    idno: row.try_get("Idno").unwrap_or_default(),
-    name: row.try_get::<Option<String>, _>("Name").unwrap_or_default().unwrap_or_else(|| "Unknown".to_string()),
-    dte_log: row.try_get("dteLog").unwrap_or_else(|_| Utc::now()),
-    reason: row.try_get("Reason").unwrap_or_default(),
-    terminal_id: row.try_get("TerminalID").unwrap_or_default(),
+    idno: row.try_get("idno").unwrap_or_default(),
+    name: row.try_get::<Option<String>, _>("name").unwrap_or_default().unwrap_or_else(|| "Unknown".to_string()),
+    course: row.try_get::<Option<String>, _>("course").unwrap_or_default().unwrap_or_else(|| "N/A".to_string()),
+    dte_log: row.try_get("dte_log").unwrap_or_else(|_| Utc::now()),
+    reason: row.try_get("reason").unwrap_or_default(),
+    terminal_id: row.try_get("terminal_id").unwrap_or_default(),
+  }).collect();
+
+  Ok(logs)
+}
+
+#[tauri::command]
+async fn get_unique_terminals(state: tauri::State<'_, DbState>) -> Result<Vec<String>, String> {
+  let pool = state.get_pool().await?;
+  let rows = sqlx::query(r#"SELECT DISTINCT "TerminalID" FROM "public"."tblAttendance" WHERE "TerminalID" IS NOT NULL"#)
+    .fetch_all(&pool)
+    .await
+    .map_err(|e| e.to_string())?;
+  
+  Ok(rows.into_iter().map(|r| r.try_get::<String, _>(0).unwrap_or_default()).collect())
+}
+
+#[tauri::command]
+async fn get_attendance_report_data(
+  start_date: String,
+  end_date: String,
+  terminal_id: Option<String>,
+  state: tauri::State<'_, DbState>
+) -> Result<Vec<AttendanceLog>, String> {
+  println!("[Report] Fetching data for range: {} to {}, Terminal: {:?}", start_date, end_date, terminal_id);
+  let pool = state.get_pool().await?;
+  
+  let start = NaiveDate::parse_from_str(&start_date, "%Y-%m-%d").map_err(|e| e.to_string())?;
+  let end = NaiveDate::parse_from_str(&end_date, "%Y-%m-%d").map_err(|e| e.to_string())?;
+
+  let mut query_builder: sqlx::QueryBuilder<'_, sqlx::Postgres> = sqlx::QueryBuilder::new(r#"
+    SELECT 
+      a."Idno" as idno, 
+      a."dteLog" as dte_log, 
+      a."Reason" as reason, 
+      a."TerminalID" as terminal_id, 
+      u."Name" as name,
+      u."Course" as course
+    FROM "public"."tblAttendance" a
+    LEFT JOIN "public"."tblUser" u ON a."Idno" = u."Idno"
+    WHERE a."dteLog"::date >= 
+  "#);
+  query_builder.push_bind(start);
+  query_builder.push(" AND a.\"dteLog\"::date <= ");
+  query_builder.push_bind(end);
+
+  if let Some(tid) = &terminal_id {
+    query_builder.push(" AND a.\"TerminalID\" = ");
+    query_builder.push_bind(tid);
+  }
+
+  query_builder.push(" ORDER BY a.\"dteLog\" ASC");
+
+  let rows = query_builder.build().fetch_all(&pool).await.map_err(|e| e.to_string())?;
+
+  let logs = rows.into_iter().map(|row| AttendanceLog {
+    idno: row.try_get("idno").unwrap_or_default(),
+    name: row.try_get::<Option<String>, _>("name").unwrap_or_default().unwrap_or_else(|| "Unknown".to_string()),
+    course: row.try_get::<Option<String>, _>("course").unwrap_or_default().unwrap_or_else(|| "N/A".to_string()),
+    dte_log: row.try_get("dte_log").unwrap_or_else(|_| Utc::now()),
+    reason: row.try_get("reason").unwrap_or_default(),
+    terminal_id: row.try_get("terminal_id").unwrap_or_default(),
   }).collect();
 
   Ok(logs)
@@ -980,12 +1048,18 @@ pub fn run() {
     .plugin(tauri_plugin_log::Builder::default().build())
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_shell::init())
+    .plugin(tauri_plugin_fs::init())
     .invoke_handler(tauri::generate_handler![
       get_catalog_records,
       get_catalog_count,
       search_catalog,
       get_search_catalog_count,
       delete_catalog_record,
+      get_catalog_entry,
+      update_catalog_record,
+      get_holdings,
+      add_holding,
+      delete_holding,
       get_patrons,
       get_patron_count,
       search_patrons,
@@ -994,8 +1068,8 @@ pub fn run() {
       update_patron,
       delete_patron,
       check_out_item,
-      get_active_loans,
       return_item,
+      get_active_loans,
       get_circulation_stats,
       get_overdue_items,
       audit_item,
@@ -1012,19 +1086,20 @@ pub fn run() {
       add_reservation,
       serve_reservation,
       cancel_reservation,
-      get_catalog_entry,
-      update_catalog_record,
-      get_holdings,
-      add_holding,
-      delete_holding,
       check_db_connection,
       maximize_window,
       reset_window_size,
       quit_app,
+      record_attendance,
+      get_attendance_stats,
+      get_attendance_logs,
+      get_unique_terminals,
+      get_attendance_report_data,
       ai::search_catalog_semantic,
       ai::chat_with_ai,
       ai::check_ollama_model,
       ai::pull_ollama_model,
+      ai::check_ollama_presence,
       settings::get_db_config,
       settings::save_db_config,
       settings::upload_logo,
@@ -1039,14 +1114,9 @@ pub fn run() {
       import::stop_import,
       import::get_import_status,
       sync::run_dual_sync,
-      record_attendance,
-      get_attendance_stats,
-      get_attendance_logs
+      commands::license::validate_license
     ])
-    .plugin(tauri_plugin_dialog::init())
-    .plugin(tauri_plugin_shell::init())
     .setup(|app| {
-      
       let handle = app.handle().clone();
 
       // Enforce Window Mode strictly in backend
@@ -1064,10 +1134,6 @@ pub fn run() {
           let _ = window.set_closable(true);
         }
       }
-
-      // NOTE: Ollama and PostgreSQL sidecar spawning has been removed.
-      // Ollama is now an external dependency (AI Setup Dialog handles missing installations).
-      // PostgreSQL is now extracted and managed directly by the NSIS installer.
 
       let pool_arc = std::sync::Arc::new(tokio::sync::Mutex::new(None));
       let remote_pool_arc = std::sync::Arc::new(tokio::sync::Mutex::new(None));
@@ -1120,19 +1186,6 @@ pub fn run() {
 
       Ok(())
     })
-    .invoke_handler(tauri::generate_handler![
-      get_catalog_records, get_catalog_count, search_catalog, get_search_catalog_count, delete_catalog_record,
-      get_patrons, get_patron_count, search_patrons, get_search_patron_count, add_patron, update_patron, delete_patron,
-      check_out_item, return_item, get_active_loans, get_circulation_stats, get_overdue_items, audit_item, pay_fine, get_financial_reports, get_acquisitions_report,
-      record_attendance, get_attendance_stats, get_attendance_logs,
-      get_authors, update_author, delete_author,
-      get_subjects, update_subject, delete_subject,
-      get_reservations, add_reservation, serve_reservation, cancel_reservation,
-      settings::get_db_config, settings::save_db_config, settings::upload_logo, settings::process_logo, settings::get_logo_path, settings::export_settings, settings::import_settings,
-      sync::run_dual_sync,
-      commands::license::validate_license,
-      ai::check_ollama_presence
-    ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

@@ -147,6 +147,7 @@ pub struct Reservation {
 pub struct AttendanceLog {
     pub idno: String,
     pub name: String,
+    pub course: String,
     pub dte_log: chrono::DateTime<chrono::Utc>,
     pub reason: String,
     pub terminal_id: String,

@@ -65,6 +65,20 @@ To resolve the current "License key missing" issue, the next agent must:
 
 ---
 
+## 🛑 Mistake 5: The "LSA Protection" Block (Windows 11)
+### The Error
+Users see a "Program Compatibility Assistant" popup: "This module is blocked from loading into the Local Security Authority... \Bonjour\mdnsNSP.dll".
+
+### The Root Cause
+Windows 11's **Local Security Authority (LSA) protection** blocks non-Microsoft DLLs from loading into sensitive security processes. Our app uses `mdns-sd` for network discovery. When the networking stack initializes, Windows tries to load the Bonjour Name Service Provider (`mdnsNSP.dll`), triggering the security block.
+
+### 💡 Learning
+This is an environmental conflict, not a code bug. However, it creates friction for the user. 
+1. **Developer Guidance**: Users should be told to click "Don't show this message again."
+2. **Architectural Choice**: If mDNS discovery is not critical for all users, consider making the `mdns-sd` initialization lazy or optional to avoid triggering the NSP load on every startup.
+
+---
+
 ## 🚀 Recommendation to Next Agent
 > [!IMPORTANT]
 > **Priority 1**: Update `settings.rs` to use `HKEY_LOCAL_MACHINE`.

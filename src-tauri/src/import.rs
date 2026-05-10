@@ -516,6 +516,7 @@ pub struct ImportProgressBatch {
     pub current: usize,
     pub total: usize,
     pub success_count: usize,
+    pub updated_count: usize,
     pub error_count: usize,
     pub is_paused: bool,
     pub is_done: bool,
@@ -530,6 +531,7 @@ pub struct ImportStatus {
     pub current: usize,
     pub total: usize,
     pub success_count: usize,
+    pub updated_count: usize,
     pub error_count: usize,
 }
 
@@ -553,6 +555,7 @@ impl Default for ImportTaskState {
                 current: 0,
                 total: 0,
                 success_count: 0,
+                updated_count: 0,
                 error_count: 0,
             }),
         }
@@ -607,6 +610,7 @@ pub async fn import_school_accounts(
             current: 0,
             total,
             success_count: 0,
+            updated_count: 0,
             error_count: 0,
         };
     }
@@ -620,6 +624,7 @@ pub async fn import_school_accounts(
     let counters = std::sync::Arc::new((
         std::sync::atomic::AtomicUsize::new(0), // current
         std::sync::atomic::AtomicUsize::new(0), // success
+        std::sync::atomic::AtomicUsize::new(0), // updated
         std::sync::atomic::AtomicUsize::new(0), // error
     ));
 
@@ -655,7 +660,8 @@ pub async fn import_school_accounts(
 
             let current = flush_counters.0.load(std::sync::atomic::Ordering::Relaxed);
             let success = flush_counters.1.load(std::sync::atomic::Ordering::Relaxed);
-            let error = flush_counters.2.load(std::sync::atomic::Ordering::Relaxed);
+            let updated = flush_counters.2.load(std::sync::atomic::Ordering::Relaxed);
+            let error = flush_counters.3.load(std::sync::atomic::Ordering::Relaxed);
             let paused = flush_paused.load(std::sync::atomic::Ordering::Relaxed);
 
             let batch = ImportProgressBatch {
@@ -663,6 +669,7 @@ pub async fn import_school_accounts(
                 current,
                 total,
                 success_count: success,
+                updated_count: updated,
                 error_count: error,
                 is_paused: paused,
                 is_done: false,
@@ -689,7 +696,7 @@ pub async fn import_school_accounts(
                         current: 0, total, last_name: "SYSTEM".into(),
                         status: "error".into(), message: format!("Transaction start failed: {}", e),
                     }],
-                    current: 0, total, success_count: 0, error_count: 0,
+                    current: 0, total, success_count: 0, updated_count: 0, error_count: 0,
                     is_paused: false, is_done: true, is_stopped: false,
                 });
                 let mut status = import_task_state.status.lock().await;
@@ -719,10 +726,11 @@ pub async fn import_school_accounts(
                     let entries: Vec<ImportProgressEntry> = lock.drain(..).collect();
                     let current = counters.0.load(std::sync::atomic::Ordering::Relaxed);
                     let success = counters.1.load(std::sync::atomic::Ordering::Relaxed);
-                    let error = counters.2.load(std::sync::atomic::Ordering::Relaxed);
+                    let updated = counters.2.load(std::sync::atomic::Ordering::Relaxed);
+                    let error = counters.3.load(std::sync::atomic::Ordering::Relaxed);
                     let _ = app_handle.emit("import-progress-batch", &ImportProgressBatch {
                         entries, current, total,
-                        success_count: success, error_count: error,
+                        success_count: success, updated_count: updated, error_count: error,
                         is_paused: true, is_done: false, is_stopped: false,
                     });
                 }
@@ -742,7 +750,7 @@ pub async fn import_school_accounts(
 
             let entry = match result {
                 Err(e) => {
-                    counters.2.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                    counters.3.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                     ImportProgressEntry {
                         current: i + 1, total,
                         last_name: "Unknown".into(),
@@ -757,29 +765,38 @@ pub async fn import_school_accounts(
 
                     match sqlx::query(
                         r#"
-                        INSERT INTO "public"."tblUser" ("Name", "Idno", "GroupName", "Dept", "UnpaidFine")
-                        VALUES ($1, $2, $3, $4, 0)
+                        INSERT INTO "public"."tblUser" ("Name", "Idno", "GroupName", "Dept", "Course", "UnpaidFine")
+                        VALUES ($1, $2, $3, $4, $5, 0)
                         ON CONFLICT ("Idno") DO UPDATE
-                        SET "Name" = EXCLUDED."Name", "Dept" = EXCLUDED."Dept", "GroupName" = EXCLUDED."GroupName"
+                        SET "Name" = EXCLUDED."Name", "Dept" = EXCLUDED."Dept", "Course" = EXCLUDED."Course", "GroupName" = EXCLUDED."GroupName"
+                        RETURNING (xmax != 0) AS is_update
                         "#
                     )
                     .bind(&full_name)
                     .bind(&record.student_id)
                     .bind(&group_name)
                     .bind(&dept)
-                    .execute(&mut *tx)
+                    .bind(&record.course)
+                    .fetch_one(&mut *tx)
                     .await {
-                        Ok(_) => {
-                            counters.1.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                        Ok(row) => {
+                            use sqlx::Row;
+                            let is_update: bool = row.get::<bool, _>("is_update");
+                            if is_update {
+                                counters.2.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                            } else {
+                                counters.1.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                            }
+                            
                             ImportProgressEntry {
                                 current: i + 1, total,
                                 last_name: record.last_name.clone(),
                                 status: "success".into(),
-                                message: format!("Imported {}", record.student_id),
+                                message: format!("{} {}", if is_update { "Updated" } else { "Imported" }, record.student_id),
                             }
                         }
                         Err(e) => {
-                            counters.2.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                            counters.3.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                             ImportProgressEntry {
                                 current: i + 1, total,
                                 last_name: record.last_name.clone(),
@@ -802,7 +819,8 @@ pub async fn import_school_accounts(
                 let mut status = import_task_state.status.lock().await;
                 status.current = counters.0.load(std::sync::atomic::Ordering::Relaxed);
                 status.success_count = counters.1.load(std::sync::atomic::Ordering::Relaxed);
-                status.error_count = counters.2.load(std::sync::atomic::Ordering::Relaxed);
+                status.updated_count = counters.2.load(std::sync::atomic::Ordering::Relaxed);
+                status.error_count = counters.3.load(std::sync::atomic::Ordering::Relaxed);
             }
 
             // Yield periodically to keep the runtime responsive
@@ -828,11 +846,12 @@ pub async fn import_school_accounts(
             let entries: Vec<ImportProgressEntry> = lock.drain(..).collect();
             let current = counters.0.load(std::sync::atomic::Ordering::Relaxed);
             let success = counters.1.load(std::sync::atomic::Ordering::Relaxed);
-            let error = counters.2.load(std::sync::atomic::Ordering::Relaxed);
+            let updated = counters.2.load(std::sync::atomic::Ordering::Relaxed);
+            let error = counters.3.load(std::sync::atomic::Ordering::Relaxed);
 
             let _ = app_handle.emit("import-progress-batch", &ImportProgressBatch {
                 entries, current, total,
-                success_count: success, error_count: error,
+                success_count: success, updated_count: updated, error_count: error,
                 is_paused: false,
                 is_done: !was_stopped,
                 is_stopped: was_stopped,

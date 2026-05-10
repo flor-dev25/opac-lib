@@ -28,3 +28,15 @@ The system comes with 9 initial reasons, manageable via the Admin dashboard:
 - **Connectivity**: Client connects to the broadcasted IPv4 address.
 - **Anti-Spam**: Random quotes delay immediate re-entry to prevent spamming.
 - **Sync**: Admin manages a `tblAttendance` table in PostgreSQL.
+
+## Student Data Integration
+The system integrates with the master student list (`tblUser`). 
+- **Student ID**: Used as the primary key for lookup.
+- **Course Tracking**: The system now supports a dedicated `Course` field (e.g., BSIT, BSCS) which is synchronized from CSV imports and displayed in real-time dashboards and PDF reports.
+- **Dept Mapping**: Secondary academic information (Year Level) is stored in the `Dept` column.
+
+## Reporting
+Attendance reports (Daily, Weekly, Monthly) are generated on the **Client-side (Admin Dashboard)**.
+- **Data Flow**: The backend provides filtered JSON data via Tauri commands.
+- **Layout**: The frontend uses `jspdf` to construct the document layout, branding, and tables.
+- **Customization**: This approach allows for easy CSS-like styling of the report without recompiling the Rust backend.

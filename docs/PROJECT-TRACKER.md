@@ -131,7 +131,7 @@ Complete parity implementation of Library Management System based on wireframe s
 - [x] M012-S03.1: High-Performance Search System (Accounts & Catalog)
 - [x] M012-S03.2: Reusable Skeleton Loading System (Dark/Theme Capable)
 - [x] M012-S03.3: Advanced Command Bar Navigation (Grouped Dropdowns)
-- [ ] M012-S04: Attendance PDF Reports (Daily/Weekly/Monthly)
+- [x] M012-S04: Attendance PDF Reports (Pivoted to Frontend-Driven Implementation)
 
 ### Phase 13: Premium Services & Hardening (M013)
 - [ ] M013-S01: Twilio SMS Integration

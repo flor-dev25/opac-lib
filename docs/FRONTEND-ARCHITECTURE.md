@@ -14,6 +14,7 @@
 - **Styling:** CSS Modules + Tailwind CSS (optional)
 - **Icons:** Lucide React or Heroicons
 - **Forms:** React Hook Form + Zod validation
+- **PDF Generation:** `jspdf` + `jspdf-autotable` (Client-side)
 
 ### Data Fetching
 - **Backend Communication:** Native Tauri invoke commands (no HTTP/Axios)
