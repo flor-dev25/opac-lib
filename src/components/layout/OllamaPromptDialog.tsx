@@ -51,13 +51,13 @@ export const OllamaPromptDialog: React.FC = () => {
           <div className="flex justify-end space-x-2 pt-2">
             <button 
               onClick={handleDownload}
-              className="px-4 py-1 bg-classic-grey border-2 border-t-white border-l-white border-b-black border-r-black active:border-t-black active:border-l-black active:border-b-white active:border-r-white text-sm font-bold min-w-[100px]"
+              className="px-4 py-1 bg-classic-grey border-2 border-t-white border-l-white border-b-black border-r-black active:border-t-black active:border-l-black active:border-b-white active:border-r-white text-sm font-bold min-w-[100px] text-black"
             >
               Install AI
             </button>
             <button 
               onClick={() => setOllamaMissing(false)}
-              className="px-4 py-1 bg-classic-grey border-2 border-t-white border-l-white border-b-black border-r-black active:border-t-black active:border-l-black active:border-b-white active:border-r-white text-sm font-bold min-w-[100px]"
+              className="px-4 py-1 bg-classic-grey border-2 border-t-white border-l-white border-b-black border-r-black active:border-t-black active:border-l-black active:border-b-white active:border-r-white text-sm font-bold min-w-[100px] text-black"
             >
               Later
             </button>

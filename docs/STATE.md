@@ -17,6 +17,7 @@ InfoLib is a hybrid offline-first library management system built with **Tauri v
   - **Architecture**: Frontend-driven (jspdf) for easy customization, Backend handles data filtering.
 - **Infrastructure**: Table `public.tblAttendance` joined with `public.tblUser`. 
   - **Enhancement**: Added `Course` field to `tblUser` and integrated it into all reports and dashboards.
+- **Report Preview (M012-S05)**: 🟡 IN PROGRESS — Live WYSIWYG preview workspace with orientation setup, sidebar settings panel, and zoom controls.
 
 ### 📚 Catalog & Circulation (M005, M014) - 🟢 FUNCTIONAL
 - **Catalog**: full CRUD with authority control (Authors/Subjects).

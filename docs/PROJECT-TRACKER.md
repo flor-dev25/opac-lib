@@ -132,6 +132,7 @@ Complete parity implementation of Library Management System based on wireframe s
 - [x] M012-S03.2: Reusable Skeleton Loading System (Dark/Theme Capable)
 - [x] M012-S03.3: Advanced Command Bar Navigation (Grouped Dropdowns)
 - [x] M012-S04: Attendance PDF Reports (Pivoted to Frontend-Driven Implementation)
+- [ ] M012-S05: Report Preview Workspace (Live Document Preview + Setup Dialog + WYSIWYG Export)
 
 ### Phase 13: Premium Services & Hardening (M013)
 - [ ] M013-S01: Twilio SMS Integration

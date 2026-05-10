@@ -40,3 +40,12 @@ Attendance reports (Daily, Weekly, Monthly) are generated on the **Client-side (
 - **Data Flow**: The backend provides filtered JSON data via Tauri commands.
 - **Layout**: The frontend uses `jspdf` to construct the document layout, branding, and tables.
 - **Customization**: This approach allows for easy CSS-like styling of the report without recompiling the Rust backend.
+
+## Report Preview Workspace (M012-S05)
+A live WYSIWYG document preview system that replaces the blind-export flow.
+- **Setup Dialog**: Orientation (portrait/landscape), paper size (A4/Letter/Legal), date range, terminal filter.
+- **Three-Panel Layout**: Left sidebar (page thumbnails + settings), central document canvas, top toolbar.
+- **Live Controls**: Zoom (25%-200%), font size, table density, report title — all re-render in real time.
+- **WYSIWYG Guarantee**: HTML preview and jsPDF export share the same config/pagination logic via `reportConfig.ts`.
+- **Export**: Final PDF generated via jsPDF only on user confirmation, saved via Tauri FS.
+- **Full Spec**: See `docs/M012-S05-REPORT-PREVIEW.md`.
