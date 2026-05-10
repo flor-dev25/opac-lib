@@ -56,9 +56,9 @@ export const AttendanceDashboard: React.FC<AttendanceDashboardProps> = ({ onClos
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <BeveledBox variant="raised" className="w-full max-w-4xl bg-classic-grey dark:bg-dark-surface shadow-2xl flex flex-col h-[85vh]">
-        <TitleBar title="Attendance System - Admin Dashboard" onClose={onClose} />
+        <TitleBar title="Attendance System - Admin Dashboard" onClose={onClose} hideUserProfile={true} />
 
         <div className="p-4 flex flex-col flex-1 overflow-hidden space-y-4">
           {/* ── Top Stats Row ── */}

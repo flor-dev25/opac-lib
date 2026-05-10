@@ -1,12 +1,22 @@
 # M012-S05: Attendance Report Preview System
 
 > **Milestone**: M012 (Attendance System) — Stage 05 (Report Preview)
-> **Status**: 🟡 PLANNING
+> **Status**: 🟡 IN PROGRESS
 > **Priority**: HIGH (Boss-critical feature)
+> **Design Reference**: `ppdo-next/app/(extra)/canvas` (left sidebar + canvas + right page panel pattern)
 
 ## 1. Objective
 
-Replace current "blind export" flow (filter → save dialog → disk) with **live document preview workspace** that lets user see, configure, and refine attendance report **before** exporting to PDF. Experience should feel like professional design studio — orientation setup on entry, left settings panel, central document canvas, and top toolbar — all wrapped in InfoLib Win95/98 aesthetic.
+Replace current "blind export" flow (filter → save dialog → disk) with **live document preview workspace** that lets user see, configure, and refine attendance report **before** exporting to PDF. Experience should feel like professional design studio — column visibility panel on left, central document canvas, preview sidebar on right, and top toolbar — all wrapped in InfoLib Win95/98 aesthetic.
+
+### 1.1 Reusability Mandate
+
+The preview canvas system MUST be **generic and reusable**. The boss wants the same WYSIWYG preview components for:
+1. **Attendance Reports** (current scope)
+2. **School Accounts PDF Export** (future scope)
+3. Any future tabular data export
+
+This means the core canvas, toolbar, sidebar, and pagination logic must be data-agnostic. Domain-specific adapters (attendance, school accounts) plug into the generic system via `ColumnDefinition<T>` and data provider interfaces.
 
 ---
 
@@ -52,21 +62,24 @@ Replace current "blind export" flow (filter → save dialog → disk) with **liv
 ```
 src/
 ├── components/
+│   ├── document-preview/                   # NEW — GENERIC reusable preview system
+│   │   ├── DocumentPreviewWorkspace.tsx     # Main layout shell (toolbar + 3 panels)
+│   │   ├── PreviewToolbar.tsx              # Top toolbar (zoom, export, print)
+│   │   ├── PreviewCanvas.tsx              # Central document renderer (generic)
+│   │   ├── PreviewSidebar.tsx             # RIGHT panel (settings, stats, pages)
+│   │   ├── ColumnVisibilityPanel.tsx      # LEFT panel (toggle columns on/off)
+│   │   ├── PageThumbnail.tsx              # Sidebar page thumbnail
+│   │   └── types.ts                       # Generic types (ColumnDefinition<T>, etc.)
 │   └── attendance/
 │       ├── AttendanceDashboard.tsx          # existing — triggers report flow
 │       ├── AttendanceReportModal.tsx        # REFACTOR → becomes Setup Dialog
-│       └── report-preview/                 # NEW — all preview components
-│           ├── ReportSetupDialog.tsx        # Step 1: orientation + filters
-│           ├── ReportPreviewWorkspace.tsx   # Step 2: full preview layout
-│           ├── PreviewToolbar.tsx           # Top toolbar (zoom, export, print)
-│           ├── PreviewSidebar.tsx           # Left panel (settings, stats, pages)
-│           ├── PreviewCanvas.tsx            # Central document renderer
-│           ├── PageThumbnail.tsx            # Sidebar page thumbnail
-│           └── types.ts                    # Shared types for preview system
+│       └── report-preview/                 # Attendance-specific adapter
+│           ├── AttendancePreviewAdapter.tsx # Wires generic workspace for attendance
+│           └── attendanceColumns.ts        # Attendance ColumnDefinition[] config
 ├── utils/
-│   ├── attendanceReportGenerator.ts        # EXTEND — add preview-mode rendering
+│   ├── attendanceReportGenerator.ts        # EXTEND — use shared config
 │   ├── reportConfig.ts                     # NEW — shared paper/font/margin constants
-│   └── reportPagination.ts                 # NEW — shared pagination logic
+│   └── reportPagination.ts                 # NEW — generic pagination logic
 └── hooks/
     └── useReportPreview.ts                 # NEW — preview state management hook
 ```
@@ -76,17 +89,33 @@ src/
 ```mermaid
 graph TD
     A[AttendanceDashboard] -->|"Generate Report"| B[ReportSetupDialog]
-    B -->|"Preview Report"| C[ReportPreviewWorkspace]
-    C --> D[PreviewToolbar]
-    C --> E[PreviewSidebar]
-    C --> F[PreviewCanvas]
-    E --> G[PageThumbnail]
-    C --> H[useReportPreview Hook]
-    H --> I[attendanceReportGenerator.ts]
-    H --> J[reportConfig.ts]
-    H --> K[reportPagination.ts]
-    D -->|"Export PDF"| L[Tauri FS write]
-    D -->|"Print"| M[window.print]
+    B -->|"Preview Report"| C[AttendancePreviewAdapter]
+    C --> D[DocumentPreviewWorkspace]
+    D --> E[PreviewToolbar]
+    D --> F[ColumnVisibilityPanel]
+    D --> G[PreviewCanvas]
+    D --> H[PreviewSidebar]
+    H --> I[PageThumbnail]
+    D --> J[useReportPreview Hook]
+    J --> K[reportConfig.ts]
+    J --> L[reportPagination.ts]
+    E -->|"Export PDF"| M[Tauri FS write]
+    E -->|"Print"| N[window.print]
+    C -->|"provides"| O[attendanceColumns.ts]
+```
+
+### 3.3 Reusability Pattern
+
+```
+                    ┌─────────────────────────────┐
+                    │  DocumentPreviewWorkspace    │  ← Generic shell
+                    │  (accepts ColumnDefinition[])│
+                    └──────────┬──────────────────┘
+                               │
+              ┌────────────────┼────────────────┐
+              │                │                │
+    AttendancePreview   SchoolAccountsPreview  FuturePreview
+    Adapter             Adapter (future)       Adapter
 ```
 
 ---
@@ -113,44 +142,62 @@ graph TD
 
 ---
 
-### 4.2 `ReportPreviewWorkspace` (Main Layout)
+### 4.2 `DocumentPreviewWorkspace` (Main Layout — GENERIC)
 
-**Purpose**: Full-screen overlay containing three-panel layout.
+**Purpose**: Full-screen overlay containing three-panel layout. Reusable across all report types.
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│ [TitleBar: "Report Preview — Attendance Report"]    [X] │
-├──────────────────────────────────────────────────────────┤
-│ [PreviewToolbar]                                        │
-│  Zoom: [-] 100% [+] | Orientation | Paper | Export | 🖨  │
-├──────────┬──────────────────────────────────────────────┤
-│          │                                              │
-│ Preview  │         PreviewCanvas                        │
-│ Sidebar  │                                              │
-│          │    ┌─────────────────────┐                   │
-│ ┌──────┐ │    │                     │                   │
-│ │ P.1  │ │    │   [Page Content]    │                   │
-│ │ ■■■  │ │    │                     │                   │
-│ └──────┘ │    │   Header / Table    │                   │
-│ ┌──────┐ │    │   / Footer          │                   │
-│ │ P.2  │ │    │                     │                   │
-│ │ ■■■  │ │    └─────────────────────┘                   │
-│ └──────┘ │                                              │
-│          │                                              │
-│ ──────── │                                              │
-│ Settings │                                              │
-│ [Title]  │                                              │
-│ [Margins]│                                              │
-│ [Font sz]│                                              │
-│          │                                              │
-├──────────┴──────────────────────────────────────────────┤
-│ Status: Page 1 of 3  |  245 records  |  Ready           │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│ [TitleBar: "Report Preview — {reportTitle}"]                [X] │
+├──────────────────────────────────────────────────────────────────┤
+│ [PreviewToolbar]                                                │
+│  Zoom: [-] 100% [+] | Orientation | Paper | Export | 🖨          │
+├────────────┬─────────────────────────────┬──────────────────────┤
+│            │                             │                      │
+│  COLUMN    │      PreviewCanvas          │   Preview            │
+│  VISIBILITY│                             │   Sidebar            │
+│  PANEL     │  ┌──────────────────────┐   │                      │
+│            │  │                      │   │  ┌──────┐            │
+│  ☑ Date    │  │   [Page Content]     │   │  │ P.1  │            │
+│  ☑ ID No   │  │                      │   │  │ ■■■  │            │
+│  ☑ Name    │  │   Header / Table     │   │  └──────┘            │
+│  ☐ Course  │  │   / Footer           │   │  ┌──────┐            │
+│  ☑ Reason  │  │                      │   │  │ P.2  │            │
+│  ☑ Terminal│  └──────────────────────┘   │  │ ■■■  │            │
+│            │                             │  └──────┘            │
+│            │                             │                      │
+│            │                             │  ────────            │
+│            │                             │  Settings            │
+│            │                             │  [Title]             │
+│            │                             │  [Font sz]           │
+│            │                             │  [Density]           │
+│            │                             │                      │
+│            │                             │  ────────            │
+│            │                             │  Quick Stats         │
+│            │                             │  Records: 245       │
+│            │                             │  Pages: 3            │
+├────────────┴─────────────────────────────┴──────────────────────┤
+│ Status: Page 1 of 3  |  245 records  |  Ready                   │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
-**Layout**: CSS Grid — `grid-template-columns: 220px 1fr`
+**Layout**: CSS Grid — `grid-template-columns: 200px 1fr 220px`
 
 **Z-index**: `z-[200]` (above all other modals)
+
+**Generic Props**:
+```typescript
+interface DocumentPreviewWorkspaceProps<T> {
+  title: string;
+  columns: ColumnDefinition<T>[];
+  data: T[];
+  previewState: ReportPreviewState;
+  onExportPDF: () => Promise<void>;
+  onPrint: () => void;
+  onClose: () => void;
+  statsRenderer?: () => React.ReactNode;  // domain-specific stats
+}
+```
 
 ---
 
@@ -175,14 +222,37 @@ graph TD
 
 ---
 
-### 4.4 `PreviewSidebar`
+### 4.4 `ColumnVisibilityPanel` (LEFT Panel — NEW)
 
-**Purpose**: Left panel with page navigation and document settings.
+**Purpose**: Let user toggle which columns appear in the preview/export.
+
+**Generic Interface**:
+```typescript
+interface ColumnVisibilityPanelProps<T> {
+  columns: ColumnDefinition<T>[];
+  onToggle: (columnKey: string) => void;
+  onReorder?: (fromIndex: number, toIndex: number) => void;
+}
+```
+
+**Rendering**:
+- Checkbox list of all available columns
+- Each row: `☑ Column Label` with drag handle for reorder
+- Minimum 1 column must remain visible (disable last checked)
+- Changes reflect **instantly** in canvas
+
+**Style**: `bg-classic-grey dark:bg-dark-panel` with `shadow-bevel-sunken` container.
+
+---
+
+### 4.5 `PreviewSidebar` (RIGHT Panel)
+
+**Purpose**: Right panel with page navigation and document settings.
 
 **Sections**:
 
 #### A. Page Navigator (Top)
-- Scrollable list of `PageThumbnail` components
+- Scrollable list of `PageThumbnail` components (inspired by `ppdo-next` PagePanel)
 - Click thumbnail → canvas scrolls to that page
 - Active page highlighted with blue border
 
@@ -193,11 +263,9 @@ graph TD
 - **Font Size**: Small / Medium / Large radio
 - **Table Density**: Compact / Normal / Relaxed radio
 
-#### C. Quick Stats (Bottom)
-- Total Records: `{count}`
-- Unique Students: `{count}`
-- Date Range: `{start} → {end}`
-- Pages: `{count}`
+#### C. Quick Stats (Bottom — via `statsRenderer` prop)
+- Rendered by domain adapter (e.g. attendance: unique students, date range)
+- Generic fallback: Total Records + Pages
 
 **Style**: `bg-classic-grey dark:bg-dark-panel` with `shadow-bevel-sunken` section dividers.
 
@@ -259,15 +327,12 @@ graph TD
 ```typescript
 interface ReportPreviewState {
   // Setup
-  orientation: 'portrait' | 'landscape';
-  paperSize: 'a4' | 'letter' | 'legal';
-  startDate: string;
-  endDate: string;
-  terminalId: string | null;
+  orientation: Orientation;
+  paperSize: PaperSize;
 
-  // Data
-  data: AttendanceLog[];
-  isLoading: boolean;
+  // Column visibility (generic)
+  visibleColumns: string[];         // keys of visible columns
+  toggleColumn: (key: string) => void;
 
   // Preview Settings
   zoom: number;           // 0.25 to 2.0
@@ -276,12 +341,12 @@ interface ReportPreviewState {
   reportTitle: string;
   showHeader: boolean;
   showFooter: boolean;
-  fontSize: 'small' | 'medium' | 'large';
-  tableDensity: 'compact' | 'normal' | 'relaxed';
+  fontSize: FontSize;
+  tableDensity: TableDensity;
 
   // Actions
-  setOrientation: (o: 'portrait' | 'landscape') => void;
-  setPaperSize: (s: 'a4' | 'letter' | 'legal') => void;
+  setOrientation: (o: Orientation) => void;
+  setPaperSize: (s: PaperSize) => void;
   setZoom: (z: number) => void;
   zoomIn: () => void;
   zoomOut: () => void;
@@ -289,15 +354,14 @@ interface ReportPreviewState {
   fitPage: () => void;
   goToPage: (page: number) => void;
   setReportTitle: (title: string) => void;
-  setFontSize: (size: 'small' | 'medium' | 'large') => void;
-  setTableDensity: (d: 'compact' | 'normal' | 'relaxed') => void;
-  fetchData: () => Promise<void>;
+  setFontSize: (size: FontSize) => void;
+  setTableDensity: (d: TableDensity) => void;
   exportPDF: () => Promise<void>;
   print: () => void;
 }
 ```
 
-**DRY Principle**: This hook centralizes ALL preview state. Components only consume slices they need via destructuring. No duplicate state in child components.
+**DRY Principle**: This hook centralizes ALL preview state. Components only consume slices they need via destructuring. No duplicate state in child components. The hook is **data-agnostic** — it manages layout/display state only. Data fetching is the adapter's responsibility.
 
 ---
 
@@ -451,4 +515,15 @@ All components MUST support dark mode using existing `dark:` Tailwind variants. 
 
 ---
 
-*Last Updated: 2026-05-10 by LPM Agent*
+## 14. Reusability Contract
+
+Any future report type (e.g. School Accounts PDF) needs only:
+1. Define `ColumnDefinition<SchoolAccount>[]` in a `schoolAccountColumns.ts`
+2. Create a thin adapter component that provides data + columns to `DocumentPreviewWorkspace`
+3. Optionally provide a `statsRenderer` for domain-specific quick stats
+
+The generic system handles: layout, zoom, pagination, column visibility, thumbnails, export, print, keyboard shortcuts.
+
+---
+
+*Last Updated: 2026-05-10 by LPM+SD Agent — Revised for reusable 3-panel layout*

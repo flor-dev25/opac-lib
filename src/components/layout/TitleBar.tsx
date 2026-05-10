@@ -4,11 +4,13 @@ import { UserProfile } from './UserProfile';
 interface TitleBarProps {
   title?: string;
   onClose?: () => void;
+  hideUserProfile?: boolean;
 }
 
 export const TitleBar: React.FC<TitleBarProps> = ({
   title = 'infoLib Library Management System',
-  onClose
+  onClose,
+  hideUserProfile = false
 }) => {
   return (
     <div className="h-8 bg-gradient-to-b from-[#A6CAF0] to-[#7FA8E0] dark:from-[#1E3A6E] dark:to-[#2A4F8A] flex items-center justify-between px-2 select-none relative z-[150]">
@@ -24,7 +26,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({
 
       {/* Right: User Profile and Close Button */}
       <div className="flex items-center gap-1">
-        <UserProfile />
+        {!hideUserProfile && <UserProfile />}
         {onClose && (
           <button
             onClick={onClose}

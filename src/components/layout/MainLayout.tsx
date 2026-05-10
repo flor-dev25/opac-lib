@@ -21,6 +21,8 @@ import { SyncLogsDialog } from '../dashboard/SyncLogsDialog';
 import { ImportMdbDialog } from '../management/ImportMdbDialog';
 import { ImportAccountsDialog } from '../management/ImportAccountsDialog';
 import { AttendanceDashboard } from '../attendance/AttendanceDashboard';
+import { CatalogPreviewAdapter } from '../catalog/report-preview/CatalogPreviewAdapter';
+import { AccountPreviewAdapter } from '../management/report-preview/AccountPreviewAdapter';
 import { useAuthStore } from '../../stores/authStore';
 import { useCatalogStore } from '../../stores/catalogStore';
 import { usePatronStore } from '../../stores/patronStore';
@@ -59,6 +61,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showImportMdb, setShowImportMdb] = React.useState(false);
   const [showImportAccounts, setShowImportAccounts] = React.useState(false);
   const [showAttendanceDashboard, setShowAttendanceDashboard] = React.useState(false);
+  const [showCatalogPreview, setShowCatalogPreview] = React.useState(false);
+  const [showAccountPreview, setShowAccountPreview] = React.useState(false);
   const [importCsvPath, setImportCsvPath] = React.useState('');
   const [isImportMinimized, setIsImportMinimized] = React.useState(false);
   const [importBadgeStats, setImportBadgeStats] = React.useState({ current: 0, total: 0, isRunning: false });
@@ -137,6 +141,15 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     }
   };
 
+  const handleExportClick = () => {
+    if (isPatrons) {
+      setShowAccountPreview(true);
+    } else {
+      // Catalog view
+      setShowCatalogPreview(true);
+    }
+  };
+
   const handleEdit = () => {
     if (isPatrons) {
       if (selectedIdno) navigate(`/patrons/edit/${selectedIdno}`);
@@ -193,7 +206,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <Toolbar 
               onAuthority={() => setShowAuthority(true)} 
               onAbout={() => setShowAbout(true)} 
-              onExport={() => setShowExport(true)}
+              onExport={handleExportClick}
               onEdit={handleEdit}
               onCheckout={() => {
                 if (isPatrons) {
@@ -279,6 +292,19 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {showAbout && <AboutDialog onClose={() => setShowAbout(false)} />}
       {showSyncLogs && <SyncLogsDialog onClose={() => setShowSyncLogs(false)} />}
       {showAttendanceDashboard && <AttendanceDashboard onClose={() => setShowAttendanceDashboard(false)} />}
+      {showCatalogPreview && (
+        <CatalogPreviewAdapter 
+          onClose={() => setShowCatalogPreview(false)} 
+          searchQuery={useCatalogStore.getState().searchQuery}
+          searchScope={useCatalogStore.getState().searchScope}
+        />
+      )}
+      {showAccountPreview && (
+        <AccountPreviewAdapter 
+          onClose={() => setShowAccountPreview(false)} 
+          filter={usePatronStore.getState().searchQuery}
+        />
+      )}
       {showImportMdb && <ImportMdbDialog onClose={() => setShowImportMdb(false)} />}
       {showImportAccounts && !isImportMinimized && importCsvPath && (
         <ImportAccountsDialog 
