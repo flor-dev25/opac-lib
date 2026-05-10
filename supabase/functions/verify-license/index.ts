@@ -1,7 +1,7 @@
 // supabase/functions/verify-license/index.ts
 // M015 S01-T03: License Verification Edge Function
 
-import { createClient } from "npm:@supabase/supabase-js@2.39.0";
+import { createClient } from "@supabase/supabase-js";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
